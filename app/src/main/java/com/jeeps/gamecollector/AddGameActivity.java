@@ -71,6 +71,7 @@ public class AddGameActivity extends AppCompatActivity {
     private Format mDateFormatter;
     private String mInputPublisher;
     private List<Publisher> mPublishers;
+    private DatabaseReference mGamesDB;
 
 
     @Override
@@ -167,10 +168,15 @@ public class AddGameActivity extends AppCompatActivity {
         final Game game = new Game(name, publisher, "", mCurrentPlatform.getName());
         final String fileName = mDateFormatter.format(Long.parseLong(game.getDateAdded()));
 
+        //Games DB Reference
+        mGamesDB = mDatabase.getReference("library/games/");
+        //Get push key
+        final String key = mGamesDB.child(mCurrentPlatform.getId() + "").push().getKey();
+
         //Start uploading cover to firebase
         mStorageRef = FirebaseStorage.getInstance().getReference();
         //Create name with current date
-        StorageReference riversRef = mStorageRef.child("gameCovers/" + fileName + ".png");
+        StorageReference riversRef = mStorageRef.child("gameCovers/" + key + ".png");
 
         if (currImageURI != null) {
             riversRef.putFile(currImageURI)
@@ -185,16 +191,14 @@ public class AddGameActivity extends AppCompatActivity {
                             game.setImageUri(imageUri);
 
                             //Add game to database
-                            DatabaseReference gamesDB = mDatabase.getReference("library/games/");
+
                             //gamesDB.child(mCurrentPlatform.getId() + ""/* + "_" + fileName*/).setValue(game);
 
                             Map<String, Object> gameValues = game.toMap();
                             Map<String, Object> childUpdates = new HashMap<>();
 
-                            String key = gamesDB.child(mCurrentPlatform.getId() + "").push().getKey();
-
                             childUpdates.put(mCurrentPlatform.getId() + "/" + key, gameValues);
-                            gamesDB.updateChildren(childUpdates);
+                            mGamesDB.updateChildren(childUpdates);
 
 
                         }
