@@ -1,13 +1,17 @@
 package com.jeeps.gamecollector;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -18,11 +22,15 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.jeeps.gamecollector.adapters.GameCardAdapter;
 import com.jeeps.gamecollector.model.Game;
 import com.squareup.picasso.Picasso;
@@ -36,7 +44,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class PlatformLibraryActivity extends AppCompatActivity {
+public class PlatformLibraryActivity extends AppCompatActivity implements GameCardAdapter.GameCardAdapterListener {
 
     public static final String CURRENT_PLATFORM = "CURRENT_PLATFORM";
 
@@ -51,6 +59,7 @@ public class PlatformLibraryActivity extends AppCompatActivity {
     private DatabaseReference mPlatformLibraryDB;
     private GameCardAdapter mAdapter;
     private List<Game> mGames;
+    private List<String> mGameKeys;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +70,7 @@ public class PlatformLibraryActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         mContext = this;
         mGames = new ArrayList<>();
+        mGameKeys = new ArrayList<>();
         initCollapsingToolbar();
 
         //Get platform id from intent
@@ -139,16 +149,19 @@ public class PlatformLibraryActivity extends AppCompatActivity {
                 // whenever data at this location is updated.
                 Map<String, HashMap<String, Object>> gamesMap = (HashMap<String, HashMap<String, Object>>) dataSnapshot.getValue();
                 List<Game> games = new ArrayList<>();
+                List<String> keys = new ArrayList<>();
                 if (gamesMap != null) {
                     for (Map.Entry<String, HashMap<String, Object>> entry : gamesMap.entrySet()) {
                         Game game = Game.mapToGame(entry.getValue());
                         games.add(game);
+                        keys.add(entry.getKey());
                     }
                 }
                 mGames = games;
+                mGameKeys = keys;
 
                 //Create adapter
-                mAdapter = new GameCardAdapter(mContext, mGames);
+                mAdapter = new GameCardAdapter(mContext, mGames, PlatformLibraryActivity.this);
 
                 mGamesRecyclerView.setAdapter(mAdapter);
                 mAdapter.notifyDataSetChanged();
@@ -208,6 +221,56 @@ public class PlatformLibraryActivity extends AppCompatActivity {
                 return R.drawable.ds_cover;
         }
         return R.drawable.switch_cover;
+    }
+
+    @Override
+    public void deleteSelectedGame(final int position) {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //Yes button clicked
+                        //Get game
+                        Game game = mGames.get(position);
+                        //Get game key for DB
+                        String key = mGameKeys.get(position);
+                        //Delete game
+                        DatabaseReference gameReference = mDatabase.getReference("library/games/" + mPlatformId + "/" + key);
+                        gameReference.removeValue();
+
+                        //Delete uploaded image
+                        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                        StorageReference gameCoverRef = storageReference.child("gameCovers/" + key + ".png");
+                        gameCoverRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                //Toast.makeText(mContext, "Deleted image", Toast.LENGTH_SHORT).show();
+                                // File deleted successfully
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+                                // Uh-oh, an error occurred!
+                            }
+                        });
+
+                        //Notify user
+                        //Toast.makeText(mContext, "Deleted: " + game.getName(), Toast.LENGTH_SHORT).show();
+                        Snackbar.make(mGamesRecyclerView, "Deleted: " + game.getName(), Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setMessage("Delete game?").setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
     }
 
     /**

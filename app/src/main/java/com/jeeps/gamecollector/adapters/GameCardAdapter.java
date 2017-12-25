@@ -21,6 +21,11 @@ import java.util.List;
 public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyViewHolder> {
     private Context mContext;
     private List<Game> mGames;
+    private GameCardAdapterListener listener;
+
+    public interface GameCardAdapterListener {
+        void deleteSelectedGame(int position);
+    }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public ImageView cover;
@@ -33,9 +38,10 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
         }
     }
 
-    public GameCardAdapter(Context context, List<Game> games) {
+    public GameCardAdapter(Context context, List<Game> games, GameCardAdapterListener listener) {
         mContext = context;
         mGames = games;
+        this.listener = listener;
     }
 
     @Override
@@ -47,7 +53,7 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
     }
 
     @Override
-    public void onBindViewHolder(final MyViewHolder holder, int position) {
+    public void onBindViewHolder(final MyViewHolder holder, final int position) {
         Game game = mGames.get(position);
 
         //load image cover
@@ -55,12 +61,13 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
 
         holder.title.setText(game.getName());
 
-        /*holder.overflow.setOnClickListener(new View.OnClickListener() {
+        holder.cover.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onClick(View view) {
-                showPopupMenu(holder.overflow);
+            public boolean onLongClick(View view) {
+                listener.deleteSelectedGame(position);
+                return true;
             }
-        });*/
+        });
     }
 
     @Override
