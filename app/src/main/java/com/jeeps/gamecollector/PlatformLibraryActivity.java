@@ -47,6 +47,7 @@ import butterknife.ButterKnife;
 public class PlatformLibraryActivity extends AppCompatActivity implements GameCardAdapter.GameCardAdapterListener {
 
     public static final String CURRENT_PLATFORM = "CURRENT_PLATFORM";
+    public static final String CURRENT_PLATFORM_NAME = "CURRENT_PLATFORM_NAME";
 
     @BindView(R.id.games_recycler_view)
     RecyclerView mGamesRecyclerView;
@@ -55,6 +56,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
 
     private Context mContext;
     private int mPlatformId;
+    private String mPlatformName;
     private FirebaseDatabase mDatabase;
     private DatabaseReference mPlatformLibraryDB;
     private GameCardAdapter mAdapter;
@@ -76,6 +78,8 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         //Get platform id from intent
         Intent intent = getIntent();
         mPlatformId = intent.getIntExtra(CURRENT_PLATFORM, 0);
+        mPlatformName = intent.getStringExtra(CURRENT_PLATFORM_NAME);
+
 
         //Display cover
         Picasso.with(mContext).load(getPlatformCover()).into(backdrop);
@@ -106,41 +110,6 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
  private void getGamesFromDB() {
         mDatabase = FirebaseDatabase.getInstance();
         mPlatformLibraryDB = mDatabase.getReference("library/games/" + mPlatformId);
-
-        /*mPlatformLibraryDB.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Game game = dataSnapshot.getValue(Game.class);
-                mGames.add(game);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Game game = dataSnapshot.getValue(Game.class);
-
-                for (Iterator<Game> iterator = mGames.iterator(); iterator.hasNext(); ) {
-                    Game value = iterator.next();
-                    if (value.getImageUri().equals(game.getImageUri())) {
-                        iterator.remove();
-                    }
-                }
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });*/
 
         mPlatformLibraryDB.addValueEventListener(new ValueEventListener() {
             @Override
@@ -197,7 +166,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                     scrollRange = appBarLayout.getTotalScrollRange();
                 }
                 if (scrollRange + verticalOffset == 0) {
-                    collapsingToolbar.setTitle(getString(R.string.app_name));
+                    collapsingToolbar.setTitle(mPlatformName);
                     isShow = true;
                 } else if (isShow) {
                     collapsingToolbar.setTitle(" ");

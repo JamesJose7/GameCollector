@@ -83,6 +83,7 @@ public class MainLibraryActivity extends AppCompatActivity {
                         //start games activity with platform id
                         Intent intent = new Intent(mContext, PlatformLibraryActivity.class);
                         intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.getId());
+                        intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME, platform.getName());
                         startActivity(intent);
                     }
                 });
