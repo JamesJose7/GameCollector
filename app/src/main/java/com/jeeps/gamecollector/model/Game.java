@@ -1,11 +1,16 @@
 package com.jeeps.gamecollector.model;
 
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.IgnoreExtraProperties;
+
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by jeeps on 12/23/2017.
  */
-
+@IgnoreExtraProperties
 public class Game {
     //Game data
     private String mName;
@@ -74,5 +79,27 @@ public class Game {
 
     public Date getDateAdded() {
         return mDateAdded;
+    }
+
+    @Exclude
+    public Map<String, Object> toMap() {
+        /*//Game data
+        private String mName;
+        private String mPublisher;
+        private String mImageUri;
+        private String mPlatform;
+
+        //User data
+        private int mTimesCompleted;
+        private Date mDateAdded;*/
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("name", mName);
+        result.put("publisher", mPublisher);
+        result.put("imageUri", mImageUri);
+        result.put("platform", mPlatform);
+        result.put("timesCompleted", mTimesCompleted);
+        result.put("dateAdded", mDateAdded);
+
+        return result;
     }
 }

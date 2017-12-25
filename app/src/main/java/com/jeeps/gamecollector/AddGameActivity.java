@@ -38,7 +38,9 @@ import com.squareup.picasso.Picasso;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -159,9 +161,10 @@ public class AddGameActivity extends AppCompatActivity {
     private void saveGame() {
         //Get values from text fields
         String name = mNameEdit.getText().toString();
+        String publisher = mPublishersSpinner.getSelectedItem().toString();
 
         //Create game
-        final Game game = new Game(name, "0", "", mCurrentPlatform.getName());
+        final Game game = new Game(name, publisher, "", mCurrentPlatform.getName());
         final String fileName = mDateFormatter.format(game.getDateAdded());
 
         //Start uploading cover to firebase
@@ -169,29 +172,48 @@ public class AddGameActivity extends AppCompatActivity {
         //Create name with current date
         StorageReference riversRef = mStorageRef.child("gameCovers/" + fileName + ".png");
 
-        riversRef.putFile(currImageURI)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // Get a URL to the uploaded content
-                        gameImageURI = taskSnapshot.getDownloadUrl();
-                        game.setImageUri(gameImageURI.toString());
+        if (currImageURI != null) {
+            riversRef.putFile(currImageURI)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            // Get a URL to the uploaded content
+                            gameImageURI = taskSnapshot.getDownloadUrl();
+                            String imageUri = "";
+                            if (gameImageURI.toString() != null)
+                                imageUri = gameImageURI.toString();
+                            game.setImageUri(imageUri);
 
-                        //Add game to database
-                        DatabaseReference gamesDB = mDatabase.getReference("library/games/" + mPlatformID);
-                        gamesDB.child(mCurrentPlatform.getId() + "_" + fileName).setValue(game);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                        // ...
-                    }
-                });
+                            //Add game to database
+                            DatabaseReference gamesDB = mDatabase.getReference("library/games/");
+                            //gamesDB.child(mCurrentPlatform.getId() + ""/* + "_" + fileName*/).setValue(game);
 
-        //Display success message
-        Toast.makeText(AddGameActivity.this, "Game added!", Toast.LENGTH_SHORT).show();
+                            Map<String, Object> gameValues = game.toMap();
+                            Map<String, Object> childUpdates = new HashMap<>();
+
+                            String key = gamesDB.child(mCurrentPlatform.getId() + "").push().getKey();
+
+                            childUpdates.put(mCurrentPlatform.getId() + "/" + key, gameValues);
+                            gamesDB.updateChildren(childUpdates);
+
+
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Handle unsuccessful uploads
+                            // ...
+                        }
+                    });
+
+            //Display success message
+            Toast.makeText(AddGameActivity.this, "Game added!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(mContext, "Image can't be null", Toast.LENGTH_SHORT).show();
+        }
+
+
 
         //Close activity
         finish();
