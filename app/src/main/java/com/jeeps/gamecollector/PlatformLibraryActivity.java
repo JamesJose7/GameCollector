@@ -64,7 +64,6 @@ public class PlatformLibraryActivity extends AppCompatActivity {
     private GameCardAdapter mAdapter;
     private List<Game> mGames;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,14 +75,17 @@ public class PlatformLibraryActivity extends AppCompatActivity {
         mGames = new ArrayList<>();
         initCollapsingToolbar();
 
+        //Get platform id from intent
+        Intent intent = getIntent();
+        mPlatformId = intent.getIntExtra(CURRENT_PLATFORM, 0);
+        
+        //Display cover
+        Picasso.with(mContext).load(getPlatformCover()).into(backdrop);
+
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(mContext, 2);
         mGamesRecyclerView.setLayoutManager(mLayoutManager);
         mGamesRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
         mGamesRecyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        //Get platform id from intent
-        Intent intent = getIntent();
-        mPlatformId = intent.getIntExtra(CURRENT_PLATFORM, 0);
 
         // Get games from the database
         getGamesFromDB();
@@ -101,9 +103,6 @@ public class PlatformLibraryActivity extends AppCompatActivity {
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        //Display cover
-        Picasso.with(mContext).load(R.drawable.switch_cover).into(backdrop);
     }
 
  private void getGamesFromDB() {
@@ -205,6 +204,22 @@ public class PlatformLibraryActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public int getPlatformCover() {
+        switch (mPlatformId) {
+            case 0:
+                return R.drawable.switch_cover;
+            case 1:
+                return R.drawable.wiiu_cover;
+            case 2:
+                return R.drawable.n3ds_cover;
+            case 3:
+                return R.drawable.wii_cover;
+            case 4:
+                return R.drawable.ds_cover;
+        }
+        return R.drawable.switch_cover;
     }
 
     /**
