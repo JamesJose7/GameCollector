@@ -165,7 +165,7 @@ public class AddGameActivity extends AppCompatActivity {
 
         //Create game
         final Game game = new Game(name, publisher, "", mCurrentPlatform.getName());
-        final String fileName = mDateFormatter.format(game.getDateAdded());
+        final String fileName = mDateFormatter.format(Long.parseLong(game.getDateAdded()));
 
         //Start uploading cover to firebase
         mStorageRef = FirebaseStorage.getInstance().getReference();

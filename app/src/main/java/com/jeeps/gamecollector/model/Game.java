@@ -1,8 +1,11 @@
 package com.jeeps.gamecollector.model;
 
+import android.support.annotation.NonNull;
+
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +14,7 @@ import java.util.Map;
  * Created by jeeps on 12/23/2017.
  */
 @IgnoreExtraProperties
-public class Game {
+public class Game /*implements Comparable<Game>*/ {
     //Game data
     private String mName;
     private String mPublisher;
@@ -20,7 +23,7 @@ public class Game {
 
     //User data
     private int mTimesCompleted;
-    private Date mDateAdded;
+    private String mDateAdded;
 
     public Game(String name, String publisher, String imageUri, String platform) {
         mName = name;
@@ -28,7 +31,7 @@ public class Game {
         mImageUri = imageUri;
         mPlatform = platform;
         mTimesCompleted = 0;
-        mDateAdded = new Date();
+        mDateAdded = (new Date()).getTime() + "";
     }
 
     public Game() {}
@@ -77,7 +80,7 @@ public class Game {
         mTimesCompleted--;
     }
 
-    public Date getDateAdded() {
+    public String getDateAdded() {
         return mDateAdded;
     }
 
