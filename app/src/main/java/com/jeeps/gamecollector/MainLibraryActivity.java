@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -86,6 +87,17 @@ public class MainLibraryActivity extends AppCompatActivity {
 
                 PlatformsListAdapter adapter = new PlatformsListAdapter(mContext, R.layout.platform_list_item, platforms);
                 platformsList.setAdapter(adapter);
+                platformsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        //Get selected platform
+                        Platform platform = (Platform) adapterView.getItemAtPosition(i);
+                        //start games activity with platform id
+                        Intent intent = new Intent(mContext, PlatformLibraryActivity.class);
+                        intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.getId());
+                        startActivity(intent);
+                    }
+                });
             }
 
             @Override

@@ -32,6 +32,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.jeeps.gamecollector.MainLibraryActivity"/>
         </activity>
+        <activity
+            android:name=".AddGameActivity"
+            android:label="@string/title_activity_add_game"
+            android:parentActivityName=".PlatformLibraryActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.jeeps.gamecollector.PlatformLibraryActivity"/>
+        </activity>
     </application>
 
 </manifest>
