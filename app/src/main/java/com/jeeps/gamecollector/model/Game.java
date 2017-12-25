@@ -1,11 +1,8 @@
 package com.jeeps.gamecollector.model;
 
-import android.support.annotation.NonNull;
-
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;

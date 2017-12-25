@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -18,34 +17,23 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.jeeps.gamecollector.adapters.GameCardAdapter;
-import com.jeeps.gamecollector.adapters.PlatformsListAdapter;
 import com.jeeps.gamecollector.model.Game;
-import com.jeeps.gamecollector.model.Platform;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeSet;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 
 public class PlatformLibraryActivity extends AppCompatActivity {
@@ -78,7 +66,7 @@ public class PlatformLibraryActivity extends AppCompatActivity {
         //Get platform id from intent
         Intent intent = getIntent();
         mPlatformId = intent.getIntExtra(CURRENT_PLATFORM, 0);
-        
+
         //Display cover
         Picasso.with(mContext).load(getPlatformCover()).into(backdrop);
 
