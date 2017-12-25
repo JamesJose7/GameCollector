@@ -84,6 +84,14 @@ public class Game /*implements Comparable<Game>*/ {
         return mDateAdded;
     }
 
+    public void setTimesCompleted(int timesCompleted) {
+        mTimesCompleted = timesCompleted;
+    }
+
+    public void setDateAdded(String dateAdded) {
+        mDateAdded = dateAdded;
+    }
+
     @Exclude
     public Map<String, Object> toMap() {
         /*//Game data
@@ -104,5 +112,33 @@ public class Game /*implements Comparable<Game>*/ {
         result.put("dateAdded", mDateAdded);
 
         return result;
+    }
+
+    public static Game mapToGame(HashMap<String, Object> map) {
+        Game game = new Game();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            switch (entry.getKey()) {
+                case "imageUri":
+                    game.setImageUri((String) entry.getValue());
+                    break;
+                case "name":
+                    game.setName((String) entry.getValue());
+                    break;
+                case "publisher":
+                    game.setPublisher((String) entry.getValue());
+                    break;
+                case "dateAdded":
+                    game.setDateAdded((String) entry.getValue());
+                    break;
+                case "platform":
+                    game.setPlatform((String) entry.getValue());
+                    break;
+                case "timesCompleted":
+                    game.setTimesCompleted(((Long) entry.getValue()).intValue());
+                    break;
+                default:
+            }
+        }
+        return game;
     }
 }
