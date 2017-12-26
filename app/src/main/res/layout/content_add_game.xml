@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:scaleType="fitCenter"
             android:src="@drawable/edit_picture"
-            android:background="#ccc"
+            android:background="#cccccc"
             android:alpha="0.5"
             android:layout_height="200dp"/>
 

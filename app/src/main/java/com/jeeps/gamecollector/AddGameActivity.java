@@ -3,6 +3,7 @@ package com.jeeps.gamecollector;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -258,6 +259,8 @@ public class AddGameActivity extends AppCompatActivity {
 
                 //Load local image for displaying purposes
                 Picasso.with(mContext).load(currImageURI).into(mGameCover);
+                mGameCover.setAlpha(1f);
+                mGameCover.setBackgroundColor(Color.parseColor("#99cccccc"));
             }
         }
     }
