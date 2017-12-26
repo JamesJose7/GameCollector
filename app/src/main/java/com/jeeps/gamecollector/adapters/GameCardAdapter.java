@@ -1,6 +1,7 @@
 package com.jeeps.gamecollector.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,12 +33,14 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
         public ImageView cover;
         public ImageView isDigital;
         public TextView title;
+        public ImageView completed;
 
         public MyViewHolder(View view) {
             super(view);
             cover = (ImageView) view.findViewById(R.id.card_game_cover);
             title = (TextView) view.findViewById(R.id.card_game_title);
             isDigital = (ImageView) view.findViewById(R.id.card_is_digital);
+            completed = (ImageView) view.findViewById(R.id.card_game_completed);
         }
     }
 
@@ -67,6 +70,10 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
 
         //Name
         holder.title.setText(game.getName());
+
+        //turn check green if game is completed
+        if (game.getTimesCompleted() > 0)
+            holder.completed.setColorFilter(Color.parseColor("#7FFF00"));
 
         holder.cover.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
