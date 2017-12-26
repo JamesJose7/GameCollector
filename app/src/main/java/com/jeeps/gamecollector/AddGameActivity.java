@@ -17,6 +17,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -60,6 +62,12 @@ public class AddGameActivity extends AppCompatActivity {
     Spinner mPublishersSpinner;
     @BindView(R.id.add_publisher_button)
     ImageView mAddPublisher;
+    @BindView(R.id.radio_group)
+    RadioGroup mRadioGroup;
+    @BindView(R.id.radio_digital)
+    RadioButton mRadioDigital;
+    @BindView(R.id.radio_physical)
+    RadioButton mRadioPhysical;
 
     private int mPlatformID;
     private Platform mCurrentPlatform;
@@ -86,6 +94,8 @@ public class AddGameActivity extends AppCompatActivity {
 
         //Formatter for file names
         mDateFormatter = new SimpleDateFormat("dd:HH:mm:ss");
+        //Select physical radio button by default
+        mRadioGroup.check(mRadioPhysical.getId());
         //Database
         mDatabase = FirebaseDatabase.getInstance();
 
@@ -165,8 +175,11 @@ public class AddGameActivity extends AppCompatActivity {
         String name = mNameEdit.getText().toString();
         String publisher = mPublishersSpinner.getSelectedItem().toString();
 
+        //Get value from radio button
+        boolean isPhysical = mRadioPhysical.isChecked();
+
         //Create game
-        final Game game = new Game(name, publisher, "", mCurrentPlatform.getName());
+        final Game game = new Game(name, publisher, "", mCurrentPlatform.getName(), isPhysical);
         final String fileName = mDateFormatter.format(Long.parseLong(game.getDateAdded()));
 
         //Games DB Reference

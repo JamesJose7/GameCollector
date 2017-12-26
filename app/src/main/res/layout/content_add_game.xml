@@ -45,6 +45,7 @@
                 android:layout_below="@id/game_name_text"/>
 
             <LinearLayout
+                android:id="@+id/platform_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -108,6 +109,41 @@
                     </LinearLayout>
 
                 </RelativeLayout>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_below="@id/platform_container"
+                android:layout_marginTop="10dp"
+                android:weightSum="100">
+
+
+                <RadioGroup
+                    android:id="@+id/radio_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="100">
+
+                    <RadioButton
+                        android:id="@+id/radio_physical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Physical"
+                        android:layout_weight="50"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_digital"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Digital"
+                        android:layout_weight="50"/>
+
+                </RadioGroup>
 
 
             </LinearLayout>

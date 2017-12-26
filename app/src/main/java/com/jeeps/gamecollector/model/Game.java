@@ -11,24 +11,26 @@ import java.util.Map;
  * Created by jeeps on 12/23/2017.
  */
 @IgnoreExtraProperties
-public class Game /*implements Comparable<Game>*/ {
+public class Game  {
     //Game data
     private String mName;
     private String mPublisher;
     private String mImageUri;
     private String mPlatform;
+    private boolean mIsPhysical;
 
     //User data
     private int mTimesCompleted;
     private String mDateAdded;
 
-    public Game(String name, String publisher, String imageUri, String platform) {
+    public Game(String name, String publisher, String imageUri, String platform, boolean isPhysical) {
         mName = name;
         mPublisher = publisher;
         mImageUri = imageUri;
         mPlatform = platform;
         mTimesCompleted = 0;
         mDateAdded = (new Date()).getTime() + "";
+        mIsPhysical = isPhysical;
     }
 
     public Game() {}
@@ -89,6 +91,14 @@ public class Game /*implements Comparable<Game>*/ {
         mDateAdded = dateAdded;
     }
 
+    public boolean isPhysical() {
+        return mIsPhysical;
+    }
+
+    public void setPhysical(boolean physical) {
+        mIsPhysical = physical;
+    }
+
     @Exclude
     public Map<String, Object> toMap() {
         /*//Game data
@@ -107,6 +117,7 @@ public class Game /*implements Comparable<Game>*/ {
         result.put("platform", mPlatform);
         result.put("timesCompleted", mTimesCompleted);
         result.put("dateAdded", mDateAdded);
+        result.put("isPhysical", mIsPhysical);
 
         return result;
     }
@@ -133,6 +144,8 @@ public class Game /*implements Comparable<Game>*/ {
                 case "timesCompleted":
                     game.setTimesCompleted(((Long) entry.getValue()).intValue());
                     break;
+                case "isPhysical":
+                    game.setPhysical((Boolean) entry.getValue());
                 default:
             }
         }
