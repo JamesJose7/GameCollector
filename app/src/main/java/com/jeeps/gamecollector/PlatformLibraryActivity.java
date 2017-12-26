@@ -48,6 +48,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
 
     public static final String CURRENT_PLATFORM = "CURRENT_PLATFORM";
     public static final String CURRENT_PLATFORM_NAME = "CURRENT_PLATFORM_NAME";
+    public static final String SELECTED_GAME_KEY = "SELECTED_GAME_KEY";
 
     @BindView(R.id.games_recycler_view)
     RecyclerView mGamesRecyclerView;
@@ -97,7 +98,6 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
             @Override
             public void onClick(View view) {
                 //Reset list
-                //mGames = new ArrayList<>();
                 Intent intent = new Intent(mContext, AddGameActivity.class);
                 intent.putExtra(CURRENT_PLATFORM, mPlatformId);
                 startActivity(intent);
@@ -241,6 +241,17 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         builder.setMessage("Delete game?").setPositiveButton("Yes", dialogClickListener)
                 .setNegativeButton("No", dialogClickListener).show();
     }
+
+    @Override
+    public void editGame(int position) {
+        String key = mGameKeys.get(position);
+        //Start add game activity to edit selected
+        Intent intent = new Intent(mContext, AddGameActivity.class);
+        intent.putExtra(CURRENT_PLATFORM, mPlatformId);
+        intent.putExtra(SELECTED_GAME_KEY, key);
+        startActivity(intent);
+    }
+
 
     /**
      * RecyclerView item decoration - give equal margin around grid item

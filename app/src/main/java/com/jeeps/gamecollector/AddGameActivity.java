@@ -76,6 +76,7 @@ public class AddGameActivity extends AppCompatActivity {
     private Platform mCurrentPlatform;
     private Uri currImageURI;
     private Uri gameImageURI;
+    private String previousUri;
 
     private StorageReference mStorageRef;
     private Context mContext;
@@ -83,6 +84,7 @@ public class AddGameActivity extends AppCompatActivity {
     private Format mDateFormatter;
     private String mInputPublisher;
     private int mTimesCompleted;
+    private String mSelectedGameKey;
     private List<Publisher> mPublishers;
     private DatabaseReference mGamesDB;
 
@@ -95,6 +97,11 @@ public class AddGameActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
         mContext = this;
+
+        //Get intent contents
+        Intent intent = getIntent();
+        mPlatformID = intent.getIntExtra(PlatformLibraryActivity.CURRENT_PLATFORM, 0);
+        mSelectedGameKey = intent.getStringExtra(PlatformLibraryActivity.SELECTED_GAME_KEY);
 
         //Formatter for file names
         mDateFormatter = new SimpleDateFormat("dd:HH:mm:ss");
@@ -143,14 +150,83 @@ public class AddGameActivity extends AppCompatActivity {
 
         //Save game
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        if (mSelectedGameKey != null) {
+            fab.setImageResource(R.drawable.edit);
+            mapSelectedGameToFields();
+        }
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (mSelectedGameKey != null) {
+                    deleteGame();
+                }
                 saveGame();
-
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void deleteGame() {
+        //Delete game
+        DatabaseReference gameReference = mDatabase.getReference("library/games/" + mPlatformID + "/" + mSelectedGameKey);
+        gameReference.removeValue();
+
+        if (currImageURI != null) {
+            //Delete uploaded image
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+            StorageReference gameCoverRef = storageReference.child("gameCovers/" + mSelectedGameKey + ".png");
+            gameCoverRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    //Toast.makeText(mContext, "Deleted image", Toast.LENGTH_SHORT).show();
+                    // File deleted successfully
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Uh-oh, an error occurred!
+                }
+            });
+        }
+    }
+
+    private void mapSelectedGameToFields() {
+        //Get selected game
+        DatabaseReference gameReference = mDatabase.getReference("library/games/" + mPlatformID + "/" + mSelectedGameKey);
+        gameReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                GenericTypeIndicator<HashMap<String, Object>> genericTypeIndicator = new GenericTypeIndicator<HashMap<String, Object>>() {
+                };
+                HashMap<String, Object> map = dataSnapshot.getValue(genericTypeIndicator);
+                if (map != null) {
+                    Game game = Game.mapToGame(map);
+                    System.out.println(game);
+
+                    //Set image
+                    Picasso.with(mContext).load(game.getImageUri()).into(mGameCover);
+                    mGameCover.setAlpha(1f);
+                    mGameCover.setBackgroundColor(Color.parseColor("#99cccccc"));
+                    previousUri = game.getImageUri();
+                    //Set name
+                    mNameEdit.setText(game.getName());
+                    //Set physical or digital
+                    if (!game.isPhysical())
+                        mRadioGroup.check(mRadioDigital.getId());
+                    //Set times commpleted
+                    mNumberPicker.setValue(game.getTimesCompleted());
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        });
     }
 
     private void populateSpinner() {
@@ -207,57 +283,61 @@ public class AddGameActivity extends AppCompatActivity {
         //Start uploading cover to firebase
         mStorageRef = FirebaseStorage.getInstance().getReference();
         //Create name with current date
-        StorageReference riversRef = mStorageRef.child("gameCovers/" + key + ".png");
+        StorageReference gameCovers = mStorageRef.child("gameCovers/" + key + ".png");
 
         if (currImageURI != null) {
-            riversRef.putFile(currImageURI)
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            // Get a URL to the uploaded content
-                            gameImageURI = taskSnapshot.getDownloadUrl();
-                            String imageUri = "";
-                            if (gameImageURI.toString() != null)
-                                imageUri = gameImageURI.toString();
-                            game.setImageUri(imageUri);
-
-                            //Add game to database
-
-                            //gamesDB.child(mCurrentPlatform.getId() + ""/* + "_" + fileName*/).setValue(game);
-
-                            Map<String, Object> gameValues = game.toMap();
-                            Map<String, Object> childUpdates = new HashMap<>();
-
-                            childUpdates.put(mCurrentPlatform.getId() + "/" + key, gameValues);
-                            mGamesDB.updateChildren(childUpdates);
-
-
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            // Handle unsuccessful uploads
-                            // ...
-                        }
-                    });
-
+            saveGameOnImageUpload(game, key, gameCovers);
             //Display success message
             Toast.makeText(AddGameActivity.this, "Game added!", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(mContext, "Image can't be null", Toast.LENGTH_SHORT).show();
+            if (previousUri != null) {
+                game.setImageUri(previousUri);it s
+
+                //Add game to database
+
+                Map<String, Object> gameValues = game.toMap();
+                Map<String, Object> childUpdates = new HashMap<>();
+
+                childUpdates.put(mCurrentPlatform.getId() + "/" + key, gameValues);
+                mGamesDB.updateChildren(childUpdates);
+            } else
+                Toast.makeText(mContext, "Image can't be null", Toast.LENGTH_SHORT).show();
         }
-
-
-
         //Close activity
         finish();
     }
 
-    private void getCurrentPlatform() {
-        Intent intent = getIntent();
-        mPlatformID = intent.getIntExtra(PlatformLibraryActivity.CURRENT_PLATFORM, 0);
+    private void saveGameOnImageUpload(final Game game, final String key, StorageReference gameCovers) {
+        gameCovers.putFile(currImageURI)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // Get a URL to the uploaded content
+                        gameImageURI = taskSnapshot.getDownloadUrl();
+                        String imageUri = "";
+                        if (gameImageURI.toString() != null)
+                            imageUri = gameImageURI.toString();
+                        game.setImageUri(imageUri);
 
+                        //Add game to database
+
+                        Map<String, Object> gameValues = game.toMap();
+                        Map<String, Object> childUpdates = new HashMap<>();
+
+                        childUpdates.put(mCurrentPlatform.getId() + "/" + key, gameValues);
+                        mGamesDB.updateChildren(childUpdates);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                        // ...
+                    }
+                });
+    }
+
+    private void getCurrentPlatform() {
         DatabaseReference platformsDB = mDatabase.getReference("library/platforms/" + mPlatformID);
         platformsDB.addValueEventListener(new ValueEventListener() {
             @Override

@@ -25,6 +25,7 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
 
     public interface GameCardAdapterListener {
         void deleteSelectedGame(int position);
+        void editGame(int position);
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -72,6 +73,13 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
             public boolean onLongClick(View view) {
                 listener.deleteSelectedGame(position);
                 return true;
+            }
+        });
+
+        holder.cover.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.editGame(position);
             }
         });
     }
