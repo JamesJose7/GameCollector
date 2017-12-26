@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -68,6 +69,8 @@ public class AddGameActivity extends AppCompatActivity {
     RadioButton mRadioDigital;
     @BindView(R.id.radio_physical)
     RadioButton mRadioPhysical;
+    @BindView(R.id.card_game_completed_selector)
+    NumberPicker mNumberPicker;
 
     private int mPlatformID;
     private Platform mCurrentPlatform;
@@ -79,6 +82,7 @@ public class AddGameActivity extends AppCompatActivity {
     private FirebaseDatabase mDatabase;
     private Format mDateFormatter;
     private String mInputPublisher;
+    private int mTimesCompleted;
     private List<Publisher> mPublishers;
     private DatabaseReference mGamesDB;
 
@@ -96,6 +100,18 @@ public class AddGameActivity extends AppCompatActivity {
         mDateFormatter = new SimpleDateFormat("dd:HH:mm:ss");
         //Select physical radio button by default
         mRadioGroup.check(mRadioPhysical.getId());
+
+        //Number picker
+        mNumberPicker.setMinValue(0);
+        mNumberPicker.setMaxValue(10);
+        mNumberPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker numberPicker, int i, int i1) {
+                mTimesCompleted = i1;
+                //Toast.makeText(mContext, "NOW: " + mTimesCompleted, Toast.LENGTH_SHORT).show();
+            }
+        });
+
         //Database
         mDatabase = FirebaseDatabase.getInstance();
 
@@ -181,6 +197,7 @@ public class AddGameActivity extends AppCompatActivity {
         //Create game
         final Game game = new Game(name, publisher, "", mCurrentPlatform.getName(), isPhysical);
         final String fileName = mDateFormatter.format(Long.parseLong(game.getDateAdded()));
+        game.setTimesCompleted(mTimesCompleted);
 
         //Games DB Reference
         mGamesDB = mDatabase.getReference("library/games/");

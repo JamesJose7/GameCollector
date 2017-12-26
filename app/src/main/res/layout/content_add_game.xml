@@ -114,6 +114,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/radio_buttons_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -144,6 +145,43 @@
                         android:layout_weight="50"/>
 
                 </RadioGroup>
+
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/games_completed_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Game completion"
+                android:layout_marginTop="5dp"
+                android:layout_below="@id/radio_buttons_container"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/games_completed_text"
+                android:orientation="horizontal"
+                android:weightSum="100">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_weight="50">
+
+                    <NumberPicker
+                        android:id="@+id/card_game_completed_selector"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"/>
+
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="50"/>
 
 
             </LinearLayout>
