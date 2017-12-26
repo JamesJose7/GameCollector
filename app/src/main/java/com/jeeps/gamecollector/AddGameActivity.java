@@ -291,7 +291,7 @@ public class AddGameActivity extends AppCompatActivity {
             Toast.makeText(AddGameActivity.this, "Game added!", Toast.LENGTH_SHORT).show();
         } else {
             if (previousUri != null) {
-                game.setImageUri(previousUri);it s
+                game.setImageUri(previousUri);
 
                 //Add game to database
 
