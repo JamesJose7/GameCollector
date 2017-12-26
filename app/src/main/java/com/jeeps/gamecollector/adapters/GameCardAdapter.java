@@ -29,12 +29,14 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public ImageView cover;
+        public ImageView isDigital;
         public TextView title;
 
         public MyViewHolder(View view) {
             super(view);
             cover = (ImageView) view.findViewById(R.id.card_game_cover);
             title = (TextView) view.findViewById(R.id.card_game_title);
+            isDigital = (ImageView) view.findViewById(R.id.card_is_digital);
         }
     }
 
@@ -58,7 +60,11 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
 
         //load image cover
         Picasso.with(mContext).load(game.getImageUri()).into(holder.cover);
+        //Display logo if it's digital
+        if (game.isPhysical())
+            holder.isDigital.setVisibility(View.INVISIBLE);
 
+        //Name
         holder.title.setText(game.getName());
 
         holder.cover.setOnLongClickListener(new View.OnLongClickListener() {

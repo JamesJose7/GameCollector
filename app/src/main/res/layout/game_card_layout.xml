@@ -9,7 +9,7 @@
         android:id="@+id/card_view"
         android:layout_gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="310dp"
         card_view:cardCornerRadius="4dp"
         android:elevation="10dp"
         card_view:cardUseCompatPadding="true">
@@ -18,16 +18,69 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="255dp"
+                android:background="#ccc"/>
+
             <ImageView
                 android:id="@+id/card_game_cover"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"/>
+                android:layout_height="255dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"/>
 
-            <TextView
-                android:id="@+id/card_game_title"
+            <ImageView
+                android:id="@+id/card_is_digital"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:padding="6dp"
+                android:src="@drawable/cloud"
+                android:tint="#fff"
+                android:background="@drawable/round_corners"
+                android:backgroundTint="#555"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="5dp"
+                android:layout_marginTop="5dp"/>
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:layout_below="@id/card_game_cover"/>
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:weightSum="100"
+                android:layout_below="@id/card_game_cover"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp">
+
+                <!--android:singleLine="true"-->
+                <TextView
+                    android:id="@+id/card_game_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="20sp"
+                    android:layout_weight="15"
+                    android:paddingEnd="5dp"
+                    android:autoSizeTextType="uniform"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="85"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:id="@+id/card_game_completed"
+                        android:layout_width="30dp"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/checked"
+                        android:tint="#ccc"
+                        android:layout_centerInParent="true"/>
+
+                </RelativeLayout>
+
+            </LinearLayout>
 
         </RelativeLayout>
 
