@@ -21,6 +21,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -55,6 +56,8 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     RecyclerView mGamesRecyclerView;
     @BindView(R.id.backdrop)
     ImageView backdrop;
+    @BindView(R.id.games_progressbar)
+    ProgressBar mProgressBar;
 
     private Context mContext;
     private int mPlatformId;
@@ -76,6 +79,9 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         mGames = new ArrayList<>();
         mGameKeys = new ArrayList<>();
         initCollapsingToolbar();
+
+        //Show progress bar
+        mProgressBar.setVisibility(View.VISIBLE);
 
         //Get platform id from intent
         Intent intent = getIntent();
@@ -135,6 +141,9 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
 
                 mGamesRecyclerView.setAdapter(mAdapter);
                 mAdapter.notifyDataSetChanged();
+
+                //Hide progressbar
+                mProgressBar.setVisibility(View.INVISIBLE);
             }
 
             @Override

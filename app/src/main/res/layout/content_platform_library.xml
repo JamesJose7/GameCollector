@@ -16,4 +16,13 @@
         android:clipToPadding="false"
         android:scrollbars="vertical" />
 
+    <ProgressBar
+        android:id="@+id/games_progressbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:indeterminate="true"
+        android:layout_marginTop="-6dp"
+        />
+
 </RelativeLayout>
