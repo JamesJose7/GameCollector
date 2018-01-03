@@ -87,6 +87,7 @@ public class AddGameActivity extends AppCompatActivity {
     private String mSelectedGameKey;
     private List<Publisher> mPublishers;
     private DatabaseReference mGamesDB;
+    private ArrayAdapter<String> mSpinnerAdapter;
 
 
     @Override
@@ -217,6 +218,11 @@ public class AddGameActivity extends AppCompatActivity {
                         mRadioGroup.check(mRadioDigital.getId());
                     //Set times commpleted
                     mNumberPicker.setValue(game.getTimesCompleted());
+                    //Set publisher in spinner
+                    if (mSpinnerAdapter != null) {
+                        int spinnerPosition = mSpinnerAdapter.getPosition(game.getPublisher());
+                        mPublishersSpinner.setSelection(spinnerPosition);
+                    }
                 }
 
             }
@@ -248,10 +254,10 @@ public class AddGameActivity extends AppCompatActivity {
                 for (Publisher publisher : mPublishers)
                     publisherNames.add(publisher.getName());
                 //Add publishers to spinner
-                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(mContext,
+                mSpinnerAdapter = new ArrayAdapter<String>(mContext,
                         android.R.layout.simple_spinner_item, publisherNames);
-                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                mPublishersSpinner.setAdapter(dataAdapter);
+                mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                mPublishersSpinner.setAdapter(mSpinnerAdapter);
             }
 
             @Override
