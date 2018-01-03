@@ -21,6 +21,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -208,9 +209,13 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                         DatabaseReference gameReference = mDatabase.getReference("library/games/" + mPlatformId + "/" + key);
                         gameReference.removeValue();
 
+                        //Get stored cover file name
+                        String firstCut[] = game.getImageUri().split("gameCovers%2F");
+                        String secondCut[] = firstCut[1].split(".png");
+                        String fileId = secondCut[0];
                         //Delete uploaded image
                         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-                        StorageReference gameCoverRef = storageReference.child("gameCovers/" + key + ".png");
+                        StorageReference gameCoverRef = storageReference.child("gameCovers/" + fileId + ".png");
                         gameCoverRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
@@ -221,6 +226,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                             @Override
                             public void onFailure(@NonNull Exception exception) {
                                 // Uh-oh, an error occurred!
+                                Toast.makeText(mContext, "There was an error trying to delete cover", Toast.LENGTH_SHORT).show();
                             }
                         });
 
