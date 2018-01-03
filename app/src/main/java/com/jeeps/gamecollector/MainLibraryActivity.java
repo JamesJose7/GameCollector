@@ -7,8 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -17,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -43,6 +42,8 @@ public class MainLibraryActivity extends AppCompatActivity {
 
     @BindView(R.id.platforms_list)
     ListView platformsList;
+    @BindView(R.id.platforms_progress_bar)
+    ProgressBar mProgressBar;
 
     private StorageReference mStorageRef;
 
@@ -58,6 +59,9 @@ public class MainLibraryActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         mContext = this;
+
+        //Show progressbar
+        mProgressBar.setVisibility(View.VISIBLE);
 
         // Get libraries from the database
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -87,6 +91,9 @@ public class MainLibraryActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 });
+
+                //Hide progressbar
+                mProgressBar.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -96,23 +103,14 @@ public class MainLibraryActivity extends AppCompatActivity {
             }
         });
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-
-                // To open up a gallery browser
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"),1);
-
-
-
             }
-        });
+        });*/
     }
 
     // To handle when an image is selected from the browser, add the following to your Activity
