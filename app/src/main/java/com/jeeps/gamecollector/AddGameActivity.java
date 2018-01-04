@@ -99,6 +99,9 @@ public class AddGameActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         mContext = this;
 
+        //Change title
+        getSupportActionBar().setTitle("Add New Game");
+
         //Get intent contents
         Intent intent = getIntent();
         mPlatformID = intent.getIntExtra(PlatformLibraryActivity.CURRENT_PLATFORM, 0);
@@ -152,6 +155,8 @@ public class AddGameActivity extends AppCompatActivity {
         //Save game
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         if (mSelectedGameKey != null) {
+            //Selected game is being edited
+            getSupportActionBar().setTitle("Edit Game");
             fab.setImageResource(R.drawable.edit);
             mapSelectedGameToFields();
         }

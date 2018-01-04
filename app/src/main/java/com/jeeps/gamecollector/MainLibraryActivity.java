@@ -58,6 +58,8 @@ public class MainLibraryActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
 
+        getSupportActionBar().setTitle("Platforms");
+
         mContext = this;
 
         //Show progressbar
