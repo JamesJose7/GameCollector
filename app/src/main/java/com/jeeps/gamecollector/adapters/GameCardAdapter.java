@@ -7,10 +7,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jeeps.gamecollector.R;
 import com.jeeps.gamecollector.model.Game;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -34,6 +37,7 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
         public ImageView isDigital;
         public TextView title;
         public ImageView completed;
+        public ProgressBar coverProgressBar;
 
         public MyViewHolder(View view) {
             super(view);
@@ -41,6 +45,7 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
             title = (TextView) view.findViewById(R.id.card_game_title);
             isDigital = (ImageView) view.findViewById(R.id.card_is_digital);
             completed = (ImageView) view.findViewById(R.id.card_game_completed);
+            coverProgressBar = (ProgressBar) view.findViewById(R.id.cover_progressbar);
         }
     }
 
@@ -63,7 +68,21 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
         Game game = mGames.get(position);
 
         //load image cover
-        Picasso.with(mContext).load(game.getImageUri()).into(holder.cover);
+        Picasso.with(mContext).load(game.getImageUri()).into(holder.cover, new Callback() {
+            @Override
+            public void onSuccess() {
+                //Hide progress bar when image is finished loading
+                holder.coverProgressBar.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onError() {
+                //Hide progress bar when image is finished loading
+                holder.coverProgressBar.setVisibility(View.INVISIBLE);
+                //Display temp error message
+                Toast.makeText(mContext, "Welp, image couldn't load... whoops", Toast.LENGTH_SHORT).show();
+            }
+        });
         //Display logo if it's digital
         if (game.isPhysical())
             holder.isDigital.setVisibility(View.INVISIBLE);

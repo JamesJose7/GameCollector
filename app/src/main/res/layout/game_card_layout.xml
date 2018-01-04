@@ -45,6 +45,7 @@
                 android:layout_marginTop="5dp"/>
 
             <LinearLayout
+                android:id="@+id/game_info_layout"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:orientation="horizontal"
@@ -82,6 +83,13 @@
                 </RelativeLayout>
 
             </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/cover_progressbar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/game_info_layout"
+                android:padding="40dp"/>
 
         </RelativeLayout>
 
