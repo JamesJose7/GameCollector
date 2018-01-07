@@ -33,6 +33,7 @@
 
             <ImageView
                 android:id="@+id/card_is_digital"
+                android:visibility="gone"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:padding="6dp"

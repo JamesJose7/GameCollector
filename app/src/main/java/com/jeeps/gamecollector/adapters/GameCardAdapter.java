@@ -67,6 +67,8 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         Game game = mGames.get(position);
 
+        //Display progress bar
+        holder.coverProgressBar.setVisibility(View.VISIBLE);
         //load image cover
         Picasso.with(mContext).load(game.getImageUri()).into(holder.cover, new Callback() {
             @Override
@@ -84,8 +86,11 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
             }
         });
         //Display logo if it's digital
-        if (game.isPhysical())
-            holder.isDigital.setVisibility(View.INVISIBLE);
+        if (!game.isPhysical())
+            holder.isDigital.setVisibility(View.VISIBLE);
+        else {
+            holder.isDigital.setVisibility(View.GONE);
+        }
 
         //Name
         holder.title.setText(game.getName());
