@@ -1,5 +1,6 @@
 package com.jeeps.gamecollector;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -36,8 +37,14 @@ public class StatsActivity extends AppCompatActivity {
     private List<Integer> gameCountPerPlatform = new ArrayList<>();
 
     //Views
-    @BindView(R.id.test)
-    TextView test;
+    @BindView(R.id.total_games)
+    TextView totalGamesText;
+    @BindView(R.id.total_publishers)
+    TextView totalPublishersText;
+
+    private List<Game> mGames;
+    private List<Platform> mPlatforms;
+    private List<Publisher> mPublishers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,10 +103,24 @@ public class StatsActivity extends AppCompatActivity {
         JSONArray publishersJSON = jsonObject.getJSONArray("publishers");
 
         //Parse json into objects
-        List<Game> games = getGames(gamesJSON);
-        List<Platform> platforms = getPlatforms(platformsJSON);
-        List<Publisher> publishers = getPublishers(publishersJSON);
+        mGames = getGames(gamesJSON);
+        mPlatforms = getPlatforms(platformsJSON);
+        mPublishers = getPublishers(publishersJSON);
 
+        //Display data on UI thread
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                displayData();
+            }
+        });
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void displayData() {
+        //Overall stats
+        totalGamesText.setText(mGames.size() + "");
+        totalPublishersText.setText(mPublishers.size() + "");
     }
 
     private List<Game> getGames(JSONArray games) throws JSONException {
