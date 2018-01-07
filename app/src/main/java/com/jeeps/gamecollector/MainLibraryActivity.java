@@ -186,7 +186,10 @@ public class MainLibraryActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_stats) {
+            Intent intent = new Intent(this, StatsActivity.class);
+            startActivity(intent);
+
             return true;
         }
 

@@ -3,6 +3,9 @@ package com.jeeps.gamecollector.model;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -122,6 +125,16 @@ public class Game  {
         return result;
     }
 
+    public void jsonToGame(JSONObject gameJson) throws JSONException {
+        mDateAdded = gameJson.getString("dateAdded");
+        mImageUri = gameJson.getString("imageUri");
+        mIsPhysical = gameJson.getBoolean("isPhysical");
+        mName = gameJson.getString("name");
+        mPlatform = gameJson.getString("platform");
+        mPublisher = gameJson.getString("publisher");
+        mTimesCompleted = gameJson.getInt("timesCompleted");
+    }
+
     public static Game mapToGame(HashMap<String, Object> map) {
         Game game = new Game();
         for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -151,4 +164,6 @@ public class Game  {
         }
         return game;
     }
+
+
 }
