@@ -42,9 +42,47 @@ public class StatsActivity extends AppCompatActivity {
     @BindView(R.id.total_publishers)
     TextView totalPublishersText;
 
+    @BindView(R.id.total_switch)
+    TextView totalSwitchGames;
+    @BindView(R.id.physical_switch)
+    TextView physicalSwitchGames;
+    @BindView(R.id.digital_switch)
+    TextView digitalSwitchGames;
+    @BindView(R.id.total_wiiu)
+    TextView totalWiiuGames;
+    @BindView(R.id.physical_wiiu)
+    TextView physicalWiiuGames;
+    @BindView(R.id.digital_wiiu)
+    TextView digitalWiiuGames;
+    @BindView(R.id.total_3ds)
+    TextView total3DSGames;
+    @BindView(R.id.physical_3ds)
+    TextView physical3DSGames;
+    @BindView(R.id.digital_3ds)
+    TextView digital3DSGames;
+    @BindView(R.id.total_wii)
+    TextView totalWiiGames;
+    @BindView(R.id.physical_wii)
+    TextView physicalWiiGames;
+    @BindView(R.id.digital_wii)
+    TextView digitalWiiGames;
+    @BindView(R.id.total_ds)
+    TextView totalDSGames;
+    @BindView(R.id.physical_ds)
+    TextView physicalDSGames;
+    @BindView(R.id.digital_ds)
+    TextView digitalDSGames;
+
     private List<Game> mGames;
     private List<Platform> mPlatforms;
     private List<Publisher> mPublishers;
+
+    //Platform stats
+    private int nintendoSwitchCount[] = {0,0,0};
+    private int wiiuCount[] = {0,0,0};
+    private int _3dsCount[] = {0,0,0};
+    private int wiiCount[] = {0,0,0};
+    private int dsCount[] = {0,0,0};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +136,7 @@ public class StatsActivity extends AppCompatActivity {
         JSONObject jsonObject = new JSONObject(string);
 
         //Get json arrays
-        final JSONArray gamesJSON = jsonObject.getJSONArray("games");
+        JSONArray gamesJSON = jsonObject.getJSONArray("games");
         JSONArray platformsJSON = jsonObject.getJSONArray("platforms");
         JSONArray publishersJSON = jsonObject.getJSONArray("publishers");
 
@@ -106,6 +144,49 @@ public class StatsActivity extends AppCompatActivity {
         mGames = getGames(gamesJSON);
         mPlatforms = getPlatforms(platformsJSON);
         mPublishers = getPublishers(publishersJSON);
+
+        //Stats per platform
+        for (Game game : mGames) {
+            String platform = game.getPlatform();
+            switch (platform) {
+                case "Nintendo Switch":
+                    nintendoSwitchCount[0]++;
+                    if (game.isPhysical())
+                        nintendoSwitchCount[1]++;
+                    else
+                        nintendoSwitchCount[2]++;
+                    break;
+                case "Nintendo Wii U":
+                    wiiuCount[0]++;
+                    if (game.isPhysical())
+                        wiiuCount[1]++;
+                    else
+                        wiiuCount[2]++;
+                    break;
+                case "Nintendo 3DS":
+                    _3dsCount[0]++;
+                    if (game.isPhysical())
+                        _3dsCount[1]++;
+                    else
+                        _3dsCount[2]++;
+                    break;
+                case "Nintendo Wii":
+                    wiiCount[0]++;
+                    if (game.isPhysical())
+                        wiiCount[1]++;
+                    else
+                        wiiCount[2]++;
+                    break;
+                case "NintendoDS":
+                    dsCount[0]++;
+                    if (game.isPhysical())
+                        dsCount[1]++;
+                    else
+                        dsCount[2]++;
+                    break;
+                default:
+            }
+        }
 
         //Display data on UI thread
         runOnUiThread(new Runnable() {
@@ -121,6 +202,27 @@ public class StatsActivity extends AppCompatActivity {
         //Overall stats
         totalGamesText.setText(mGames.size() + "");
         totalPublishersText.setText(mPublishers.size() + "");
+
+        //Stats per platform
+        //Total
+        total3DSGames.setText(_3dsCount[0] + "");
+        totalDSGames.setText(dsCount[0] + "");
+        totalSwitchGames.setText(nintendoSwitchCount[0] + "");
+        totalWiiGames.setText(wiiCount[0] + "");
+        totalWiiuGames.setText(wiiuCount[0] + "");
+        //Physical
+        physical3DSGames.setText(_3dsCount[1] + "");
+        physicalDSGames.setText(dsCount[1] + "");
+        physicalSwitchGames.setText(nintendoSwitchCount[1] + "");
+        physicalWiiGames.setText(wiiCount[1] + "");
+        physicalWiiuGames.setText(wiiuCount[1] + "");
+        //Digital
+        digital3DSGames.setText(_3dsCount[2] + "");
+        digitalDSGames.setText(dsCount[2] + "");
+        digitalSwitchGames.setText(nintendoSwitchCount[2] + "");
+        digitalWiiGames.setText(wiiCount[2] + "");
+        digitalWiiuGames.setText(wiiuCount[2] + "");
+
     }
 
     private List<Game> getGames(JSONArray games) throws JSONException {

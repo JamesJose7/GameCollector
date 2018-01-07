@@ -10,85 +10,425 @@
     tools:showIn="@layout/activity_stats"
     android:background="#44cccccc">
 
-    <android.support.v7.widget.CardView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        app:cardElevation="6dp">
+        android:layout_height="match_parent">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp">
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/overall"
+            <android.support.v7.widget.CardView
+                android:id="@+id/overall_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:layout_marginBottom="5dp"
-                android:textSize="25sp"
-                android:text="Overall"/>
+                android:layout_margin="10dp"
+                app:cardElevation="6dp">
 
-            <LinearLayout
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp">
+
+                    <TextView
+                        android:id="@+id/overall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="5dp"
+                        android:textSize="25sp"
+                        android:text="Overall"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/overall"
+                        android:orientation="horizontal"
+                        android:weightSum="100">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="20"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:textSize="18sp"
+                                android:text="Total games"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:text="Total publishers"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="80"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/total_games"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:layout_marginBottom="5dp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <TextView
+                                android:id="@+id/total_publishers"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/platforms_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/overall"
-                android:orientation="horizontal"
-                android:weightSum="100">
+                android:layout_below="@id/overall_card"
+                android:layout_marginTop="0dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                app:cardElevation="6dp">
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="20"
-                    android:orientation="vertical">
+                    android:padding="8dp">
 
                     <TextView
+                        android:id="@+id/platforms"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:textStyle="bold"
                         android:layout_marginBottom="5dp"
-                        android:textSize="18sp"
-                        android:text="Total games"/>
+                        android:textSize="25sp"
+                        android:text="Platforms"/>
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:text="Total publishers"/>
+                        android:layout_below="@id/platforms"
+                        android:orientation="horizontal"
+                        android:weightSum="100">
 
-                </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="20"
+                            android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="80"
-                    android:orientation="vertical">
+                            <!-- Switch -->
 
-                    <TextView
-                        android:id="@+id/total_games"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:layout_marginBottom="5dp"
-                        android:textAlignment="textEnd"
-                        android:text="0"
-                        tools:text="100"/>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="#55cccccc"
+                                android:textStyle="bold"
+                                android:textSize="18sp"
+                                android:text="Nintendo Switch"/>
 
-                    <TextView
-                        android:id="@+id/total_publishers"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:textAlignment="textEnd"
-                        android:text="0"
-                        tools:text="100"/>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:text="Physical"/>
 
-                </LinearLayout>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:textSize="18sp"
+                                android:text="Digital"/>
 
-            </LinearLayout>
+                            <!-- Wii U -->
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="#55cccccc"
+                                android:textStyle="bold"
+                                android:textSize="18sp"
+                                android:text="Nintendo Wii U"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:text="Physical"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:textSize="18sp"
+                                android:text="Digital"/>
+
+                            <!-- 3DS -->
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="#55cccccc"
+                                android:textStyle="bold"
+                                android:textSize="18sp"
+                                android:text="Nintendo 3DS"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:text="Physical"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:textSize="18sp"
+                                android:text="Digital"/>
+
+                            <!-- Wii -->
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="#55cccccc"
+                                android:textStyle="bold"
+                                android:textSize="18sp"
+                                android:text="Nintendo Wii"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:text="Physical"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:textSize="18sp"
+                                android:text="Digital"/>
+
+                            <!-- DS -->
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="#55cccccc"
+                                android:textStyle="bold"
+                                android:textSize="18sp"
+                                android:text="Nintendo DS"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:text="Physical"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:textSize="18sp"
+                                android:text="Digital"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="80"
+                            android:orientation="vertical">
+
+                            <!-- Switch -->
+
+                            <TextView
+                                android:id="@+id/total_switch"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="#55cccccc"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <TextView
+                                android:id="@+id/physical_switch"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <TextView
+                                android:id="@+id/digital_switch"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <!-- Wii U -->
+
+                            <TextView
+                                android:id="@+id/total_wiiu"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="#55cccccc"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <TextView
+                                android:id="@+id/physical_wiiu"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <TextView
+                                android:id="@+id/digital_wiiu"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <!-- 3DS-->
+
+                            <TextView
+                                android:id="@+id/total_3ds"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="#55cccccc"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <TextView
+                                android:id="@+id/physical_3ds"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <TextView
+                                android:id="@+id/digital_3ds"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <!-- Wii -->
+
+                            <TextView
+                                android:id="@+id/total_wii"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="#55cccccc"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <TextView
+                                android:id="@+id/physical_wii"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <TextView
+                                android:id="@+id/digital_wii"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <!-- DS -->
+
+                            <TextView
+                                android:id="@+id/total_ds"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="#55cccccc"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <TextView
+                                android:id="@+id/physical_ds"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <TextView
+                                android:id="@+id/digital_ds"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+
+            </android.support.v7.widget.CardView>
 
         </RelativeLayout>
 
-    </android.support.v7.widget.CardView>
+    </ScrollView>
 
 </RelativeLayout>
