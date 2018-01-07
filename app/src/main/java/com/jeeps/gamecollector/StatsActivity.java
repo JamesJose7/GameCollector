@@ -130,11 +130,23 @@ public class StatsActivity extends AppCompatActivity {
     }
 
 
-    private List<Publisher> getPublishers(JSONArray publishers) {
-        return null;
+    private List<Publisher> getPublishers(JSONArray publishers) throws JSONException {
+        List<Publisher> publishersList = new ArrayList<>();
+        for (int i = 0; i < publishers.length(); i++) {
+            Publisher publisher = new Publisher();
+            publisher.jsonToPublisher(publishers.getJSONObject(i));
+            publishersList.add(publisher);
+        }
+        return publishersList;
     }
 
-    private List<Platform> getPlatforms(JSONArray platforms) {
-        return null;
+    private List<Platform> getPlatforms(JSONArray platforms) throws JSONException {
+        List<Platform> platformsList = new ArrayList<>();
+        for (int i = 0; i < platforms.length(); i++) {
+            Platform platform = new Platform();
+            platform.jsonToPlatform(platforms.getJSONObject(i));
+            platformsList.add(platform);
+        }
+        return platformsList;
     }
 }

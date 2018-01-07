@@ -1,5 +1,8 @@
 package com.jeeps.gamecollector.model;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by jeeps on 12/23/2017.
  */
@@ -46,5 +49,12 @@ public class Platform {
 
     public void setColor(String color) {
         mColor = color;
+    }
+
+    public void jsonToPlatform(JSONObject jsonObject) throws JSONException {
+        mId = jsonObject.getInt("id");
+        mName = jsonObject.getString("name");
+        mImageUri = jsonObject.getString("imageUri");
+        mColor = jsonObject.getString("color");
     }
 }
