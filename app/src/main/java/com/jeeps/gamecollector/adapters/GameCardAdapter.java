@@ -98,6 +98,8 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
         //turn check green if game is completed
         if (game.getTimesCompleted() > 0)
             holder.completed.setColorFilter(Color.parseColor("#7FFF00"));
+        else
+            holder.completed.setColorFilter(Color.parseColor("#cccccc"));
 
         holder.cover.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
