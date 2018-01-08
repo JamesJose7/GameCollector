@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.jeeps.gamecollector.R;
 import com.jeeps.gamecollector.model.Game;
@@ -82,7 +81,7 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
                 //Hide progress bar when image is finished loading
                 holder.coverProgressBar.setVisibility(View.INVISIBLE);
                 //Display temp error message
-                Toast.makeText(mContext, "Welp, image couldn't load... whoops", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(mContext, "Welp, image couldn't load... whoops", Toast.LENGTH_SHORT).show();
             }
         });
         //Display logo if it's digital
