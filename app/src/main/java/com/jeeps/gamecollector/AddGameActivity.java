@@ -39,19 +39,27 @@ import com.jeeps.gamecollector.model.Platform;
 import com.jeeps.gamecollector.model.Publisher;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import id.zelory.compressor.Compressor;
 
 public class AddGameActivity extends AppCompatActivity {
 
     private static final String TAG = "ADD_GAME_ACTIVITY";
+    private static final int MY_PERMISSIONS_REQUEST_WRITE_STORAGE = 2929;
 
     @BindView(R.id.game_cover)
     ImageView mGameCover;
@@ -319,33 +327,76 @@ public class AddGameActivity extends AppCompatActivity {
     }
 
     private void saveGameOnImageUpload(final Game game, final String key, StorageReference gameCovers) {
-        gameCovers.putFile(currImageURI)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // Get a URL to the uploaded content
-                        gameImageURI = taskSnapshot.getDownloadUrl();
-                        String imageUri = "";
-                        if (gameImageURI.toString() != null)
-                            imageUri = gameImageURI.toString();
-                        game.setImageUri(imageUri);
+        //Get file from URI
+        final File localCover = new File(mContext.getFilesDir(), mDateFormatter.format(new Date()));
+        try {
+            InputStream inputStream = getContentResolver()
+                    .openInputStream(currImageURI);
+            FileOutputStream fileOutputStream = new FileOutputStream(
+                    localCover);
+            copyStream(inputStream, fileOutputStream);
+            fileOutputStream.close();
+            inputStream.close();
+            //Compress image
+            final File compressedImageFile = new Compressor(this)
+                    .setMaxWidth(300)
+                    .setQuality(75)
+                    .compressToFile(localCover);
+            //Get URI from file
+            currImageURI = Uri.fromFile(compressedImageFile);
 
-                        //Add game to database
+            gameCovers.putFile(currImageURI)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            // Get a URL to the uploaded content
+                            gameImageURI = taskSnapshot.getDownloadUrl();
+                            String imageUri = "";
+                            if (gameImageURI.toString() != null)
+                                imageUri = gameImageURI.toString();
+                            game.setImageUri(imageUri);
 
-                        Map<String, Object> gameValues = game.toMap();
-                        Map<String, Object> childUpdates = new HashMap<>();
+                            //Add game to database
 
-                        childUpdates.put(mCurrentPlatform.getId() + "/" + key, gameValues);
-                        mGamesDB.updateChildren(childUpdates);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                        // ...
-                    }
-                });
+                            Map<String, Object> gameValues = game.toMap();
+                            Map<String, Object> childUpdates = new HashMap<>();
+
+                            childUpdates.put(mCurrentPlatform.getId() + "/" + key, gameValues);
+                            mGamesDB.updateChildren(childUpdates);
+
+                            //Delete temp files
+                            deleteTempFiles(localCover, compressedImageFile);
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Handle unsuccessful uploads
+                            // ...
+                            //Delete temp files
+                            deleteTempFiles(localCover, compressedImageFile);
+                        }
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void deleteTempFiles(File localCover, File compressedImageFile) {
+        if (localCover.exists())
+            localCover.delete();
+        if (compressedImageFile.exists())
+            compressedImageFile.delete();
+    }
+
+    public void copyStream(InputStream input, OutputStream output)
+            throws IOException {
+
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = input.read(buffer)) != -1) {
+            output.write(buffer, 0, bytesRead);
+        }
     }
 
     private void getCurrentPlatform() {
