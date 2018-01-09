@@ -282,6 +282,11 @@ public class AddGameActivity extends AppCompatActivity {
     }
 
     private void saveGame() {
+        //Games DB Reference
+        mGamesDB = mDatabase.getReference("library/games/");
+        //Get push key
+        final String key = mGamesDB.child(mCurrentPlatform.getId() + "").push().getKey();
+
         //Get values from text fields
         String name = mNameEdit.getText().toString();
         String publisher = mPublishersSpinner.getSelectedItem().toString();
@@ -290,14 +295,9 @@ public class AddGameActivity extends AppCompatActivity {
         boolean isPhysical = mRadioPhysical.isChecked();
 
         //Create game
-        final Game game = new Game(name, publisher, "", mCurrentPlatform.getName(), isPhysical);
+        final Game game = new Game(key, name, publisher, "", mCurrentPlatform.getName(), isPhysical);
         final String fileName = mDateFormatter.format(Long.parseLong(game.getDateAdded()));
         game.setTimesCompleted(mTimesCompleted);
-
-        //Games DB Reference
-        mGamesDB = mDatabase.getReference("library/games/");
-        //Get push key
-        final String key = mGamesDB.child(mCurrentPlatform.getId() + "").push().getKey();
 
         //Start uploading cover to firebase
         mStorageRef = FirebaseStorage.getInstance().getReference();

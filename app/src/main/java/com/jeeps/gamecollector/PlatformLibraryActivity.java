@@ -213,10 +213,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                         //Get game
                         Game game = mGames.get(position);
                         //Get game key for DB
-                        String key = mGameKeys.get(position);
-                        //Delete game
-                        DatabaseReference gameReference = mDatabase.getReference("library/games/" + mPlatformId + "/" + key);
-                        gameReference.removeValue();
+                        String key = game.getKey();
 
                         //Get stored cover file name
                         String firstCut[] = game.getImageUri().split("gameCovers%2F");
@@ -239,6 +236,10 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                             }
                         });
 
+                        //Delete game
+                        DatabaseReference gameReference = mDatabase.getReference("library/games/" + mPlatformId + "/" + key);
+                        gameReference.removeValue();
+
                         //Notify user
                         //Toast.makeText(mContext, "Deleted: " + game.getName(), Toast.LENGTH_SHORT).show();
                         Snackbar.make(mGamesRecyclerView, "Deleted: " + game.getName(), Snackbar.LENGTH_LONG)
@@ -259,7 +260,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
 
     @Override
     public void editGame(int position) {
-        String key = mGameKeys.get(position);
+        String key = mGames.get(position).getKey();
         //Start add game activity to edit selected
         Intent intent = new Intent(mContext, AddGameActivity.class);
         intent.putExtra(CURRENT_PLATFORM, mPlatformId);

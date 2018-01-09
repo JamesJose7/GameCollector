@@ -15,6 +15,7 @@ import java.util.Map;
  */
 @IgnoreExtraProperties
 public class Game  {
+    private String mKey;
     //Game data
     private String mName;
     private String mPublisher;
@@ -26,7 +27,8 @@ public class Game  {
     private int mTimesCompleted;
     private String mDateAdded;
 
-    public Game(String name, String publisher, String imageUri, String platform, boolean isPhysical) {
+    public Game(String key, String name, String publisher, String imageUri, String platform, boolean isPhysical) {
+        mKey = key;
         mName = name;
         mPublisher = publisher;
         mImageUri = imageUri;
@@ -37,6 +39,14 @@ public class Game  {
     }
 
     public Game() {}
+
+    public String getKey() {
+        return mKey;
+    }
+
+    public void setKey(String key) {
+        mKey = key;
+    }
 
     public String getName() {
         return mName;
@@ -114,6 +124,7 @@ public class Game  {
         private int mTimesCompleted;
         private Date mDateAdded;*/
         HashMap<String, Object> result = new HashMap<>();
+        result.put("key", mKey);
         result.put("name", mName);
         result.put("publisher", mPublisher);
         result.put("imageUri", mImageUri);
@@ -126,6 +137,7 @@ public class Game  {
     }
 
     public void jsonToGame(JSONObject gameJson) throws JSONException {
+        mKey = gameJson.getString("key");
         mDateAdded = gameJson.getString("dateAdded");
         mImageUri = gameJson.getString("imageUri");
         mIsPhysical = gameJson.getBoolean("isPhysical");
@@ -139,6 +151,9 @@ public class Game  {
         Game game = new Game();
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
+                case "key":
+                    game.setKey((String) entry.getValue());
+                    break;
                 case "imageUri":
                     game.setImageUri((String) entry.getValue());
                     break;
