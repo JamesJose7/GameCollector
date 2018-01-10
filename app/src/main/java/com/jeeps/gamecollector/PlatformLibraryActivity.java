@@ -19,6 +19,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -34,10 +36,14 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.jeeps.gamecollector.adapters.GameCardAdapter;
+import com.jeeps.gamecollector.comparators.GameByNameComparator;
+import com.jeeps.gamecollector.comparators.GameByPhysicalComparator;
+import com.jeeps.gamecollector.comparators.GameByTimesPlayedComparator;
 import com.jeeps.gamecollector.model.Game;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +72,6 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     private DatabaseReference mPlatformLibraryDB;
     private GameCardAdapter mAdapter;
     private List<Game> mGames;
-    private List<String> mGameKeys;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +82,6 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         ButterKnife.bind(this);
         mContext = this;
         mGames = new ArrayList<>();
-        mGameKeys = new ArrayList<>();
         initCollapsingToolbar();
 
         //Show progress bar
@@ -134,7 +138,9 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                     }
                 }
                 mGames = games;
-                mGameKeys = keys;
+
+                //Sort A-z
+                Collections.sort(mGames, new GameByNameComparator());
 
                 //Create adapter
                 mAdapter = new GameCardAdapter(mContext, mGames, PlatformLibraryActivity.this);
@@ -313,6 +319,57 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     private int dpToPx(int dp) {
         Resources r = getResources();
         return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_platform_library, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+
+        switch (id) {
+            case R.id.action_filter_alph:
+                //Sort A-z
+                Collections.sort(mGames, new GameByNameComparator());
+                mAdapter.notifyDataSetChanged();
+                return true;
+            case R.id.action_filter_alph_desc:
+                //Sort A-z desc
+                Collections.sort(mGames, new GameByNameComparator(true));
+                mAdapter.notifyDataSetChanged();
+                return true;
+            case R.id.action_filter_physical:
+                //Sort physical
+                Collections.sort(mGames, new GameByPhysicalComparator(true));
+                mAdapter.notifyDataSetChanged();
+                return true;
+            case R.id.action_filter_alph_physical_desc:
+                Collections.sort(mGames, new GameByPhysicalComparator());
+                mAdapter.notifyDataSetChanged();
+                return true;
+            case R.id.action_filter_timesc:
+                //Sort physical
+                Collections.sort(mGames, new GameByTimesPlayedComparator());
+                mAdapter.notifyDataSetChanged();
+                return true;
+            case R.id.action_filter_alph_timesc_desc:
+                Collections.sort(mGames, new GameByTimesPlayedComparator(true));
+                mAdapter.notifyDataSetChanged();
+                return true;
+        }
+
+
+        return super.onOptionsItemSelected(item);
     }
 
 }

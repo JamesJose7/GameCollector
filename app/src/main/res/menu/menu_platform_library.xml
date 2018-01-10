@@ -1,0 +1,60 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.jeeps.gamecollector.PlatformLibraryActivity">
+
+
+    <item
+        android:id="@+id/filter_menu"
+        android:orderInCategory="100"
+        android:title="Filter"
+        app:showAsAction="never">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_filter_alph"
+                android:icon="@drawable/ic_up"
+                android:orderInCategory="100"
+                android:title="A-Z"
+                app:showAsAction="never"/>
+
+            <item
+                android:id="@+id/action_filter_alph_desc"
+                android:icon="@drawable/ic_down"
+                android:orderInCategory="101"
+                android:title="A-Z"
+                app:showAsAction="never"/>
+
+            <item
+                android:id="@+id/action_filter_physical"
+                android:icon="@drawable/ic_physical"
+                android:orderInCategory="102"
+                android:title="Physical"
+                app:showAsAction="never"/>
+
+            <item
+                android:id="@+id/action_filter_alph_physical_desc"
+                android:icon="@drawable/ic_digital"
+                android:orderInCategory="103"
+                android:title="Digital"
+                app:showAsAction="never"/>
+
+            <item
+                android:id="@+id/action_filter_timesc"
+                android:icon="@drawable/ic_up"
+                android:orderInCategory="104"
+                android:title="Times completed"
+                app:showAsAction="never"/>
+
+            <item
+                android:id="@+id/action_filter_alph_timesc_desc"
+                android:icon="@drawable/ic_down"
+                android:orderInCategory="105"
+                android:title="Times completed"
+                app:showAsAction="never"/>
+
+        </menu>
+
+    </item>
+</menu>
