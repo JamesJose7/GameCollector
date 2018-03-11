@@ -72,10 +72,18 @@ public class StatsActivity extends AppCompatActivity {
     TextView physicalDSGames;
     @BindView(R.id.digital_ds)
     TextView digitalDSGames;
+    @BindView(R.id.games_finished_counter)
+    TextView gamesFinishedText;
+    @BindView(R.id.games_not_finished_counter)
+    TextView gamesNotFinishedText;
 
     private List<Game> mGames;
     private List<Platform> mPlatforms;
     private List<Publisher> mPublishers;
+
+    //Stats
+    private int gamesFinishedCounter;
+    private int gamesNotFinishedCounter;
 
     //Platform stats
     private int nintendoSwitchCount[] = {0,0,0};
@@ -145,6 +153,14 @@ public class StatsActivity extends AppCompatActivity {
         mPlatforms = getPlatforms(platformsJSON);
         mPublishers = getPublishers(publishersJSON);
 
+        //Overall Stats
+        for (Game game : mGames) {
+            if (game.getTimesCompleted() > 0)
+                gamesFinishedCounter++;
+            else
+                gamesNotFinishedCounter++;
+        }
+
         //Stats per platform
         for (Game game : mGames) {
             String platform = game.getPlatform();
@@ -202,6 +218,8 @@ public class StatsActivity extends AppCompatActivity {
         //Overall stats
         totalGamesText.setText(mGames.size() + "");
         totalPublishersText.setText(mPublishers.size() + "");
+        gamesFinishedText.setText(gamesFinishedCounter + "");
+        gamesNotFinishedText.setText(gamesNotFinishedCounter + "");
 
         //Stats per platform
         //Total
