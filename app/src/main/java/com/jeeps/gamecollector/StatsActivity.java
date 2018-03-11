@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.jeeps.gamecollector.model.Game;
@@ -77,6 +80,11 @@ public class StatsActivity extends AppCompatActivity {
     @BindView(R.id.games_not_finished_counter)
     TextView gamesNotFinishedText;
 
+    @BindView(R.id.card_stats_container)
+    RelativeLayout cardStatsContainer;
+    @BindView(R.id.stats_progress_bar)
+    ProgressBar statsProgressBar;
+
     private List<Game> mGames;
     private List<Platform> mPlatforms;
     private List<Publisher> mPublishers;
@@ -103,6 +111,10 @@ public class StatsActivity extends AppCompatActivity {
         //Change title
         getSupportActionBar().setTitle("Statistics");
 
+        //Hide card stats
+        cardStatsContainer.setVisibility(View.INVISIBLE);
+        //Show progress bar
+        statsProgressBar.setVisibility(View.VISIBLE);
 
         try {
             getJson();
@@ -241,6 +253,9 @@ public class StatsActivity extends AppCompatActivity {
         digitalWiiGames.setText(wiiCount[2] + "");
         digitalWiiuGames.setText(wiiuCount[2] + "");
 
+        //Hide Progress bar and show cards
+        statsProgressBar.setVisibility(View.INVISIBLE);
+        cardStatsContainer.setVisibility(View.VISIBLE);
     }
 
     private List<Game> getGames(JSONArray games) throws JSONException {

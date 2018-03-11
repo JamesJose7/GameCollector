@@ -15,8 +15,10 @@
         android:layout_height="match_parent">
 
         <RelativeLayout
+            android:id="@+id/card_stats_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:visibility="invisible">
 
             <android.support.v7.widget.CardView
                 android:id="@+id/overall_card"
@@ -460,5 +462,11 @@
         </RelativeLayout>
 
     </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/stats_progress_bar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"/>
 
 </RelativeLayout>
