@@ -18,7 +18,8 @@
             android:id="@+id/card_stats_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="invisible">
+            android:visibility="invisible"
+            tools:visibility="visible">
 
             <android.support.v7.widget.CardView
                 android:id="@+id/overall_card"
@@ -79,6 +80,12 @@
                                 android:textSize="18sp"
                                 android:text="Games Pending"/>
 
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:text="Completion Percentage"/>
+
                         </LinearLayout>
 
                         <LinearLayout
@@ -117,6 +124,15 @@
 
                             <TextView
                                 android:id="@+id/games_not_finished_counter"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:textAlignment="textEnd"
+                                android:text="0"
+                                tools:text="100"/>
+
+                            <TextView
+                                android:id="@+id/completion_percentage"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:textSize="18sp"

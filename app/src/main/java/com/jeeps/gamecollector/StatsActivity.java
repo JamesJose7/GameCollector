@@ -1,10 +1,14 @@
 package com.jeeps.gamecollector;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -79,9 +83,15 @@ public class StatsActivity extends AppCompatActivity {
     TextView gamesFinishedText;
     @BindView(R.id.games_not_finished_counter)
     TextView gamesNotFinishedText;
+    @BindView(R.id.completion_percentage)
+    TextView gamesCompletionPercentageText;
 
     @BindView(R.id.card_stats_container)
     RelativeLayout cardStatsContainer;
+    @BindView(R.id.overall_card)
+    CardView overallCard;
+    @BindView(R.id.platforms_card)
+    CardView platformsCard;
     @BindView(R.id.stats_progress_bar)
     ProgressBar statsProgressBar;
 
@@ -92,6 +102,7 @@ public class StatsActivity extends AppCompatActivity {
     //Stats
     private int gamesFinishedCounter;
     private int gamesNotFinishedCounter;
+    private int gameCompletionPercentage;
 
     //Platform stats
     private int nintendoSwitchCount[] = {0,0,0};
@@ -172,6 +183,8 @@ public class StatsActivity extends AppCompatActivity {
             else
                 gamesNotFinishedCounter++;
         }
+        //Calculate completion percentage
+        gameCompletionPercentage = (gamesFinishedCounter * 100) / mGames.size();
 
         //Stats per platform
         for (Game game : mGames) {
@@ -232,6 +245,7 @@ public class StatsActivity extends AppCompatActivity {
         totalPublishersText.setText(mPublishers.size() + "");
         gamesFinishedText.setText(gamesFinishedCounter + "");
         gamesNotFinishedText.setText(gamesNotFinishedCounter + "");
+        gamesCompletionPercentageText.setText(gameCompletionPercentage + "%");
 
         //Stats per platform
         //Total
@@ -255,7 +269,8 @@ public class StatsActivity extends AppCompatActivity {
 
         //Hide Progress bar and show cards
         statsProgressBar.setVisibility(View.INVISIBLE);
-        cardStatsContainer.setVisibility(View.VISIBLE);
+        //cardStatsContainer.setVisibility(View.VISIBLE);
+        animateAppearance();
     }
 
     private List<Game> getGames(JSONArray games) throws JSONException {
@@ -304,5 +319,36 @@ public class StatsActivity extends AppCompatActivity {
             platformsList.add(platform);
         }
         return platformsList;
+    }
+
+    private void animateAppearance() {
+        //Get coordinates values
+        int firstCardStartValue = overallCard.getTop();
+        int firstCardEndValue = overallCard.getBottom();
+        int おはよう = platformsCard.getTop();
+        int secondCardEndValue = platformsCard.getBottom();
+
+        //Slide animation on cards
+        ObjectAnimator firstCardAnimator = ObjectAnimator.ofInt(overallCard, "bottom", firstCardStartValue, firstCardEndValue);
+        ObjectAnimator secondCardAnimator = ObjectAnimator.ofInt(platformsCard, "bottom", おはよう, secondCardEndValue);
+
+        //Modify animators
+        firstCardAnimator.setInterpolator(new AccelerateInterpolator());
+        secondCardAnimator.setInterpolator(new AccelerateInterpolator());
+        firstCardAnimator.setDuration(500);
+        secondCardAnimator.setDuration(500);
+
+        //Hide them before showing them
+        overallCard.setBottom(firstCardStartValue);
+        platformsCard.setBottom(おはよう);
+
+        cardStatsContainer.setVisibility(View.VISIBLE);
+
+        //Sequential animations
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playSequentially(firstCardAnimator, secondCardAnimator);
+
+        //Start
+        animatorSet.start();
     }
 }
