@@ -85,10 +85,21 @@
 
             </LinearLayout>
 
-            <ProgressBar
+            <!--<ProgressBar
                 android:id="@+id/cover_progressbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_above="@id/game_info_layout"
+                android:padding="40dp"/>-->
+
+            <com.github.ybq.android.spinkit.SpinKitView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/cover_progressbar"
+                style="@style/SpinKitView.Large.Circle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                app:SpinKit_Color="@color/colorAccent"
                 android:layout_above="@id/game_info_layout"
                 android:padding="40dp"/>
 

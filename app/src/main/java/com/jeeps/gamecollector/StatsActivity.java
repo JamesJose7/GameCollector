@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.github.ybq.android.spinkit.style.DoubleBounce;
 import com.jeeps.gamecollector.model.Game;
 import com.jeeps.gamecollector.model.Platform;
 import com.jeeps.gamecollector.model.Publisher;
@@ -121,6 +122,10 @@ public class StatsActivity extends AppCompatActivity {
 
         //Change title
         getSupportActionBar().setTitle("Statistics");
+
+        //Progress bar animation
+        DoubleBounce doubleBounce = new DoubleBounce();
+        statsProgressBar.setIndeterminateDrawable(doubleBounce);
 
         //Hide card stats
         cardStatsContainer.setVisibility(View.INVISIBLE);

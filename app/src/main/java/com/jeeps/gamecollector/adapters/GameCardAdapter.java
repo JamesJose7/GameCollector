@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.github.ybq.android.spinkit.style.DoubleBounce;
 import com.jeeps.gamecollector.R;
 import com.jeeps.gamecollector.model.Game;
 import com.squareup.picasso.Callback;
@@ -66,7 +67,11 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         Game game = mGames.get(position);
 
-        //Display progress bar
+        //Set progressbar animation
+        DoubleBounce doubleBounce = new DoubleBounce();
+        holder.coverProgressBar.setIndeterminateDrawable(doubleBounce);
+
+        //Display progressbar
         holder.coverProgressBar.setVisibility(View.VISIBLE);
         //load image cover
         Picasso.with(mContext).load(game.getImageUri()).into(holder.cover, new Callback() {
