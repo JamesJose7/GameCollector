@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "652636772380-60bt0kkurii8pte48q7m3on4vssloers.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jeeps.gamecollector",
+            "certificate_hash": "684d5930992744c9568e896ecb1fcdb8ac6894e7"
+          }
+        },
+        {
           "client_id": "652636772380-chdp0maha14hnqsk6ce7f75rjgdv7te7.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -33,20 +41,13 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
               "client_id": "652636772380-0f1454evstu9ov7mjk35oe7l3hgld9uc.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
         }
       }
     }
