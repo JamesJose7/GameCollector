@@ -50,9 +50,15 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
     implementation 'com.squareup.picasso:picasso:2.5.2'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
-    implementation 'org.json:json:20171018'
+    implementation 'org.json:json:20180130'
     implementation 'id.zelory:compressor:2.1.0'
     implementation 'com.github.ybq:Android-SpinKit:1.4.0'
+}
+
+configurations {
+    all {
+        exclude group: 'org.json', module: 'json'
+    }
 }
 
 
