@@ -23,8 +23,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -347,11 +349,27 @@ public class AddGameActivity extends AppCompatActivity {
             currImageURI = Uri.fromFile(compressedImageFile);
 
             gameCovers.putFile(currImageURI)
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            // Get a URL to the uploaded content
-                            gameImageURI = taskSnapshot.getDownloadUrl();
+                    .addOnSuccessListener(taskSnapshot -> {
+                        // Get a URL to the uploaded content
+//                        gameImageURI = taskSnapshot.getDownloadUrl();
+
+                        //Delete temp files
+                        deleteTempFiles(localCover, compressedImageFile);
+                    })
+                    .addOnFailureListener(exception -> {
+                        // Handle unsuccessful uploads
+                        // ...
+                        //Delete temp files
+                        deleteTempFiles(localCover, compressedImageFile);
+                    }).continueWithTask(task -> {
+                        if (!task.isSuccessful()) {
+                            throw task.getException();
+                        }
+                        // Continue with the task to get the download URL
+                        return gameCovers.getDownloadUrl();
+                    }).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            gameImageURI = task.getResult();
                             String imageUri = "";
                             if (gameImageURI.toString() != null)
                                 imageUri = gameImageURI.toString();
@@ -364,18 +382,9 @@ public class AddGameActivity extends AppCompatActivity {
 
                             childUpdates.put(mCurrentPlatform.getId() + "/" + key, gameValues);
                             mGamesDB.updateChildren(childUpdates);
-
-                            //Delete temp files
-                            deleteTempFiles(localCover, compressedImageFile);
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            // Handle unsuccessful uploads
+                        } else {
+                            // Handle failures
                             // ...
-                            //Delete temp files
-                            deleteTempFiles(localCover, compressedImageFile);
                         }
                     });
         } catch (IOException e) {

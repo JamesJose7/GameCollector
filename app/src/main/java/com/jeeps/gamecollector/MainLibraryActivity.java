@@ -141,8 +141,8 @@ public class MainLibraryActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                 // Get a URL to the uploaded content
-                                Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                                System.out.println("DOWNLOAD:: " + downloadUrl);
+//                                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+//                                System.out.println("DOWNLOAD:: " + downloadUrl);
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
