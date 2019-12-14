@@ -1,14 +1,12 @@
 package com.jeeps.gamecollector;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.util.Log;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -18,15 +16,10 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -36,17 +29,16 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.jeeps.gamecollector.model.Game;
 import com.jeeps.gamecollector.model.Platform;
 import com.jeeps.gamecollector.model.Publisher;
+import com.jeeps.gamecollector.utils.FileUtils;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -82,6 +74,8 @@ public class AddGameActivity extends AppCompatActivity {
     RadioButton mRadioPhysical;
     @BindView(R.id.card_game_completed_selector)
     NumberPicker mNumberPicker;
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
 
     private int mPlatformID;
     private Platform mCurrentPlatform;
@@ -105,7 +99,7 @@ public class AddGameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_game);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
         mContext = this;
@@ -126,13 +120,7 @@ public class AddGameActivity extends AppCompatActivity {
         //Number picker
         mNumberPicker.setMinValue(0);
         mNumberPicker.setMaxValue(10);
-        mNumberPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker numberPicker, int i, int i1) {
-                mTimesCompleted = i1;
-                //Toast.makeText(mContext, "NOW: " + mTimesCompleted, Toast.LENGTH_SHORT).show();
-            }
-        });
+        mNumberPicker.setOnValueChangedListener((numberPicker, i, i1) -> mTimesCompleted = i1);
 
         //Database
         mDatabase = FirebaseDatabase.getInstance();
@@ -141,44 +129,31 @@ public class AddGameActivity extends AppCompatActivity {
         getCurrentPlatform();
 
         //Select image for cover
-        mGameCover.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // To open up a gallery browser
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"),1);
-            }
+        mGameCover.setOnClickListener(view -> {
+            // To open up a gallery browser
+            Intent intent1 = new Intent();
+            intent1.setType("image/*");
+            intent1.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent1, "Select Picture"),1);
         });
 
 
         //Get publishers for spinner
         populateSpinner();
         //Add publishers
-        mAddPublisher.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                promptForPublisher();
-            }
-        });
+        mAddPublisher.setOnClickListener(view -> promptForPublisher());
 
-        //Save game
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        // Edit mode
         if (mSelectedGameKey != null) {
             //Selected game is being edited
             getSupportActionBar().setTitle("Edit Game");
             fab.setImageResource(R.drawable.edit);
-            mapSelectedGameToFields();
         }
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mSelectedGameKey != null) {
-                    deleteGame();
-                }
-                saveGame();
-            }
+
+        fab.setOnClickListener(view -> {
+            if (mSelectedGameKey != null)
+                deleteGame();
+            saveGame();
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
@@ -192,17 +167,12 @@ public class AddGameActivity extends AppCompatActivity {
             //Delete uploaded image
             StorageReference storageReference = FirebaseStorage.getInstance().getReference();
             StorageReference gameCoverRef = storageReference.child("gameCovers/" + mSelectedGameKey + ".png");
-            gameCoverRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    //Toast.makeText(mContext, "Deleted image", Toast.LENGTH_SHORT).show();
-                    // File deleted successfully
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Uh-oh, an error occurred!
-                }
+            gameCoverRef.delete().addOnSuccessListener(aVoid -> {
+                // File deleted successfully
+                Log.i(AddGameActivity.class.getSimpleName(), "Deleted image successfully");
+            }).addOnFailureListener(exception -> {
+                // Uh-oh, an error occurred!
+                Log.e(AddGameActivity.class.getSimpleName(), "There was an error deleting the image");
             });
         }
     }
@@ -210,7 +180,7 @@ public class AddGameActivity extends AppCompatActivity {
     private void mapSelectedGameToFields() {
         //Get selected game
         DatabaseReference gameReference = mDatabase.getReference("library/games/" + mPlatformID + "/" + mSelectedGameKey);
-        gameReference.addValueEventListener(new ValueEventListener() {
+        gameReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -253,8 +223,6 @@ public class AddGameActivity extends AppCompatActivity {
 
     private void populateSpinner() {
         final DatabaseReference publishers = mDatabase.getReference("library/publishers/");
-        //Publisher publisher = new Publisher("Nintendo");
-        //publishers.child("0").setValue(publisher);
 
         // Read from the database
         publishers.addValueEventListener(new ValueEventListener() {
@@ -270,10 +238,14 @@ public class AddGameActivity extends AppCompatActivity {
                 for (Publisher publisher : mPublishers)
                     publisherNames.add(publisher.getName());
                 //Add publishers to spinner
-                mSpinnerAdapter = new ArrayAdapter<String>(mContext,
+                mSpinnerAdapter = new ArrayAdapter<>(mContext,
                         android.R.layout.simple_spinner_item, publisherNames);
                 mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 mPublishersSpinner.setAdapter(mSpinnerAdapter);
+
+                // In case a game is being edited, map the values after this finishes
+                if (mSelectedGameKey != null)
+                    mapSelectedGameToFields();
             }
 
             @Override
@@ -337,7 +309,7 @@ public class AddGameActivity extends AppCompatActivity {
                     .openInputStream(currImageURI);
             FileOutputStream fileOutputStream = new FileOutputStream(
                     localCover);
-            copyStream(inputStream, fileOutputStream);
+            FileUtils.copyStream(inputStream, fileOutputStream);
             fileOutputStream.close();
             inputStream.close();
             //Compress image
@@ -399,16 +371,6 @@ public class AddGameActivity extends AppCompatActivity {
             compressedImageFile.delete();
     }
 
-    public void copyStream(InputStream input, OutputStream output)
-            throws IOException {
-
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = input.read(buffer)) != -1) {
-            output.write(buffer, 0, bytesRead);
-        }
-    }
-
     private void getCurrentPlatform() {
         DatabaseReference platformsDB = mDatabase.getReference("library/platforms/" + mPlatformID);
         platformsDB.addValueEventListener(new ValueEventListener() {
@@ -454,21 +416,17 @@ public class AddGameActivity extends AppCompatActivity {
                 .setTitle("Add publisher")
                 .setMessage("Name")
                 .setView(input)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        Editable value = input.getText();
-                        mInputPublisher = value.toString();
+                .setPositiveButton("Ok", (dialog, whichButton) -> {
+                    Editable value = input.getText();
+                    mInputPublisher = value.toString();
 
-                        //Add publisher to database
-                        final DatabaseReference publishers = mDatabase.getReference("library/publishers/");
-                        Publisher publisher = new Publisher(mInputPublisher);
-                        publishers.child(mPublishers.size() + "").setValue(publisher);
-                    }
-                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                // Do nothing.
-            }
-        }).show();
+                    //Add publisher to database
+                    final DatabaseReference publishers = mDatabase.getReference("library/publishers/");
+                    Publisher publisher = new Publisher(mInputPublisher);
+                    publishers.child(mPublishers.size() + "").setValue(publisher);
+                }).setNegativeButton("Cancel", (dialog, whichButton) -> {
+                    // Do nothing.
+                }).show();
     }
 
 }

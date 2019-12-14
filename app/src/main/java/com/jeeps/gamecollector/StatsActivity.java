@@ -117,7 +117,7 @@ public class StatsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stats);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
 
@@ -236,12 +236,7 @@ public class StatsActivity extends AppCompatActivity {
         }
 
         //Display data on UI thread
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                displayData();
-            }
-        });
+        runOnUiThread(() -> displayData());
     }
 
     @SuppressLint("SetTextI18n")
