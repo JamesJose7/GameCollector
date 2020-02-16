@@ -1,5 +1,7 @@
 package com.jeeps.gamecollector.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -8,53 +10,63 @@ import org.json.JSONObject;
  */
 
 public class Platform {
-    private int mId;
-    private String mName;
-    private String mImageUri;
-    private String mColor;
-
-    public Platform(int id) {
-        mId = id;
-    }
-
-    public int getId() {
-        return mId;
-    }
-
-    public void setId(int id) {
-        mId = id;
-    }
+    @SerializedName("platformId")
+    private String id;
+    private String user;
+    private String name;
+    private String imageUri;
+    private String color;
 
     public Platform() {}
 
+    public Platform(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
     public String getName() {
-        return mName;
+        return name;
     }
 
     public void setName(String name) {
-        mName = name;
+        this.name = name;
     }
 
     public String getImageUri() {
-        return mImageUri;
+        return imageUri;
     }
 
     public void setImageUri(String imageUri) {
-        mImageUri = imageUri;
+        this.imageUri = imageUri;
     }
 
     public String getColor() {
-        return mColor;
+        return color;
     }
 
     public void setColor(String color) {
-        mColor = color;
+        this.color = color;
     }
 
     public void jsonToPlatform(JSONObject jsonObject) throws JSONException {
-        mId = jsonObject.getInt("id");
-        mName = jsonObject.getString("name");
-        mImageUri = jsonObject.getString("imageUri");
-        mColor = jsonObject.getString("color");
+        id = jsonObject.getString("id");
+        name = jsonObject.getString("name");
+        imageUri = jsonObject.getString("imageUri");
+        color = jsonObject.getString("color");
     }
 }

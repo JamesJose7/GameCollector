@@ -24,4 +24,12 @@ public class UserUtils {
         editor.putString(context.getString(R.string.current_user_token), token);
         editor.apply();
     }
+
+    public static void updateToken(
+            Context context, SharedPreferences sharedPreferences,
+            String token) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(context.getString(R.string.current_user_token), token);
+        editor.apply();
+    }
 }

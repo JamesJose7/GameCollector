@@ -31,6 +31,7 @@ import com.jeeps.gamecollector.model.Platform;
 import com.jeeps.gamecollector.model.User;
 import com.jeeps.gamecollector.model.UserDetails;
 import com.jeeps.gamecollector.services.api.ApiClient;
+import com.jeeps.gamecollector.services.api.PlatformService;
 import com.jeeps.gamecollector.services.api.UserService;
 import com.jeeps.gamecollector.utils.UserUtils;
 
@@ -93,9 +94,16 @@ public class MainLibraryActivity extends AppCompatActivity {
 
     private void checkUserLogin() {
         user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null)
-            populatePlatforms();
-        else
+        if (user != null) {
+            // Refresh token
+            user.getIdToken(true)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            UserUtils.updateToken(context, sharedPreferences, task.getResult().getToken());
+                            populatePlatforms();
+                        }
+                    });
+        } else
             promptUserLogin();
     }
 
@@ -193,7 +201,7 @@ public class MainLibraryActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                user.getIdToken(false).addOnCompleteListener(task -> {
+                user.getIdToken(true).addOnCompleteListener(task -> {
                     // Save current user data
                     String token = task.getResult().getToken();
                     String uid = user.getUid();
@@ -231,9 +239,39 @@ public class MainLibraryActivity extends AppCompatActivity {
     private void populatePlatforms() {
         // Load current user
         CurrentUser currentUser = UserUtils.getCurrentUser(context, sharedPreferences);
-        Toast.makeText(context, String.format("uid: %s\n username: %s\n token: %s",
-                currentUser.getUid(), currentUser.getUsername(), currentUser.getToken()
-                ), Toast.LENGTH_SHORT).show();
+        // Load user platforms
+        PlatformService platformService = ApiClient.createService(PlatformService.class);
+        Call<List<Platform>> getPlatformsByUser = platformService.getPlatformsByUser("Bearer " + currentUser.getToken());
+        getPlatformsByUser.enqueue(new Callback<List<Platform>>() {
+            @Override
+            public void onResponse(Call<List<Platform>> call, Response<List<Platform>> response) {
+                if (response.isSuccessful()) {
+                    List<Platform> platforms = response.body();
+                    PlatformsListAdapter adapter = new PlatformsListAdapter(context, R.layout.platform_list_item, platforms);
+                    platformsList.setAdapter(adapter);
+                    platformsList.setOnItemClickListener((adapterView, view, i, l) -> {
+                        //Get selected platform
+                        Platform platform = (Platform) adapterView.getItemAtPosition(i);
+                        //start games activity with platform id
+                        Intent intent = new Intent(context, PlatformLibraryActivity.class);
+                        intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.getId());
+                        intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME, platform.getName());
+                        startActivity(intent);
+                    });
+                }
+
+                //Hide progressbar
+                mProgressBar.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onFailure(Call<List<Platform>> call, Throwable t) {
+                //Hide progressbar
+                mProgressBar.setVisibility(View.INVISIBLE);
+                Log.e(TAG, "There was an error retrieving user platforms");
+                Toast.makeText(context, "An error has occurred, please try again", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 
