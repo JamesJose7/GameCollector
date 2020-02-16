@@ -4,4 +4,12 @@
     <string name="title_activity_platform_library">PlatformLibraryActivity</string>
     <string name="title_activity_add_game">AddGameActivity</string>
     <string name="title_activity_stats">StatsActivity</string>
+
+    <!-- Shared preferences -->
+    <string name="shared_preferences_global">com.jeeps.gamecollector.SHARED_PREFERENCES_GLOBAL</string>
+    <string name="current_user_username">CURRENT_USER_USERNAME</string>
+    <string name="current_user_uid">CURRENT_USER_UID</string>
+    <string name="current_user_token">CURRENT_USER_TOKEN</string>
+    <string name="log_out">Log out</string>
+    <string name="stats_menu">Stats</string>
 </resources>
