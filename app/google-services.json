@@ -1,50 +1,34 @@
 {
   "project_info": {
-    "project_number": "652636772380",
-    "firebase_url": "https://gamecollector-59155.firebaseio.com",
-    "project_id": "gamecollector-59155",
-    "storage_bucket": "gamecollector-59155.appspot.com"
+    "project_number": "187869698472",
+    "firebase_url": "https://gamecollectorrev.firebaseio.com",
+    "project_id": "gamecollectorrev",
+    "storage_bucket": "gamecollectorrev.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:652636772380:android:d14fc88966cee940",
+        "mobilesdk_app_id": "1:187869698472:android:ecdf6e21d53559d5baa59d",
         "android_client_info": {
           "package_name": "com.jeeps.gamecollector"
         }
       },
       "oauth_client": [
         {
-          "client_id": "652636772380-60bt0kkurii8pte48q7m3on4vssloers.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.jeeps.gamecollector",
-            "certificate_hash": "684d5930992744c9568e896ecb1fcdb8ac6894e7"
-          }
-        },
-        {
-          "client_id": "652636772380-chdp0maha14hnqsk6ce7f75rjgdv7te7.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.jeeps.gamecollector",
-            "certificate_hash": "865b12072282adb5ef75ac46b965eaeffa424b88"
-          }
-        },
-        {
-          "client_id": "652636772380-0f1454evstu9ov7mjk35oe7l3hgld9uc.apps.googleusercontent.com",
+          "client_id": "187869698472-8c61h84emcgg4rg88q09202e9d329v5j.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCDnlm-PbcDAPJvmA3uyBSk_sUW8ZkefmE"
+          "current_key": "AIzaSyAD1Lx9B5IaglsJXQ_XZrdwmkVweTLLdw8"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "652636772380-0f1454evstu9ov7mjk35oe7l3hgld9uc.apps.googleusercontent.com",
+              "client_id": "187869698472-8c61h84emcgg4rg88q09202e9d329v5j.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
