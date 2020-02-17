@@ -25,6 +25,11 @@ public interface GameService {
     Call<Game> postGame(@Header("Authorization") String authorization,
                         @Body Game game);
 
+    @POST("/api/games/{gameId}")
+    Call<ResponseBody> editGame(@Header("Authorization") String authorization,
+                        @Path("gameId") String gameId,
+                        @Body Game game);
+
     @Multipart
     @POST("/api/games/{gameId}/image")
     Call<ResponseBody> uploadGameCover(@Header("Authorization") String authorization,

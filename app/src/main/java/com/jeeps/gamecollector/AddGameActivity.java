@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -29,10 +30,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.StorageReference;
 import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Game;
-import com.jeeps.gamecollector.model.Platform;
 import com.jeeps.gamecollector.model.Publisher;
 import com.jeeps.gamecollector.model.igdb.GameCoverIG;
 import com.jeeps.gamecollector.model.igdb.GameIG;
@@ -47,15 +46,13 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -67,9 +64,8 @@ import retrofit2.Response;
 public class AddGameActivity extends AppCompatActivity {
 
     private static final String TAG = "ADD_GAME_ACTIVITY";
-    private static final int MY_PERMISSIONS_REQUEST_WRITE_STORAGE = 2929;
 
-    @BindView(R.id.game_cover) ImageView mGameCover;
+    @BindView(R.id.game_cover) ImageView gameCover;
     @BindView(R.id.game_name_edit) EditText nameEdit;
     @BindView(R.id.game_shortname_edit) EditText shortNameEdit;
     @BindView(R.id.platform_game_edit) EditText platformEdit;
@@ -86,21 +82,19 @@ public class AddGameActivity extends AppCompatActivity {
 
     private String platformId;
     private String platformName;
-    private Platform mCurrentPlatform;
     private Uri currImageURI;
-    private Uri gameImageURI;
     private String previousUri;
 
-    private StorageReference mStorageRef;
     private Context context;
     private FirebaseDatabase mDatabase;
-    private Format mDateFormatter;
     private String mInputPublisher;
     private int timesCompleted;
-    private String selectedGameId;
+    private Game selectedGame;
     private List<Publisher> mPublishers;
     private DatabaseReference mGamesDB;
     private ArrayAdapter<String> mSpinnerAdapter;
+    private boolean coverDeleted = false;
+    private int selectedGamePosition;
 
 
     @Override
@@ -123,10 +117,9 @@ public class AddGameActivity extends AppCompatActivity {
         Intent intent = getIntent();
         platformId = intent.getStringExtra(PlatformLibraryActivity.CURRENT_PLATFORM);
         platformName = intent.getStringExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME);
-        selectedGameId = intent.getStringExtra(PlatformLibraryActivity.SELECTED_GAME_KEY);
+        selectedGame = (Game) intent.getSerializableExtra(PlatformLibraryActivity.SELECTED_GAME);
+        selectedGamePosition = intent.getIntExtra(PlatformLibraryActivity.SELECTED_GAME_POSITION, -1);
 
-        //Formatter for file names
-        mDateFormatter = new SimpleDateFormat("dd:HH:mm:ss");
         //Select physical radio button by default
         mRadioGroup.check(radioPhysical.getId());
 
@@ -142,7 +135,7 @@ public class AddGameActivity extends AppCompatActivity {
         platformEdit.setText(platformName);
 
         //Select image for cover
-        mGameCover.setOnClickListener(view -> {
+        gameCover.setOnClickListener(view -> {
             // To open up a gallery browser
             Intent intent1 = new Intent();
             intent1.setType("image/*");
@@ -156,61 +149,40 @@ public class AddGameActivity extends AppCompatActivity {
         mAddPublisher.setOnClickListener(view -> promptForPublisher());
 
         // Edit mode
-        if (selectedGameId != null) {
+        if (selectedGame != null) {
             //Selected game is being edited
             getSupportActionBar().setTitle("Edit Game");
             fab.setImageResource(R.drawable.edit);
+            mapSelectedGameToFields(selectedGame);
         }
 
         fab.setOnClickListener(view -> {
-//            if (selectedGameId != null)
+//            if (selectedGame != null)
 //                deleteGame();
             saveGame();
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void mapSelectedGameToFields() {
-        //Get selected game
-        DatabaseReference gameReference = mDatabase.getReference("library/games/" + platformId + "/" + selectedGameId);
-        gameReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                GenericTypeIndicator<HashMap<String, Object>> genericTypeIndicator = new GenericTypeIndicator<HashMap<String, Object>>() {
-                };
-                HashMap<String, Object> map = dataSnapshot.getValue(genericTypeIndicator);
-                if (map != null) {
-                    Game game = Game.mapToGame(map);
-                    System.out.println(game);
-
-                    //Set image
-                    Picasso.with(context).load(game.getImageUri()).into(mGameCover);
-                    mGameCover.setAlpha(1f);
-                    mGameCover.setBackgroundColor(Color.parseColor("#99cccccc"));
-                    previousUri = game.getImageUri();
-                    //Set name
-                    nameEdit.setText(game.getName());
-                    //Set physical or digital
-                    if (!game.isPhysical())
-                        mRadioGroup.check(mRadioDigital.getId());
-                    //Set times commpleted
-                    mNumberPicker.setValue(game.getTimesCompleted());
-                    //Set publisher in spinner
-                    if (mSpinnerAdapter != null) {
-                        int spinnerPosition = mSpinnerAdapter.getPosition(game.getPublisher());
-                        mPublishersSpinner.setSelection(spinnerPosition);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        });
+    private void mapSelectedGameToFields(Game game) {
+        //Set image
+        Picasso.with(context).load(game.getImageUri()).into(gameCover);
+        gameCover.setAlpha(1f);
+        gameCover.setBackgroundColor(Color.parseColor("#99cccccc"));
+        previousUri = game.getImageUri();
+        //Set name
+        nameEdit.setText(game.getName());
+        shortNameEdit.setText(game.getShortName());
+        //Set physical or digital
+        if (!game.isPhysical())
+            mRadioGroup.check(mRadioDigital.getId());
+        //Set times commpleted
+        mNumberPicker.setValue(game.getTimesCompleted());
+        //Set publisher in spinner
+        /*if (mSpinnerAdapter != null) {
+            int spinnerPosition = mSpinnerAdapter.getPosition(game.getPublisher());
+            mPublishersSpinner.setSelection(spinnerPosition);
+        }*/
     }
 
     private void populateSpinner() {
@@ -236,8 +208,8 @@ public class AddGameActivity extends AppCompatActivity {
                 mPublishersSpinner.setAdapter(mSpinnerAdapter);
 
                 // In case a game is being edited, map the values after this finishes
-                if (selectedGameId != null)
-                    mapSelectedGameToFields();
+                /*if (selectedGame != null)
+                    mapSelectedGameToFields();*/
             }
 
             @Override
@@ -263,102 +235,147 @@ public class AddGameActivity extends AppCompatActivity {
         Game game = new Game("",
                 isPhysical, name, shortName, platformId, platformName, publisherId, publisher);
         game.setTimesCompleted(timesCompleted);
-        // Set selected image URI if selected
-        if (currImageURI != null) {
-            game.setImageUri(currImageURI.toString());
-            // Post game
-            postGame(game);
-        } else {
-            // Get cover from IGDB
-            IgdbService igdbService = IgdbApiClient.createService(IgdbService.class);
-            Call<List<GameIG>> searchGames = igdbService.searchGames(IgdbUtils.getSearchGamesQuery(game.getName()));
-            searchGames.enqueue(new Callback<List<GameIG>>() {
+
+        // When editing a game
+        if (selectedGame != null)  {
+            game.setId(selectedGame.getId());
+            if (currImageURI != null) { // New image file selected
+                game.setImageUri(currImageURI.toString());
+                postGame(game, true);
+            } else if (coverDeleted){ // Custom cover got removed, get one from IGDB
+                // Get cover from IGDB
+                postGameAfterGettingCover(game, true);
+            } else { // No changes, get the previous set cover
+                game.setImageUri(selectedGame.getImageUri());
+                postGame(game, true);
+            }
+        } else { // When creating a game
+            if (currImageURI != null) { // upload custom image cover
+                game.setImageUri(currImageURI.toString());
+                postGame(game, false);
+            } else {
+                // Get cover from IGDB
+                postGameAfterGettingCover(game, false);
+            }
+        }
+    }
+
+    private void postGameAfterGettingCover(Game game, boolean isEdit) {
+        IgdbService igdbService = IgdbApiClient.createService(IgdbService.class);
+        Call<List<GameIG>> searchGames = igdbService.searchGames(IgdbUtils.getSearchGamesQuery(game.getName()));
+        searchGames.enqueue(new Callback<List<GameIG>>() {
+            @Override
+            public void onResponse(Call<List<GameIG>> call, Response<List<GameIG>> response) {
+                if (response.isSuccessful()) {
+                    // Get games
+                    List<GameIG> gamesIG = response.body();
+                    if (gamesIG != null)
+                        if (!gamesIG.isEmpty()) {
+                            // Exclude DLC
+                            Optional<GameIG> selectedGame = gamesIG.stream()
+                                    .filter(gameIG -> gameIG.getCategory() != 1)
+                                    .findFirst();
+                            if (selectedGame.isPresent()) {
+                                // Get cover for game
+                                Call<List<GameCoverIG>> getGameCover =
+                                        igdbService.getImageCoverById(IgdbUtils.getCoverImageQuery(selectedGame.get().getCover()));
+
+                                getGameCover.enqueue(new Callback<List<GameCoverIG>>() {
+                                    @Override
+                                    public void onResponse(Call<List<GameCoverIG>> call, Response<List<GameCoverIG>> response) {
+                                        if (response.isSuccessful()) {
+                                            List<GameCoverIG> gameCoverIGS = response.body();
+                                            if (gameCoverIGS != null)
+                                                if (!gameCoverIGS.isEmpty())
+                                                    game.setImageUri(gameCoverIGS.get(0).getUrl());
+                                        }
+                                        postGame(game, isEdit);
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<List<GameCoverIG>> call, Throwable t) {
+                                        Log.e(TAG, "There was an error in the request to IGDB");
+                                        postGame(game, isEdit);
+                                    }
+                                });
+                            } else postGame(game, isEdit);
+                        } else postGame(game, isEdit);
+                    else postGame(game, isEdit);
+                } else {
+                    Log.e(TAG, "There was an error in the request to IGDB");
+                    postGame(game, isEdit);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<GameIG>> call, Throwable t) {
+                Log.e(TAG, "There was an error finding a cover from IGDB");
+                postGame(game, isEdit);
+            }
+        });
+    }
+
+    private void postGame(Game game, boolean isEdit) {
+        GameService gameService = ApiClient.createService(GameService.class);
+        if (isEdit) {
+            Call<ResponseBody> editGame = gameService.editGame("Bearer " + currentUser.getToken(),
+                    game.getId(), game);
+            editGame.enqueue(new Callback<ResponseBody>() {
                 @Override
-                public void onResponse(Call<List<GameIG>> call, Response<List<GameIG>> response) {
-                    if (response.isSuccessful()) {
-                        // Get games
-                        List<GameIG> gamesIG = response.body();
-                        if (gamesIG != null)
-                            if (!gamesIG.isEmpty()) {
-                                // Exclude DLC
-                                Optional<GameIG> selectedGame = gamesIG.stream()
-                                        .filter(gameIG -> gameIG.getCategory() != 1)
-                                        .findFirst();
-                                if (selectedGame.isPresent()) {
-                                    // Get cover for game
-                                    Call<List<GameCoverIG>> getGameCover =
-                                            igdbService.getImageCoverById(IgdbUtils.getCoverImageQuery(selectedGame.get().getCover()));
-
-                                    getGameCover.enqueue(new Callback<List<GameCoverIG>>() {
-                                        @Override
-                                        public void onResponse(Call<List<GameCoverIG>> call, Response<List<GameCoverIG>> response) {
-                                            if (response.isSuccessful()) {
-                                                List<GameCoverIG> gameCoverIGS = response.body();
-                                                if (gameCoverIGS != null)
-                                                    if (!gameCoverIGS.isEmpty())
-                                                        game.setImageUri(gameCoverIGS.get(0).getUrl());
-                                            }
-                                            postGame(game);
-                                        }
-
-                                        @Override
-                                        public void onFailure(Call<List<GameCoverIG>> call, Throwable t) {
-                                            Log.e(TAG, "There was an error in the request to IGDB");
-                                            postGame(game);
-                                        }
-                                    });
-                                } else postGame(game);
-                            } else postGame(game);
-                        else postGame(game);
-                    } else {
-                        Log.e(TAG, "There was an error in the request to IGDB");
-                        postGame(game);
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.isSuccessful())
+                        returnGameAsResult(game, PlatformLibraryActivity.EDIT_GAME_RESULT);
+                    else {
+                        Log.e(TAG, "Authentication error");
+                        Toast.makeText(context, "There was an error when adding the game, please try again", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
-                public void onFailure(Call<List<GameIG>> call, Throwable t) {
-                    Log.e(TAG, "There was an error finding a cover from IGDB");
-                    postGame(game);
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Log.e(TAG, "Edit game request failed");
+                    Toast.makeText(context, "There was an error when editing the game, please try again", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Call<Game> postGame = gameService.postGame("Bearer " + currentUser.getToken(), game);
+            postGame.enqueue(new Callback<Game>() {
+                @Override
+                public void onResponse(Call<Game> call, Response<Game> response) {
+                    if (response.isSuccessful()) {
+                        Game game = response.body();
+                        returnGameAsResult(game, PlatformLibraryActivity.ADD_GAME_RESULT);
+                    } else {
+                        Log.e(TAG, "Authentication error");
+                        Toast.makeText(context, "There was an error when adding the game, please try again", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Game> call, Throwable t) {
+                    Log.e(TAG, "Post game request failed");
+                    Toast.makeText(context, "There was an error when adding the game, please try again", Toast.LENGTH_SHORT).show();
                 }
             });
         }
     }
 
-    private void postGame(Game game) {
-        GameService gameService = ApiClient.createService(GameService.class);
-        Call<Game> postGame = gameService.postGame("Bearer " + currentUser.getToken(), game);
-        postGame.enqueue(new Callback<Game>() {
-            @Override
-            public void onResponse(Call<Game> call, Response<Game> response) {
-                if (response.isSuccessful()) {
-                    Game game = response.body();
-                    Intent result = new Intent();
-                    result.putExtra(PlatformLibraryActivity.NEW_GAME, game);
-                    setResult(PlatformLibraryActivity.ADD_GAME_RESULT, result);
-                    if (currImageURI != null) {
-                        try {
-                            uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
-                                            game.getId());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Log.e(TAG, "There was an error uploading the image");
-                            finish();
-                        }
-                    } else
-                        finish();
-                } else {
-                    Log.e(TAG, "Authentication error");
-                    Toast.makeText(context, "There was an error when adding the game, please try again", Toast.LENGTH_SHORT).show();
-                }
+    private void returnGameAsResult(Game game, int resultCode) {
+        Intent result = new Intent();
+        result.putExtra(PlatformLibraryActivity.NEW_GAME, game);
+        result.putExtra(PlatformLibraryActivity.SELECTED_GAME_POSITION, selectedGamePosition);
+        setResult(resultCode, result);
+        if (currImageURI != null) {
+            try {
+                uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
+                                game.getId());
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e(TAG, "There was an error uploading the image");
+                finish();
             }
-
-            @Override
-            public void onFailure(Call<Game> call, Throwable t) {
-                Log.e(TAG, "Post game request failed");
-                Toast.makeText(context, "There was an error when adding the game, please try again", Toast.LENGTH_SHORT).show();
-            }
-        });
+        } else
+            finish();
     }
 
     // To handle when an image is selected from the browser, add the following to your Activity
@@ -367,15 +384,28 @@ public class AddGameActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
-
             if (requestCode == 1) {
-                currImageURI = data.getData();
-                //Load local image for displaying purposes
-                Picasso.with(context).load(currImageURI).into(mGameCover);
-                mGameCover.setAlpha(1f);
-                mGameCover.setBackgroundColor(Color.parseColor("#99cccccc"));
+                loadCover(data.getData());
             }
         }
+    }
+
+    private void loadCover(Uri uri) {
+        coverDeleted = false;
+        currImageURI = uri;
+        //Load local image for displaying purposes
+        Picasso.with(context).load(currImageURI).into(gameCover);
+        gameCover.setAlpha(1f);
+        gameCover.setBackgroundColor(Color.parseColor("#99cccccc"));
+    }
+
+    private void removeCover() {
+        coverDeleted = true;
+        currImageURI = null;
+        // Unload image
+        Picasso.with(context).load(R.drawable.edit_picture).into(gameCover);
+        gameCover.setAlpha(0.5f);
+        gameCover.setBackgroundColor(Color.parseColor("#cccccc"));
     }
 
     private void promptForPublisher() {
@@ -427,5 +457,10 @@ public class AddGameActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    @OnClick(R.id.remove_cover_button)
+    protected void removeGameCoverButton(View v) {
+        removeCover();
     }
 }

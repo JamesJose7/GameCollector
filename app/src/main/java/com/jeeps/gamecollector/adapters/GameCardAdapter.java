@@ -102,6 +102,9 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
 
         //Name
         holder.title.setText(game.getName());
+        if (game.getShortName() != null)
+            if (!game.getShortName().isEmpty())
+                holder.title.setText(game.getShortName());
 
         //turn check green if game is completed
         if (game.getTimesCompleted() > 0)
@@ -109,20 +112,12 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
         else
             holder.completed.setColorFilter(Color.parseColor("#cccccc"));
 
-        holder.cover.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                listener.deleteSelectedGame(position);
-                return true;
-            }
+        holder.cover.setOnLongClickListener(view -> {
+            listener.deleteSelectedGame(position);
+            return true;
         });
 
-        holder.cover.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                listener.editGame(position);
-            }
-        });
+        holder.cover.setOnClickListener(view -> listener.editGame(position));
     }
 
     @Override

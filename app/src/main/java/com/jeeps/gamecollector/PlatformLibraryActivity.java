@@ -58,8 +58,10 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
 
     public static final String CURRENT_PLATFORM = "CURRENT_PLATFORM";
     public static final String CURRENT_PLATFORM_NAME = "CURRENT_PLATFORM_NAME";
-    public static final String SELECTED_GAME_KEY = "SELECTED_GAME_KEY";
+    public static final String SELECTED_GAME = "SELECTED_GAME";
+    public static final String SELECTED_GAME_POSITION = "SELECTED_GAME_POSITION";
     public static final int ADD_GAME_RESULT = 123;
+    public static final int EDIT_GAME_RESULT = 321;
     public static final String NEW_GAME = "NEW_GAME";
     private static final String TAG = PlatformLibraryActivity.class.getSimpleName();
 
@@ -128,6 +130,15 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
             games.add(game);
             Collections.sort(games, new GameByNameComparator());
             gamesAdapter.notifyDataSetChanged();
+        } else if (requestCode == EDIT_GAME_RESULT) {
+            Game game = (Game) data.getSerializableExtra(NEW_GAME);
+            int position = data.getIntExtra(SELECTED_GAME_POSITION, -1);
+            if (position >= 0) {
+                games.remove(position);
+                games.add(game);
+                Collections.sort(games, new GameByNameComparator());
+                gamesAdapter.notifyDataSetChanged();
+            }
         }
     }
 
@@ -258,12 +269,14 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
 
     @Override
     public void editGame(int position) {
-        String key = games.get(position).getId();
+        Game game = games.get(position);
         //Start add game activity to edit selected
         Intent intent = new Intent(context, AddGameActivity.class);
         intent.putExtra(CURRENT_PLATFORM, platformId);
-        intent.putExtra(SELECTED_GAME_KEY, key);
-        startActivity(intent);
+        intent.putExtra(CURRENT_PLATFORM_NAME, platformName);
+        intent.putExtra(SELECTED_GAME, game);
+        intent.putExtra(SELECTED_GAME_POSITION, position);
+        startActivityForResult(intent, EDIT_GAME_RESULT);
     }
 
     /**

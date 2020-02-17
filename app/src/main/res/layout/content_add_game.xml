@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -9,22 +9,48 @@
     tools:context="com.jeeps.gamecollector.AddGameActivity"
     tools:showIn="@layout/activity_add_game">
 
+
+    <ImageView
+        android:id="@+id/game_cover"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:alpha="0.5"
+        android:background="#cccccc"
+        android:scaleType="fitCenter"
+        android:src="@drawable/edit_picture"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:text="@string/cover_disclaimer"
+        app:layout_constraintTop_toBottomOf="@+id/game_cover" />
+
+    <ImageButton
+        android:id="@+id/remove_cover_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#00cccccc"
+        android:src="@android:drawable/ic_menu_delete"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="10dp"
         android:paddingStart="10dp"
-        android:paddingEnd="10dp">
-
-        <ImageView
-            android:id="@+id/game_cover"
-            android:layout_width="match_parent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/edit_picture"
-            android:background="#cccccc"
-            android:alpha="0.5"
-            android:layout_height="200dp"/>
+        android:paddingEnd="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -32,40 +58,40 @@
             android:layout_marginTop="10dp">
 
             <TextView
-            android:id="@+id/game_name_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Name:"
-            android:layout_marginTop="5dp"/>
+                android:id="@+id/game_name_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Name:" />
 
             <EditText
                 android:id="@+id/game_name_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/game_name_text"/>
+                android:layout_below="@id/game_name_text" />
 
             <TextView
                 android:id="@+id/game_shortname_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Short Name:"
+                android:layout_below="@id/game_name_edit"
                 android:layout_marginTop="5dp"
-                android:layout_below="@id/game_name_edit"/>
+                android:text="Short Name:" />
 
             <EditText
                 android:id="@+id/game_shortname_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Optional"
-                android:layout_below="@id/game_shortname_text"/>
+                android:layout_below="@id/game_shortname_text"
+                android:hint="Optional" />
 
             <LinearLayout
                 android:id="@+id/platform_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_below="@id/game_shortname_edit"
                 android:layout_marginTop="10dp"
+                android:orientation="horizontal"
                 android:weightSum="100">
 
                 <RelativeLayout
@@ -77,15 +103,15 @@
                         android:id="@+id/platform_game"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Platform"
-                        android:layout_marginTop="5dp"/>
+                        android:layout_marginTop="5dp"
+                        android:text="Platform" />
 
                     <EditText
                         android:id="@+id/platform_game_edit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:enabled="false"
-                        android:layout_below="@id/platform_game"/>
+                        android:layout_below="@id/platform_game"
+                        android:enabled="false" />
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -97,8 +123,8 @@
                         android:id="@+id/game_publisher_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Publisher"
-                        android:layout_marginTop="5dp"/>
+                        android:layout_marginTop="5dp"
+                        android:text="Publisher" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -112,14 +138,14 @@
                             android:id="@+id/game_publisher_spinner"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="20"/>
+                            android:layout_weight="20" />
 
                         <ImageView
                             android:id="@+id/add_publisher_button"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight="80"
-                            android:src="@drawable/add"/>
+                            android:src="@drawable/add" />
 
                     </LinearLayout>
 
@@ -132,9 +158,9 @@
                 android:id="@+id/radio_buttons_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_below="@id/platform_container"
                 android:layout_marginTop="10dp"
+                android:orientation="horizontal"
                 android:weightSum="100">
 
 
@@ -149,15 +175,15 @@
                         android:id="@+id/radio_physical"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Physical"
-                        android:layout_weight="50"/>
+                        android:layout_weight="50"
+                        android:text="Physical" />
 
                     <RadioButton
                         android:id="@+id/radio_digital"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Digital"
-                        android:layout_weight="50"/>
+                        android:layout_weight="50"
+                        android:text="Digital" />
 
                 </RadioGroup>
 
@@ -168,9 +194,9 @@
                 android:id="@+id/games_completed_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Game completion"
+                android:layout_below="@id/radio_buttons_container"
                 android:layout_marginTop="5dp"
-                android:layout_below="@id/radio_buttons_container"/>
+                android:text="Game completion" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -182,13 +208,13 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_weight="50">
+                    android:layout_weight="50"
+                    android:orientation="horizontal">
 
                     <NumberPicker
                         android:id="@+id/card_game_completed_selector"
                         android:layout_width="match_parent"
-                        android:layout_height="80dp"/>
+                        android:layout_height="80dp" />
 
 
                 </LinearLayout>
@@ -196,15 +222,14 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="50"/>
+                    android:layout_weight="50" />
 
 
             </LinearLayout>
-
 
 
         </RelativeLayout>
 
     </LinearLayout>
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

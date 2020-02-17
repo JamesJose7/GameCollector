@@ -48,24 +48,24 @@ public class Game implements Serializable {
         return id;
     }
 
-    public void setId(String key) {
-        id = key;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getUser() {
+        return user;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUser(String user) {
+        this.user = user;
     }
 
-    public String getPublisher() {
-        return publisher;
+    public String getDateAdded() {
+        return dateAdded;
     }
 
-    public void setPublisher(String publisher) {
-        this.publisher = publisher;
+    public void setDateAdded(String dateAdded) {
+        this.dateAdded = dateAdded;
     }
 
     public String getImageUri() {
@@ -76,6 +76,38 @@ public class Game implements Serializable {
         this.imageUri = imageUri;
     }
 
+    public boolean isPhysical() {
+        return isPhysical;
+    }
+
+    public void setPhysical(boolean physical) {
+        isPhysical = physical;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getShortName() {
+        return shortName;
+    }
+
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
+    }
+
+    public String getPlatformId() {
+        return platformId;
+    }
+
+    public void setPlatformId(String platformId) {
+        this.platformId = platformId;
+    }
+
     public String getPlatform() {
         return platform;
     }
@@ -84,28 +116,28 @@ public class Game implements Serializable {
         this.platform = platform;
     }
 
+    public String getPublisherId() {
+        return publisherId;
+    }
+
+    public void setPublisherId(String publisherId) {
+        this.publisherId = publisherId;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
     public int getTimesCompleted() {
         return timesCompleted;
     }
 
-    public String getDateAdded() {
-        return dateAdded;
-    }
-
     public void setTimesCompleted(int timesCompleted) {
         this.timesCompleted = timesCompleted;
-    }
-
-    public void setDateAdded(String dateAdded) {
-        this.dateAdded = dateAdded;
-    }
-
-    public boolean isPhysical() {
-        return isPhysical;
-    }
-
-    public void setPhysical(boolean physical) {
-        isPhysical = physical;
     }
 
     @Exclude

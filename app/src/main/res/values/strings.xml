@@ -14,4 +14,6 @@
     <string name="log_out">Log out</string>
     <string name="stats_menu">Stats</string>
     <string name="title_activity_add_platform">Platform</string>
+    <string name="edit_menu">Edit</string>
+    <string name="cover_disclaimer">Custom cover is optional. An appropriate cover for the game will be added if none is selected.</string>
 </resources>
