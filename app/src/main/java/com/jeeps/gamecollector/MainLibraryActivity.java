@@ -18,13 +18,11 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
 import com.jeeps.gamecollector.adapters.PlatformsListAdapter;
 import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Platform;
@@ -35,11 +33,16 @@ import com.jeeps.gamecollector.services.api.PlatformService;
 import com.jeeps.gamecollector.services.api.UserService;
 import com.jeeps.gamecollector.utils.UserUtils;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,18 +50,21 @@ import retrofit2.Response;
 public class MainLibraryActivity extends AppCompatActivity {
 
     private static final String TAG = MainLibraryActivity.class.getSimpleName();
-    private static final int RC_SIGN_IN = 420;
+    protected static final int RC_SIGN_IN = 420;
+    protected static final int ADD_PLATFORM_RESULT = 13;
 
-    @BindView(R.id.platforms_list)
-    ListView platformsList;
-    @BindView(R.id.platforms_progress_bar)
-    ProgressBar mProgressBar;
+    @BindView(R.id.platforms_list) ListView platformsListView;
+    @BindView(R.id.platforms_progress_bar) ProgressBar mProgressBar;
+    @BindView(R.id.fab) FloatingActionButton fab;
 
     private Context context;
     private SharedPreferences sharedPreferences;
     private DatabaseReference librariesDB;
 
     private FirebaseUser user;
+    private PlatformsListAdapter platformsAdapter;
+    private List<Platform> platforms;
+    private CurrentUser currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,14 +88,11 @@ public class MainLibraryActivity extends AppCompatActivity {
 //        librariesDB = FirebaseDatabase.getInstance().getReference("library/platforms");
 //        readGamePlatforms();
 
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
+        fab.setOnClickListener(view -> {
+            // Create platform activity
+            Intent intent = new Intent(this, AddPlatformActivity.class);
+            startActivityForResult(intent, ADD_PLATFORM_RESULT);
+        });
     }
 
     private void checkUserLogin() {
@@ -129,40 +132,6 @@ public class MainLibraryActivity extends AppCompatActivity {
                     Toast.makeText(context, "Logged out", Toast.LENGTH_SHORT).show();
                     promptUserLogin();
                 });
-    }
-
-    private void readGamePlatforms() {
-        // Read from the database
-        librariesDB.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                GenericTypeIndicator<List<Platform>> genericTypeIndicator = new GenericTypeIndicator<List<Platform>>() {};
-                List<Platform> platforms = dataSnapshot.getValue(genericTypeIndicator);
-
-                PlatformsListAdapter adapter = new PlatformsListAdapter(context, R.layout.platform_list_item, platforms);
-                platformsList.setAdapter(adapter);
-                platformsList.setOnItemClickListener((adapterView, view, i, l) -> {
-                    //Get selected platform
-                    Platform platform = (Platform) adapterView.getItemAtPosition(i);
-                    //start games activity with platform id
-                    Intent intent = new Intent(context, PlatformLibraryActivity.class);
-                    intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.getId());
-                    intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME, platform.getName());
-                    startActivity(intent);
-                });
-
-                //Hide progressbar
-                mProgressBar.setVisibility(View.INVISIBLE);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        });
     }
 
     @Override
@@ -218,6 +187,8 @@ public class MainLibraryActivity extends AppCompatActivity {
                                             context, sharedPreferences,
                                             currentUser.getUsername(), uid, token);
                                 }
+                            } else {
+                                Log.e(TAG, "Authentication error on login");
                             }
                             populatePlatforms();
                         }
@@ -233,12 +204,39 @@ public class MainLibraryActivity extends AppCompatActivity {
                 // Error signing in
                 Toast.makeText(context, "There was an error signing you in, Please try again", Toast.LENGTH_SHORT).show();
             }
+        } else if (resultCode == ADD_PLATFORM_RESULT) {
+            // Add platform
+            Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivity.PLATFORM);
+            File imageCover = (File) data.getSerializableExtra(AddPlatformActivity.COVER_FILE);
+            PlatformService platformService = ApiClient.createService(PlatformService.class);
+            Call<Platform> postPlatform = platformService.postPlatform("Bearer " + currentUser.getToken(), platform);
+            postPlatform.enqueue(new Callback<Platform>() {
+                @Override
+                public void onResponse(Call<Platform> call, Response<Platform> response) {
+                    if (response.isSuccessful()) {
+                        Platform responsePlatform = response.body();
+                        platforms.add(responsePlatform);
+                        platforms.sort((p1, p2) -> p1.getName().toLowerCase().compareTo(p2.getName().toLowerCase()));
+                        platformsAdapter.notifyDataSetChanged();
+                        Snackbar.make(fab, "Successfully added platform", Snackbar.LENGTH_SHORT).show();
+                        // Upload image cover
+                        uploadImageCover(imageCover, responsePlatform.getId());
+                    } else {
+                        Log.e(TAG, "Authentication error when posting platform");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Platform> call, Throwable t) {
+                    Log.e(TAG, "Error posting platform");
+                }
+            });
         }
     }
 
     private void populatePlatforms() {
         // Load current user
-        CurrentUser currentUser = UserUtils.getCurrentUser(context, sharedPreferences);
+        currentUser = UserUtils.getCurrentUser(context, sharedPreferences);
         // Load user platforms
         PlatformService platformService = ApiClient.createService(PlatformService.class);
         Call<List<Platform>> getPlatformsByUser = platformService.getPlatformsByUser("Bearer " + currentUser.getToken());
@@ -246,10 +244,10 @@ public class MainLibraryActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<Platform>> call, Response<List<Platform>> response) {
                 if (response.isSuccessful()) {
-                    List<Platform> platforms = response.body();
-                    PlatformsListAdapter adapter = new PlatformsListAdapter(context, R.layout.platform_list_item, platforms);
-                    platformsList.setAdapter(adapter);
-                    platformsList.setOnItemClickListener((adapterView, view, i, l) -> {
+                    platforms = response.body();
+                    platformsAdapter = new PlatformsListAdapter(context, R.layout.platform_list_item, platforms);
+                    platformsListView.setAdapter(platformsAdapter);
+                    platformsListView.setOnItemClickListener((adapterView, view, i, l) -> {
                         //Get selected platform
                         Platform platform = (Platform) adapterView.getItemAtPosition(i);
                         //start games activity with platform id
@@ -274,5 +272,32 @@ public class MainLibraryActivity extends AppCompatActivity {
         });
     }
 
+    private void uploadImageCover(File imageFile, String platformId) {
+        PlatformService platformService = ApiClient.createService(PlatformService.class);
+        RequestBody requestFile = RequestBody.create(
+                MediaType.parse("image/png"),
+                imageFile);
+        MultipartBody.Part body =
+                MultipartBody.Part.createFormData("image", imageFile.getName(), requestFile);
+        Call<ResponseBody> uploadCall = platformService.uploadPlatformCover(
+                "Bearer " + currentUser.getToken(), platformId, body);
+        uploadCall.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful())
+                    Log.i(TAG, "Image cover uploaded correctly");
+                else
+                    Snackbar.make(fab, "There was an error uploading the image", Snackbar.LENGTH_SHORT);
+                if (imageFile.exists())
+                    imageFile.delete();
+            }
 
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Snackbar.make(fab, "There was an error uploading the image", Snackbar.LENGTH_SHORT);
+                if (imageFile.exists())
+                    imageFile.delete();
+            }
+        });
+    }
 }

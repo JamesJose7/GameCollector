@@ -47,21 +47,18 @@ public class PlatformsListAdapter extends ArrayAdapter<Platform> {
         Platform platform = getItem(position);
 
         if (platform != null) {
-            TextView background = (TextView) v.findViewById(R.id.platform_background_color);
-            ImageView logo = (ImageView) v.findViewById(R.id.platform_image);
-            TextView name = (TextView) v.findViewById(R.id.platform_name);
+            TextView background = v.findViewById(R.id.platform_background_color);
+            ImageView logo = v.findViewById(R.id.platform_image);
+            TextView name = v.findViewById(R.id.platform_name);
 
-            if (background != null) {
+            if (background != null)
                 background.setBackgroundColor(Color.parseColor(platform.getColor()));
-            }
 
-            if (logo != null) {
+            if (logo != null)
                 Picasso.with(mContext).load(platform.getImageUri()).into(logo);
-            }
 
-            if (name != null) {
+            if (name != null)
                 name.setText(platform.getName());
-            }
         }
 
         return v;

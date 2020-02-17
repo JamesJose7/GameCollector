@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".AddPlatformActivity"
+    tools:showIn="@layout/activity_add_platform"
+    android:id="@+id/add_platform_layout"
+    >
+
+    <ImageView
+        android:id="@+id/platform_cover"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:alpha="0.5"
+        android:background="#cccccc"
+        android:scaleType="fitCenter"
+        android:src="@drawable/edit_picture"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/platform_cover"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/platform_name_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Name"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <EditText
+            android:id="@+id/platform_name_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/platform_name_text" />
+
+        <TextView
+            android:id="@+id/platform_color_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Color"
+            app:layout_constraintTop_toBottomOf="@+id/platform_name_edit"
+            tools:layout_editor_absoluteX="10dp" />
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/platform_color_text"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/color_switch_normiewhite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Normie White"
+                android:onClick="onColorPickerClicked"/>
+
+            <RadioButton
+                android:id="@+id/color_switchred"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Switch Red"
+                android:textColor="#E60012"
+                android:onClick="onColorPickerClicked"/>
+
+            <RadioButton
+                android:id="@+id/color_xboxgreen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Xbox Green"
+                android:textColor="#107C10"
+                android:onClick="onColorPickerClicked"/>
+
+            <RadioButton
+                android:id="@+id/color_playstationblue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Playstation Blue"
+                android:textColor="#0070D1"
+                android:onClick="onColorPickerClicked"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="More colors and custom picker coming soon..."/>
+
+        </RadioGroup>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,11 +5,13 @@ import com.google.gson.annotations.SerializedName;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
+
 /**
  * Created by jeeps on 12/23/2017.
  */
 
-public class Platform {
+public class Platform implements Serializable {
     @SerializedName("platformId")
     private String id;
     private String user;

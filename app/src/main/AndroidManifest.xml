@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.jeeps.gamecollector">
+    package="com.jeeps.gamecollector">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -14,45 +14,54 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".AddPlatformActivity"
+            android:label="@string/title_activity_add_platform"
+            android:parentActivityName=".MainLibraryActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.jeeps.gamecollector.MainLibraryActivity" />
+        </activity>
+        <activity
             android:name=".MainLibraryActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".PlatformLibraryActivity"
             android:label="@string/title_activity_platform_library"
             android:parentActivityName=".MainLibraryActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jeeps.gamecollector.MainLibraryActivity"/>
+                android:value="com.jeeps.gamecollector.MainLibraryActivity" />
         </activity>
         <activity
             android:name=".AddGameActivity"
             android:label="@string/title_activity_add_game"
             android:parentActivityName=".PlatformLibraryActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jeeps.gamecollector.PlatformLibraryActivity"/>
+                android:value="com.jeeps.gamecollector.PlatformLibraryActivity" />
         </activity>
         <activity
             android:name=".StatsActivity"
             android:label="@string/title_activity_stats"
             android:parentActivityName=".MainLibraryActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jeeps.gamecollector.MainLibraryActivity"/>
+                android:value="com.jeeps.gamecollector.MainLibraryActivity" />
         </activity>
     </application>
 
