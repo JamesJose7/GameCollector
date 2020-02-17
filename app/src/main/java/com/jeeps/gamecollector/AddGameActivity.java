@@ -34,9 +34,14 @@ import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Game;
 import com.jeeps.gamecollector.model.Platform;
 import com.jeeps.gamecollector.model.Publisher;
+import com.jeeps.gamecollector.model.igdb.GameCoverIG;
+import com.jeeps.gamecollector.model.igdb.GameIG;
 import com.jeeps.gamecollector.services.api.ApiClient;
 import com.jeeps.gamecollector.services.api.GameService;
+import com.jeeps.gamecollector.services.igdb.IgdbApiClient;
+import com.jeeps.gamecollector.services.igdb.IgdbService;
 import com.jeeps.gamecollector.utils.FileUtils;
+import com.jeeps.gamecollector.utils.IgdbUtils;
 import com.jeeps.gamecollector.utils.UserUtils;
 import com.squareup.picasso.Picasso;
 
@@ -47,6 +52,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -258,10 +264,68 @@ public class AddGameActivity extends AppCompatActivity {
                 isPhysical, name, shortName, platformId, platformName, publisherId, publisher);
         game.setTimesCompleted(timesCompleted);
         // Set selected image URI if selected
-        if (currImageURI != null)
+        if (currImageURI != null) {
             game.setImageUri(currImageURI.toString());
+            // Post game
+            postGame(game);
+        } else {
+            // Get cover from IGDB
+            IgdbService igdbService = IgdbApiClient.createService(IgdbService.class);
+            Call<List<GameIG>> searchGames = igdbService.searchGames(IgdbUtils.getSearchGamesQuery(game.getName()));
+            searchGames.enqueue(new Callback<List<GameIG>>() {
+                @Override
+                public void onResponse(Call<List<GameIG>> call, Response<List<GameIG>> response) {
+                    if (response.isSuccessful()) {
+                        // Get games
+                        List<GameIG> gamesIG = response.body();
+                        if (gamesIG != null)
+                            if (!gamesIG.isEmpty()) {
+                                // Exclude DLC
+                                Optional<GameIG> selectedGame = gamesIG.stream()
+                                        .filter(gameIG -> gameIG.getCategory() != 1)
+                                        .findFirst();
+                                if (selectedGame.isPresent()) {
+                                    // Get cover for game
+                                    Call<List<GameCoverIG>> getGameCover =
+                                            igdbService.getImageCoverById(IgdbUtils.getCoverImageQuery(selectedGame.get().getCover()));
 
-        // Post game
+                                    getGameCover.enqueue(new Callback<List<GameCoverIG>>() {
+                                        @Override
+                                        public void onResponse(Call<List<GameCoverIG>> call, Response<List<GameCoverIG>> response) {
+                                            if (response.isSuccessful()) {
+                                                List<GameCoverIG> gameCoverIGS = response.body();
+                                                if (gameCoverIGS != null)
+                                                    if (!gameCoverIGS.isEmpty())
+                                                        game.setImageUri(gameCoverIGS.get(0).getUrl());
+                                            }
+                                            postGame(game);
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<List<GameCoverIG>> call, Throwable t) {
+                                            Log.e(TAG, "There was an error in the request to IGDB");
+                                            postGame(game);
+                                        }
+                                    });
+                                } else postGame(game);
+                            } else postGame(game);
+                        else postGame(game);
+                    } else {
+                        Log.e(TAG, "There was an error in the request to IGDB");
+                        postGame(game);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<GameIG>> call, Throwable t) {
+                    Log.e(TAG, "There was an error finding a cover from IGDB");
+                    postGame(game);
+                }
+            });
+        }
+    }
+
+    private void postGame(Game game) {
         GameService gameService = ApiClient.createService(GameService.class);
         Call<Game> postGame = gameService.postGame("Bearer " + currentUser.getToken(), game);
         postGame.enqueue(new Callback<Game>() {

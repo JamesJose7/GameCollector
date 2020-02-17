@@ -75,21 +75,24 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
         //Display progressbar
         holder.coverProgressBar.setVisibility(View.VISIBLE);
         //load image cover
-        Picasso.with(mContext).load(game.getImageUri()).into(holder.cover, new Callback() {
-            @Override
-            public void onSuccess() {
-                //Hide progress bar when image is finished loading
-                holder.coverProgressBar.setVisibility(View.INVISIBLE);
-            }
+        if (!game.getImageUri().isEmpty()) {
+            Picasso.with(mContext).load(game.getImageUri()).into(holder.cover, new Callback() {
+                @Override
+                public void onSuccess() {
+                    //Hide progress bar when image is finished loading
+                    holder.coverProgressBar.setVisibility(View.INVISIBLE);
+                }
 
-            @Override
-            public void onError() {
-                //Hide progress bar when image is finished loading
-                holder.coverProgressBar.setVisibility(View.INVISIBLE);
-                //Display temp error message
-                //Toast.makeText(mContext, "Welp, image couldn't load... whoops", Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onError() {
+                    //Hide progress bar when image is finished loading
+                    holder.coverProgressBar.setVisibility(View.INVISIBLE);
+                    //Display temp error message
+                    //Toast.makeText(mContext, "Welp, image couldn't load... whoops", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else
+            holder.coverProgressBar.setVisibility(View.INVISIBLE);
         //Display logo if it's digital
         if (!game.isPhysical())
             holder.isDigital.setVisibility(View.VISIBLE);
