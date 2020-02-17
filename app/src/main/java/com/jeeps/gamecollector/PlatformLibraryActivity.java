@@ -3,6 +3,7 @@ package com.jeeps.gamecollector;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,29 +26,31 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.jeeps.gamecollector.adapters.GameCardAdapter;
 import com.jeeps.gamecollector.comparators.GameByNameComparator;
 import com.jeeps.gamecollector.comparators.GameByPhysicalComparator;
 import com.jeeps.gamecollector.comparators.GameByTimesPlayedComparator;
+import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Game;
+import com.jeeps.gamecollector.services.api.ApiClient;
+import com.jeeps.gamecollector.services.api.GameService;
+import com.jeeps.gamecollector.utils.UserUtils;
 import com.jeeps.gamecollector.views.GridSpacingItemDecoration;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class PlatformLibraryActivity extends AppCompatActivity implements GameCardAdapter.GameCardAdapterListener {
@@ -55,22 +58,20 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     public static final String CURRENT_PLATFORM = "CURRENT_PLATFORM";
     public static final String CURRENT_PLATFORM_NAME = "CURRENT_PLATFORM_NAME";
     public static final String SELECTED_GAME_KEY = "SELECTED_GAME_KEY";
+    private static final String TAG = PlatformLibraryActivity.class.getSimpleName();
 
-    @BindView(R.id.games_recycler_view)
-    RecyclerView mGamesRecyclerView;
-    @BindView(R.id.backdrop)
-    ImageView backdrop;
-    @BindView(R.id.games_progressbar)
-    ProgressBar mProgressBar;
-    @BindView(R.id.fab)
-    FloatingActionButton fab;
+    @BindView(R.id.games_recycler_view) RecyclerView gamesRecyclerView;
+    @BindView(R.id.backdrop) ImageView backdrop;
+    @BindView(R.id.games_progressbar) ProgressBar progressBar;
+    @BindView(R.id.fab) FloatingActionButton fab;
 
-    private Context mContext;
-    private int mPlatformId;
-    private String mPlatformName;
-    private DatabaseReference mPlatformLibraryDB;
-    private GameCardAdapter mAdapter;
-    private List<Game> mGames;
+    private Context context;
+    private String platformId;
+    private String platformName;
+    private GameCardAdapter gamesAdapter;
+    private List<Game> games;
+    private CurrentUser currentUser;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,73 +80,69 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
-        mContext = this;
-        mGames = new ArrayList<>();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        context = this;
+        games = new ArrayList<>();
         initCollapsingToolbar();
 
         //Show progress bar
-        mProgressBar.setVisibility(View.VISIBLE);
-
-        // Initialize DB
-        mPlatformLibraryDB = FirebaseDatabase.getInstance().getReference("library/games/" + mPlatformId);
+        progressBar.setVisibility(View.VISIBLE);
+        sharedPreferences = context.getSharedPreferences(
+                getString(R.string.shared_preferences_global), Context.MODE_PRIVATE);
 
         //Get platform id from intent
         Intent intent = getIntent();
-        mPlatformId = intent.getIntExtra(CURRENT_PLATFORM, 0);
-        mPlatformName = intent.getStringExtra(CURRENT_PLATFORM_NAME);
+        platformId = intent.getStringExtra(CURRENT_PLATFORM);
+        platformName = intent.getStringExtra(CURRENT_PLATFORM_NAME);
 
         //Display cover
-        Picasso.with(mContext).load(getPlatformCover()).into(backdrop);
+        Picasso.with(context).load(getPlatformCover()).into(backdrop);
 
         // Configure recycler view
-        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(mContext, 2);
-        mGamesRecyclerView.setLayoutManager(mLayoutManager);
-        mGamesRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
-        mGamesRecyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        // Get games from the database
-        getGamesFromDB();
+        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(context, 2);
+        gamesRecyclerView.setLayoutManager(mLayoutManager);
+        gamesRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
+        gamesRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         // Add game
         fab.setOnClickListener(view -> {
-            Intent startAddGameActivityIntent = new Intent(mContext, AddGameActivity.class);
-            startAddGameActivityIntent.putExtra(CURRENT_PLATFORM, mPlatformId);
+            Intent startAddGameActivityIntent = new Intent(context, AddGameActivity.class);
+            startAddGameActivityIntent.putExtra(CURRENT_PLATFORM, platformId);
             startActivity(startAddGameActivityIntent);
 
         });
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        // Get games from the database
+        populateGames();
     }
 
- private void getGamesFromDB() {
-        mPlatformLibraryDB.addValueEventListener(new ValueEventListener() {
+    private void populateGames() {
+        // Load current user
+        currentUser = UserUtils.getCurrentUser(context, sharedPreferences);
+        // Load games
+        GameService gameService = ApiClient.createService(GameService.class);
+        Call<List<Game>> getGamesByUserAndPlatform = gameService.getGamesByUserAndPlatform(
+                "Bearer " + currentUser.getToken(), currentUser.getUsername(), platformId);
+        getGamesByUserAndPlatform.enqueue(new Callback<List<Game>>() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                Map<String, HashMap<String, Object>> gamesMap = (HashMap<String, HashMap<String, Object>>) dataSnapshot.getValue();
-                List<Game> games = new ArrayList<>();
-                if (gamesMap != null)
-                    gamesMap.values()
-                            .forEach(gameValues -> games.add(Game.mapToGame(gameValues)));
-                mGames = games;
-
-                //Sort A-z
-                Collections.sort(mGames, new GameByNameComparator());
-
-                //Create adapter
-                mAdapter = new GameCardAdapter(mContext, mGames, PlatformLibraryActivity.this);
-
-                mGamesRecyclerView.setAdapter(mAdapter);
-                mAdapter.notifyDataSetChanged();
-
-                //Hide progressbar
-                mProgressBar.setVisibility(View.INVISIBLE);
+            public void onResponse(Call<List<Game>> call, Response<List<Game>> response) {
+                if (response.isSuccessful()) {
+                    games = response.body();
+                    // Sort A-z
+                    Collections.sort(games, new GameByNameComparator());
+                    // Create adapter
+                    gamesAdapter = new GameCardAdapter(context, games, PlatformLibraryActivity.this);
+                    gamesRecyclerView.setAdapter(gamesAdapter);
+                    gamesAdapter.notifyDataSetChanged();
+                    // Hide progressbar
+                    progressBar.setVisibility(View.INVISIBLE);
+                } else
+                    Log.e(TAG, "Something went wrong when retrieving games");
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(CURRENT_PLATFORM, "Failed to read value.", error.toException());
+            public void onFailure(Call<List<Game>> call, Throwable t) {
+                Log.e(TAG, "Something went wrong when retrieving games");
             }
         });
     }
@@ -171,7 +168,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                     scrollRange = appBarLayout.getTotalScrollRange();
                 }
                 if (scrollRange + verticalOffset == 0) {
-                    collapsingToolbar.setTitle(mPlatformName);
+                    collapsingToolbar.setTitle(platformName);
                     isShow = true;
                 } else if (isShow) {
                     collapsingToolbar.setTitle(" ");
@@ -182,16 +179,16 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     }
 
     public int getPlatformCover() {
-        switch (mPlatformId) {
-            case 0:
+        switch (platformId) {
+            case "0":
                 return R.drawable.switch_cover;
-            case 1:
+            case "1":
                 return R.drawable.wiiu_cover;
-            case 2:
+            case "2":
                 return R.drawable.n3ds_cover;
-            case 3:
+            case "3":
                 return R.drawable.wii_cover;
-            case 4:
+            case "4":
                 return R.drawable.ds_cover;
         }
         return R.drawable.switch_cover;
@@ -204,9 +201,9 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                 case DialogInterface.BUTTON_POSITIVE:
                     //Yes button clicked
                     //Get game
-                    Game game = mGames.get(position);
+                    Game game = games.get(position);
                     //Get game key for DB
-                    String key = game.getKey();
+                    String key = game.getId();
 
                     //Get stored cover file name
                     String firstCut[] = game.getImageUri().split("gameCovers%2F");
@@ -220,16 +217,16 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                         Log.i(PlatformLibraryActivity.class.getSimpleName(), "Deleted image successfully");
                     }).addOnFailureListener(exception -> {
                         // Uh-oh, an error occurred!
-                        Toast.makeText(mContext, "There was an error trying to delete cover", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "There was an error trying to delete cover", Toast.LENGTH_SHORT).show();
                     });
 
                     //Delete game
                     DatabaseReference selectedGameReference = FirebaseDatabase.getInstance()
-                            .getReference("library/games/" + mPlatformId + "/" + key);
+                            .getReference("library/games/" + platformId + "/" + key);
                     selectedGameReference.removeValue();
 
                     //Notify user
-                    Snackbar.make(mGamesRecyclerView, "Deleted: " + game.getName(), Snackbar.LENGTH_LONG)
+                    Snackbar.make(gamesRecyclerView, "Deleted: " + game.getName(), Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                     break;
 
@@ -239,17 +236,17 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
             }
         };
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage("Delete game?").setPositiveButton("Yes", dialogClickListener)
                 .setNegativeButton("No", dialogClickListener).show();
     }
 
     @Override
     public void editGame(int position) {
-        String key = mGames.get(position).getKey();
+        String key = games.get(position).getId();
         //Start add game activity to edit selected
-        Intent intent = new Intent(mContext, AddGameActivity.class);
-        intent.putExtra(CURRENT_PLATFORM, mPlatformId);
+        Intent intent = new Intent(context, AddGameActivity.class);
+        intent.putExtra(CURRENT_PLATFORM, platformId);
         intent.putExtra(SELECTED_GAME_KEY, key);
         startActivity(intent);
     }
@@ -281,31 +278,31 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         switch (id) {
             case R.id.action_filter_alph:
                 //Sort A-z
-                Collections.sort(mGames, new GameByNameComparator());
-                mAdapter.notifyDataSetChanged();
+                Collections.sort(games, new GameByNameComparator());
+                gamesAdapter.notifyDataSetChanged();
                 return true;
             case R.id.action_filter_alph_desc:
                 //Sort A-z desc
-                Collections.sort(mGames, new GameByNameComparator(true));
-                mAdapter.notifyDataSetChanged();
+                Collections.sort(games, new GameByNameComparator(true));
+                gamesAdapter.notifyDataSetChanged();
                 return true;
             case R.id.action_filter_physical:
                 //Sort physical
-                Collections.sort(mGames, new GameByPhysicalComparator(true));
-                mAdapter.notifyDataSetChanged();
+                Collections.sort(games, new GameByPhysicalComparator(true));
+                gamesAdapter.notifyDataSetChanged();
                 return true;
             case R.id.action_filter_alph_physical_desc:
-                Collections.sort(mGames, new GameByPhysicalComparator());
-                mAdapter.notifyDataSetChanged();
+                Collections.sort(games, new GameByPhysicalComparator());
+                gamesAdapter.notifyDataSetChanged();
                 return true;
             case R.id.action_filter_timesc:
                 //Sort physical
-                Collections.sort(mGames, new GameByTimesPlayedComparator());
-                mAdapter.notifyDataSetChanged();
+                Collections.sort(games, new GameByTimesPlayedComparator());
+                gamesAdapter.notifyDataSetChanged();
                 return true;
             case R.id.action_filter_alph_timesc_desc:
-                Collections.sort(mGames, new GameByTimesPlayedComparator(true));
-                mAdapter.notifyDataSetChanged();
+                Collections.sort(games, new GameByTimesPlayedComparator(true));
+                gamesAdapter.notifyDataSetChanged();
                 return true;
         }
 
