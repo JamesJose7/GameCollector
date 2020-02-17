@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,15 +29,17 @@ public class Game implements Serializable {
     private String publisher;
     private int timesCompleted;
 
-    public Game(String key, String name, String publisher, String imageUri, String platform, boolean isPhysical) {
-        id = key;
-        this.name = name;
-        this.publisher = publisher;
+    public Game(String imageUri, boolean isPhysical, String name, String shortName,
+                String platformId, String platform, String publisherId, String publisher) {
         this.imageUri = imageUri;
-        this.platform = platform;
-        timesCompleted = 0;
-        dateAdded = (new Date()).getTime() + "";
         this.isPhysical = isPhysical;
+        this.name = name;
+        this.shortName = shortName;
+        this.platformId = platformId;
+        this.platform = platform;
+        this.publisherId = publisherId;
+        this.publisher = publisher;
+        timesCompleted = 0;
     }
 
     public Game() {}

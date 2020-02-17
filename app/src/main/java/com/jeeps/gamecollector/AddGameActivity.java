@@ -2,6 +2,7 @@ package com.jeeps.gamecollector;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,75 +22,76 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Game;
 import com.jeeps.gamecollector.model.Platform;
 import com.jeeps.gamecollector.model.Publisher;
+import com.jeeps.gamecollector.services.api.ApiClient;
+import com.jeeps.gamecollector.services.api.GameService;
 import com.jeeps.gamecollector.utils.FileUtils;
+import com.jeeps.gamecollector.utils.UserUtils;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import id.zelory.compressor.Compressor;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AddGameActivity extends AppCompatActivity {
 
     private static final String TAG = "ADD_GAME_ACTIVITY";
     private static final int MY_PERMISSIONS_REQUEST_WRITE_STORAGE = 2929;
 
-    @BindView(R.id.game_cover)
-    ImageView mGameCover;
-    @BindView(R.id.game_name_edit)
-    EditText mNameEdit;
-    @BindView(R.id.platform_game_edit)
-    EditText mPlatformEdit;
-    @BindView(R.id.game_publisher_spinner)
-    Spinner mPublishersSpinner;
-    @BindView(R.id.add_publisher_button)
-    ImageView mAddPublisher;
-    @BindView(R.id.radio_group)
-    RadioGroup mRadioGroup;
-    @BindView(R.id.radio_digital)
-    RadioButton mRadioDigital;
-    @BindView(R.id.radio_physical)
-    RadioButton mRadioPhysical;
-    @BindView(R.id.card_game_completed_selector)
-    NumberPicker mNumberPicker;
-    @BindView(R.id.fab)
-    FloatingActionButton fab;
+    @BindView(R.id.game_cover) ImageView mGameCover;
+    @BindView(R.id.game_name_edit) EditText nameEdit;
+    @BindView(R.id.game_shortname_edit) EditText shortNameEdit;
+    @BindView(R.id.platform_game_edit) EditText platformEdit;
+    @BindView(R.id.game_publisher_spinner) Spinner mPublishersSpinner;
+    @BindView(R.id.add_publisher_button) ImageView mAddPublisher;
+    @BindView(R.id.radio_group) RadioGroup mRadioGroup;
+    @BindView(R.id.radio_digital) RadioButton mRadioDigital;
+    @BindView(R.id.radio_physical) RadioButton radioPhysical;
+    @BindView(R.id.card_game_completed_selector) NumberPicker mNumberPicker;
+    @BindView(R.id.fab) FloatingActionButton fab;
 
-    private int mPlatformID;
+    private SharedPreferences sharedPreferences;
+    private CurrentUser currentUser;
+
+    private String platformId;
+    private String platformName;
     private Platform mCurrentPlatform;
     private Uri currImageURI;
     private Uri gameImageURI;
     private String previousUri;
 
     private StorageReference mStorageRef;
-    private Context mContext;
+    private Context context;
     private FirebaseDatabase mDatabase;
     private Format mDateFormatter;
     private String mInputPublisher;
-    private int mTimesCompleted;
-    private String mSelectedGameKey;
+    private int timesCompleted;
+    private String selectedGameId;
     private List<Publisher> mPublishers;
     private DatabaseReference mGamesDB;
     private ArrayAdapter<String> mSpinnerAdapter;
@@ -102,31 +104,36 @@ public class AddGameActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
-        mContext = this;
+        context = this;
 
         //Change title
         getSupportActionBar().setTitle("Add New Game");
 
+        sharedPreferences = context.getSharedPreferences(
+                getString(R.string.shared_preferences_global), Context.MODE_PRIVATE);
+        currentUser = UserUtils.getCurrentUser(context, sharedPreferences);
+
         //Get intent contents
         Intent intent = getIntent();
-        mPlatformID = intent.getIntExtra(PlatformLibraryActivity.CURRENT_PLATFORM, 0);
-        mSelectedGameKey = intent.getStringExtra(PlatformLibraryActivity.SELECTED_GAME_KEY);
+        platformId = intent.getStringExtra(PlatformLibraryActivity.CURRENT_PLATFORM);
+        platformName = intent.getStringExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME);
+        selectedGameId = intent.getStringExtra(PlatformLibraryActivity.SELECTED_GAME_KEY);
 
         //Formatter for file names
         mDateFormatter = new SimpleDateFormat("dd:HH:mm:ss");
         //Select physical radio button by default
-        mRadioGroup.check(mRadioPhysical.getId());
+        mRadioGroup.check(radioPhysical.getId());
 
         //Number picker
         mNumberPicker.setMinValue(0);
         mNumberPicker.setMaxValue(10);
-        mNumberPicker.setOnValueChangedListener((numberPicker, i, i1) -> mTimesCompleted = i1);
+        mNumberPicker.setOnValueChangedListener((numberPicker, i, i1) -> timesCompleted = i1);
 
         //Database
         mDatabase = FirebaseDatabase.getInstance();
 
         //Get current platform
-        getCurrentPlatform();
+        platformEdit.setText(platformName);
 
         //Select image for cover
         mGameCover.setOnClickListener(view -> {
@@ -137,49 +144,29 @@ public class AddGameActivity extends AppCompatActivity {
             startActivityForResult(Intent.createChooser(intent1, "Select Picture"),1);
         });
 
-
         //Get publishers for spinner
-        populateSpinner();
+//        populateSpinner();
         //Add publishers
         mAddPublisher.setOnClickListener(view -> promptForPublisher());
 
         // Edit mode
-        if (mSelectedGameKey != null) {
+        if (selectedGameId != null) {
             //Selected game is being edited
             getSupportActionBar().setTitle("Edit Game");
             fab.setImageResource(R.drawable.edit);
         }
 
         fab.setOnClickListener(view -> {
-            if (mSelectedGameKey != null)
-                deleteGame();
+//            if (selectedGameId != null)
+//                deleteGame();
             saveGame();
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void deleteGame() {
-        //Delete game
-        DatabaseReference gameReference = mDatabase.getReference("library/games/" + mPlatformID + "/" + mSelectedGameKey);
-        gameReference.removeValue();
-
-        if (currImageURI != null) {
-            //Delete uploaded image
-            StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-            StorageReference gameCoverRef = storageReference.child("gameCovers/" + mSelectedGameKey + ".png");
-            gameCoverRef.delete().addOnSuccessListener(aVoid -> {
-                // File deleted successfully
-                Log.i(AddGameActivity.class.getSimpleName(), "Deleted image successfully");
-            }).addOnFailureListener(exception -> {
-                // Uh-oh, an error occurred!
-                Log.e(AddGameActivity.class.getSimpleName(), "There was an error deleting the image");
-            });
-        }
-    }
-
     private void mapSelectedGameToFields() {
         //Get selected game
-        DatabaseReference gameReference = mDatabase.getReference("library/games/" + mPlatformID + "/" + mSelectedGameKey);
+        DatabaseReference gameReference = mDatabase.getReference("library/games/" + platformId + "/" + selectedGameId);
         gameReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -193,12 +180,12 @@ public class AddGameActivity extends AppCompatActivity {
                     System.out.println(game);
 
                     //Set image
-                    Picasso.with(mContext).load(game.getImageUri()).into(mGameCover);
+                    Picasso.with(context).load(game.getImageUri()).into(mGameCover);
                     mGameCover.setAlpha(1f);
                     mGameCover.setBackgroundColor(Color.parseColor("#99cccccc"));
                     previousUri = game.getImageUri();
                     //Set name
-                    mNameEdit.setText(game.getName());
+                    nameEdit.setText(game.getName());
                     //Set physical or digital
                     if (!game.isPhysical())
                         mRadioGroup.check(mRadioDigital.getId());
@@ -210,7 +197,6 @@ public class AddGameActivity extends AppCompatActivity {
                         mPublishersSpinner.setSelection(spinnerPosition);
                     }
                 }
-
             }
 
             @Override
@@ -238,13 +224,13 @@ public class AddGameActivity extends AppCompatActivity {
                 for (Publisher publisher : mPublishers)
                     publisherNames.add(publisher.getName());
                 //Add publishers to spinner
-                mSpinnerAdapter = new ArrayAdapter<>(mContext,
+                mSpinnerAdapter = new ArrayAdapter<>(context,
                         android.R.layout.simple_spinner_item, publisherNames);
                 mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 mPublishersSpinner.setAdapter(mSpinnerAdapter);
 
                 // In case a game is being edited, map the values after this finishes
-                if (mSelectedGameKey != null)
+                if (selectedGameId != null)
                     mapSelectedGameToFields();
             }
 
@@ -257,135 +243,56 @@ public class AddGameActivity extends AppCompatActivity {
     }
 
     private void saveGame() {
-        //Games DB Reference
-        mGamesDB = mDatabase.getReference("library/games/");
-        //Get push key
-        final String key = mGamesDB.child(mCurrentPlatform.getId() + "").push().getKey();
-
         //Get values from text fields
-        String name = mNameEdit.getText().toString();
-        String publisher = mPublishersSpinner.getSelectedItem().toString();
+        String name = nameEdit.getText().toString();
+        String shortName = shortNameEdit.getText().toString();
+//        String publisher = mPublishersSpinner.getSelectedItem().toString();
+        String publisher = "TEMP";
+        String publisherId = "TEMP";
 
         //Get value from radio button
-        boolean isPhysical = mRadioPhysical.isChecked();
+        boolean isPhysical = radioPhysical.isChecked();
 
         //Create game
-        final Game game = new Game(key, name, publisher, "", mCurrentPlatform.getName(), isPhysical);
-        final String fileName = mDateFormatter.format(Long.parseLong(game.getDateAdded()));
-        game.setTimesCompleted(mTimesCompleted);
+        Game game = new Game("",
+                isPhysical, name, shortName, platformId, platformName, publisherId, publisher);
+        game.setTimesCompleted(timesCompleted);
+        // Set selected image URI if selected
+        if (currImageURI != null)
+            game.setImageUri(currImageURI.toString());
 
-        //Start uploading cover to firebase
-        mStorageRef = FirebaseStorage.getInstance().getReference();
-        //Create name with current date
-        StorageReference gameCovers = mStorageRef.child("gameCovers/" + key + ".png");
-
-        if (currImageURI != null) {
-            saveGameOnImageUpload(game, key, gameCovers);
-            //Display success message
-            Toast.makeText(AddGameActivity.this, "Game added!", Toast.LENGTH_SHORT).show();
-        } else {
-            if (previousUri != null) {
-                game.setImageUri(previousUri);
-
-                //Add game to database
-
-                Map<String, Object> gameValues = game.toMap();
-                Map<String, Object> childUpdates = new HashMap<>();
-
-                childUpdates.put(mCurrentPlatform.getId() + "/" + key, gameValues);
-                mGamesDB.updateChildren(childUpdates);
-            } else
-                Toast.makeText(mContext, "Image can't be null", Toast.LENGTH_SHORT).show();
-        }
-        //Close activity
-        finish();
-    }
-
-    private void saveGameOnImageUpload(final Game game, final String key, StorageReference gameCovers) {
-        //Get file from URI
-        final File localCover = new File(mContext.getFilesDir(), mDateFormatter.format(new Date()));
-        try {
-            InputStream inputStream = getContentResolver()
-                    .openInputStream(currImageURI);
-            FileOutputStream fileOutputStream = new FileOutputStream(
-                    localCover);
-            FileUtils.copyStream(inputStream, fileOutputStream);
-            fileOutputStream.close();
-            inputStream.close();
-            //Compress image
-            final File compressedImageFile = new Compressor(this)
-                    .setMaxWidth(300)
-                    .setQuality(75)
-                    .compressToFile(localCover);
-            //Get URI from file
-            currImageURI = Uri.fromFile(compressedImageFile);
-
-            gameCovers.putFile(currImageURI)
-                    .addOnSuccessListener(taskSnapshot -> {
-                        // Get a URL to the uploaded content
-//                        gameImageURI = taskSnapshot.getDownloadUrl();
-
-                        //Delete temp files
-                        deleteTempFiles(localCover, compressedImageFile);
-                    })
-                    .addOnFailureListener(exception -> {
-                        // Handle unsuccessful uploads
-                        // ...
-                        //Delete temp files
-                        deleteTempFiles(localCover, compressedImageFile);
-                    }).continueWithTask(task -> {
-                        if (!task.isSuccessful()) {
-                            throw task.getException();
-                        }
-                        // Continue with the task to get the download URL
-                        return gameCovers.getDownloadUrl();
-                    }).addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            gameImageURI = task.getResult();
-                            String imageUri = "";
-                            if (gameImageURI.toString() != null)
-                                imageUri = gameImageURI.toString();
-                            game.setImageUri(imageUri);
-
-                            //Add game to database
-
-                            Map<String, Object> gameValues = game.toMap();
-                            Map<String, Object> childUpdates = new HashMap<>();
-
-                            childUpdates.put(mCurrentPlatform.getId() + "/" + key, gameValues);
-                            mGamesDB.updateChildren(childUpdates);
-                        } else {
-                            // Handle failures
-                            // ...
-                        }
-                    });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void deleteTempFiles(File localCover, File compressedImageFile) {
-        if (localCover.exists())
-            localCover.delete();
-        if (compressedImageFile.exists())
-            compressedImageFile.delete();
-    }
-
-    private void getCurrentPlatform() {
-        DatabaseReference platformsDB = mDatabase.getReference("library/platforms/" + mPlatformID);
-        platformsDB.addValueEventListener(new ValueEventListener() {
+        // Post game
+        GameService gameService = ApiClient.createService(GameService.class);
+        Call<Game> postGame = gameService.postGame("Bearer " + currentUser.getToken(), game);
+        postGame.enqueue(new Callback<Game>() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                mCurrentPlatform = dataSnapshot.getValue(Platform.class);
-                mPlatformEdit.setText(mCurrentPlatform.getName());
+            public void onResponse(Call<Game> call, Response<Game> response) {
+                if (response.isSuccessful()) {
+                    Game game = response.body();
+                    Intent result = new Intent();
+                    result.putExtra(PlatformLibraryActivity.NEW_GAME, game);
+                    setResult(PlatformLibraryActivity.ADD_GAME_RESULT, result);
+                    if (currImageURI != null) {
+                        try {
+                            uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
+                                            game.getId());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Log.e(TAG, "There was an error uploading the image");
+                            finish();
+                        }
+                    } else
+                        finish();
+                } else {
+                    Log.e(TAG, "Authentication error");
+                    Toast.makeText(context, "There was an error when adding the game, please try again", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
+            public void onFailure(Call<Game> call, Throwable t) {
+                Log.e(TAG, "Post game request failed");
+                Toast.makeText(context, "There was an error when adding the game, please try again", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -393,16 +300,14 @@ public class AddGameActivity extends AppCompatActivity {
     // To handle when an image is selected from the browser, add the following to your Activity
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
 
             if (requestCode == 1) {
-
-                // currImageURI is the global variable I'm using to hold the content:// URI of the image
                 currImageURI = data.getData();
-
                 //Load local image for displaying purposes
-                Picasso.with(mContext).load(currImageURI).into(mGameCover);
+                Picasso.with(context).load(currImageURI).into(mGameCover);
                 mGameCover.setAlpha(1f);
                 mGameCover.setBackgroundColor(Color.parseColor("#99cccccc"));
             }
@@ -429,4 +334,34 @@ public class AddGameActivity extends AppCompatActivity {
                 }).show();
     }
 
+    private void uploadImageCover(File imageFile, String gameId) {
+        GameService platformService = ApiClient.createService(GameService.class);
+        RequestBody requestFile = RequestBody.create(
+                MediaType.parse("image/png"),
+                imageFile);
+        MultipartBody.Part body =
+                MultipartBody.Part.createFormData("image", imageFile.getName(), requestFile);
+        Call<ResponseBody> uploadCall = platformService.uploadGameCover(
+                "Bearer " + currentUser.getToken(), gameId, body);
+        uploadCall.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful())
+                    Log.i(TAG, "Image cover uploaded correctly");
+                else
+                    Snackbar.make(fab, "There was an error uploading the image", Snackbar.LENGTH_SHORT);
+                if (imageFile.exists())
+                    imageFile.delete();
+                finish();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Snackbar.make(fab, "There was an error uploading the image", Snackbar.LENGTH_SHORT);
+                if (imageFile.exists())
+                    imageFile.delete();
+                finish();
+            }
+        });
+    }
 }

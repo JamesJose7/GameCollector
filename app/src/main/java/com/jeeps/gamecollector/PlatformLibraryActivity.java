@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -58,6 +59,8 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     public static final String CURRENT_PLATFORM = "CURRENT_PLATFORM";
     public static final String CURRENT_PLATFORM_NAME = "CURRENT_PLATFORM_NAME";
     public static final String SELECTED_GAME_KEY = "SELECTED_GAME_KEY";
+    public static final int ADD_GAME_RESULT = 123;
+    public static final String NEW_GAME = "NEW_GAME";
     private static final String TAG = PlatformLibraryActivity.class.getSimpleName();
 
     @BindView(R.id.games_recycler_view) RecyclerView gamesRecyclerView;
@@ -108,12 +111,24 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         fab.setOnClickListener(view -> {
             Intent startAddGameActivityIntent = new Intent(context, AddGameActivity.class);
             startAddGameActivityIntent.putExtra(CURRENT_PLATFORM, platformId);
-            startActivity(startAddGameActivityIntent);
-
+            startAddGameActivityIntent.putExtra(CURRENT_PLATFORM_NAME, platformName);
+            startActivityForResult(startAddGameActivityIntent, ADD_GAME_RESULT);
         });
 
         // Get games from the database
         populateGames();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == ADD_GAME_RESULT) {
+            Game game = (Game) data.getSerializableExtra(NEW_GAME);
+            games.add(game);
+            Collections.sort(games, new GameByNameComparator());
+            gamesAdapter.notifyDataSetChanged();
+        }
     }
 
     private void populateGames() {

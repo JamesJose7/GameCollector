@@ -32,11 +32,11 @@
             android:layout_marginTop="10dp">
 
             <TextView
-                android:id="@+id/game_name_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Name:"
-                android:layout_marginTop="5dp"/>
+            android:id="@+id/game_name_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Name:"
+            android:layout_marginTop="5dp"/>
 
             <EditText
                 android:id="@+id/game_name_edit"
@@ -44,12 +44,27 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/game_name_text"/>
 
+            <TextView
+                android:id="@+id/game_shortname_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Short Name:"
+                android:layout_marginTop="5dp"
+                android:layout_below="@id/game_name_edit"/>
+
+            <EditText
+                android:id="@+id/game_shortname_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Optional"
+                android:layout_below="@id/game_shortname_text"/>
+
             <LinearLayout
                 android:id="@+id/platform_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_below="@id/game_name_edit"
+                android:layout_below="@id/game_shortname_edit"
                 android:layout_marginTop="10dp"
                 android:weightSum="100">
 
@@ -69,7 +84,7 @@
                         android:id="@+id/platform_game_edit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="none"
+                        android:enabled="false"
                         android:layout_below="@id/platform_game"/>
                 </RelativeLayout>
 
