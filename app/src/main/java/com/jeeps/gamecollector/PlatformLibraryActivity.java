@@ -125,18 +125,22 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == ADD_GAME_RESULT) {
-            Game game = (Game) data.getSerializableExtra(NEW_GAME);
-            games.add(game);
-            Collections.sort(games, new GameByNameComparator());
-            gamesAdapter.notifyDataSetChanged();
-        } else if (requestCode == EDIT_GAME_RESULT) {
-            Game game = (Game) data.getSerializableExtra(NEW_GAME);
-            int position = data.getIntExtra(SELECTED_GAME_POSITION, -1);
-            if (position >= 0) {
-                games.remove(position);
+            if (resultCode == RESULT_OK) {
+                Game game = (Game) data.getSerializableExtra(NEW_GAME);
                 games.add(game);
                 Collections.sort(games, new GameByNameComparator());
                 gamesAdapter.notifyDataSetChanged();
+            }
+        } else if (requestCode == EDIT_GAME_RESULT) {
+            if (resultCode == RESULT_OK) {
+                Game game = (Game) data.getSerializableExtra(NEW_GAME);
+                int position = data.getIntExtra(SELECTED_GAME_POSITION, -1);
+                if (position >= 0) {
+                    games.remove(position);
+                    games.add(game);
+                    Collections.sort(games, new GameByNameComparator());
+                    gamesAdapter.notifyDataSetChanged();
+                }
             }
         }
     }
