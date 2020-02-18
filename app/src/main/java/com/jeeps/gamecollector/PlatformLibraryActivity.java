@@ -26,11 +26,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.jeeps.gamecollector.adapters.GameCardAdapter;
 import com.jeeps.gamecollector.comparators.GameByNameComparator;
 import com.jeeps.gamecollector.comparators.GameByPhysicalComparator;
@@ -49,6 +46,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -77,6 +75,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     private List<Game> games;
     private CurrentUser currentUser;
     private SharedPreferences sharedPreferences;
+    private String gameToBeDeleted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -221,7 +220,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     }
 
     @Override
-    public void deleteSelectedGame(final int position) {
+    public void deleteSelectedGame(int position) {
         DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
             switch (which){
                 case DialogInterface.BUTTON_POSITIVE:
@@ -229,31 +228,31 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                     //Get game
                     Game game = games.get(position);
                     //Get game key for DB
-                    String key = game.getId();
+                    gameToBeDeleted = game.getId();
 
-                    //Get stored cover file name
-                    String firstCut[] = game.getImageUri().split("gameCovers%2F");
-                    String secondCut[] = firstCut[1].split(".png");
-                    String fileId = secondCut[0];
-                    //Delete uploaded image
-                    StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-                    StorageReference gameCoverRef = storageReference.child("gameCovers/" + fileId + ".png");
-                    gameCoverRef.delete().addOnSuccessListener(aVoid -> {
-                        // File deleted successfully
-                        Log.i(PlatformLibraryActivity.class.getSimpleName(), "Deleted image successfully");
-                    }).addOnFailureListener(exception -> {
-                        // Uh-oh, an error occurred!
-                        Toast.makeText(context, "There was an error trying to delete cover", Toast.LENGTH_SHORT).show();
-                    });
-
-                    //Delete game
-                    DatabaseReference selectedGameReference = FirebaseDatabase.getInstance()
-                            .getReference("library/games/" + platformId + "/" + key);
-                    selectedGameReference.removeValue();
+                    // Remove game from adapter
+                    games.remove(position);
+                    gamesAdapter.notifyItemRemoved(position);
 
                     //Notify user
-                    Snackbar.make(gamesRecyclerView, "Deleted: " + game.getName(), Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    BaseTransientBottomBar.BaseCallback<Snackbar> undoCallback = new BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                        @Override
+                        public void onDismissed(Snackbar transientBottomBar, int event) {
+                            // Delete game from the database
+                            deleteGame();
+                        }
+                    };
+                    Snackbar undo = Snackbar.make(gamesRecyclerView, "Deleted: " + game.getName(), Snackbar.LENGTH_LONG)
+                            .addCallback(undoCallback);
+                    undo.setAction("UNDO", view -> {
+                        // Remove deletion callback
+                        gameToBeDeleted = null;
+                        undo.removeCallback(undoCallback);
+                        // Put the game back in the adapter
+                        games.add(position, game);
+                        gamesAdapter.notifyItemInserted(position);
+                    });
+                    undo.show();
                     break;
 
                 case DialogInterface.BUTTON_NEGATIVE:
@@ -265,6 +264,29 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage("Delete game?").setPositiveButton("Yes", dialogClickListener)
                 .setNegativeButton("No", dialogClickListener).show();
+    }
+
+    private void deleteGame() {
+        String id = gameToBeDeleted;
+        gameToBeDeleted = null;
+        if (id != null) {
+            GameService gameService = ApiClient.createService(GameService.class);
+            Call<ResponseBody> deleteGame = gameService.deleteGame("Bearer " + currentUser.getToken(), id);
+            deleteGame.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.isSuccessful())
+                        Log.i(TAG, "Game deleted successfully");
+                    else
+                        Toast.makeText(context, "There was a problem deleting the game, please try again", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Toast.makeText(context, "There was a problem deleting the game, please try again", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     @Override
@@ -338,4 +360,11 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Delete a game if it was pending deletion
+        if (gameToBeDeleted != null)
+            deleteGame();
+    }
 }

@@ -30,6 +30,10 @@ public interface GameService {
                         @Path("gameId") String gameId,
                         @Body Game game);
 
+    @POST("/api/games/{gameId}/delete")
+    Call<ResponseBody> deleteGame(@Header("Authorization") String authorization,
+                                  @Path("gameId") String gameId);
+
     @Multipart
     @POST("/api/games/{gameId}/image")
     Call<ResponseBody> uploadGameCover(@Header("Authorization") String authorization,
