@@ -22,7 +22,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
 import com.jeeps.gamecollector.adapters.PlatformsListAdapter;
 import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Platform;
@@ -59,7 +58,6 @@ public class MainLibraryActivity extends AppCompatActivity {
 
     private Context context;
     private SharedPreferences sharedPreferences;
-    private DatabaseReference librariesDB;
 
     private FirebaseUser user;
     private PlatformsListAdapter platformsAdapter;
@@ -204,33 +202,35 @@ public class MainLibraryActivity extends AppCompatActivity {
                 // Error signing in
                 Toast.makeText(context, "There was an error signing you in, Please try again", Toast.LENGTH_SHORT).show();
             }
-        } else if (resultCode == ADD_PLATFORM_RESULT) {
-            // Add platform
-            Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivity.PLATFORM);
-            File imageCover = (File) data.getSerializableExtra(AddPlatformActivity.COVER_FILE);
-            PlatformService platformService = ApiClient.createService(PlatformService.class);
-            Call<Platform> postPlatform = platformService.postPlatform("Bearer " + currentUser.getToken(), platform);
-            postPlatform.enqueue(new Callback<Platform>() {
-                @Override
-                public void onResponse(Call<Platform> call, Response<Platform> response) {
-                    if (response.isSuccessful()) {
-                        Platform responsePlatform = response.body();
-                        platforms.add(responsePlatform);
-                        platforms.sort((p1, p2) -> p1.getName().toLowerCase().compareTo(p2.getName().toLowerCase()));
-                        platformsAdapter.notifyDataSetChanged();
-                        Snackbar.make(fab, "Successfully added platform", Snackbar.LENGTH_SHORT).show();
-                        // Upload image cover
-                        uploadImageCover(imageCover, responsePlatform.getId());
-                    } else {
-                        Log.e(TAG, "Authentication error when posting platform");
+        } else if (requestCode == ADD_PLATFORM_RESULT) {
+            if (resultCode == RESULT_OK) {
+                // Add platform
+                Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivity.PLATFORM);
+                File imageCover = (File) data.getSerializableExtra(AddPlatformActivity.COVER_FILE);
+                PlatformService platformService = ApiClient.createService(PlatformService.class);
+                Call<Platform> postPlatform = platformService.postPlatform("Bearer " + currentUser.getToken(), platform);
+                postPlatform.enqueue(new Callback<Platform>() {
+                    @Override
+                    public void onResponse(Call<Platform> call, Response<Platform> response) {
+                        if (response.isSuccessful()) {
+                            Platform responsePlatform = response.body();
+                            platforms.add(responsePlatform);
+                            platforms.sort((p1, p2) -> p1.getName().toLowerCase().compareTo(p2.getName().toLowerCase()));
+                            platformsAdapter.notifyDataSetChanged();
+                            Snackbar.make(fab, "Successfully added platform", Snackbar.LENGTH_SHORT).show();
+                            // Upload image cover
+                            uploadImageCover(imageCover, responsePlatform.getId());
+                        } else {
+                            Log.e(TAG, "Authentication error when posting platform");
+                        }
                     }
-                }
 
-                @Override
-                public void onFailure(Call<Platform> call, Throwable t) {
-                    Log.e(TAG, "Error posting platform");
-                }
-            });
+                    @Override
+                    public void onFailure(Call<Platform> call, Throwable t) {
+                        Log.e(TAG, "Error posting platform");
+                    }
+                });
+            }
         }
     }
 

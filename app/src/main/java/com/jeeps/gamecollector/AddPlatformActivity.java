@@ -84,7 +84,7 @@ public class AddPlatformActivity extends AppCompatActivity {
             Intent data = new Intent();
             data.putExtra(PLATFORM, platform);
             data.putExtra(COVER_FILE, FileUtils.compressImage(this, "temp.png", currImageURI));
-            setResult(MainLibraryActivity.ADD_PLATFORM_RESULT, data);
+            setResult(RESULT_OK, data);
             finish();
         } catch (IOException e) {
             e.printStackTrace();

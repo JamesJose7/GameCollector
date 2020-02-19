@@ -324,7 +324,7 @@ public class AddGameActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     if (response.isSuccessful())
-                        returnGameAsResult(game, PlatformLibraryActivity.EDIT_GAME_RESULT);
+                        returnGameAsResult(game);
                     else {
                         Log.e(TAG, "Authentication error");
                         Toast.makeText(context, "There was an error when adding the game, please try again", Toast.LENGTH_SHORT).show();
@@ -344,7 +344,7 @@ public class AddGameActivity extends AppCompatActivity {
                 public void onResponse(Call<Game> call, Response<Game> response) {
                     if (response.isSuccessful()) {
                         Game game = response.body();
-                        returnGameAsResult(game, PlatformLibraryActivity.ADD_GAME_RESULT);
+                        returnGameAsResult(game);
                     } else {
                         Log.e(TAG, "Authentication error");
                         Toast.makeText(context, "There was an error when adding the game, please try again", Toast.LENGTH_SHORT).show();
@@ -360,11 +360,11 @@ public class AddGameActivity extends AppCompatActivity {
         }
     }
 
-    private void returnGameAsResult(Game game, int resultCode) {
+    private void returnGameAsResult(Game game) {
         Intent result = new Intent();
         result.putExtra(PlatformLibraryActivity.NEW_GAME, game);
         result.putExtra(PlatformLibraryActivity.SELECTED_GAME_POSITION, selectedGamePosition);
-        setResult(resultCode, result);
+        setResult(RESULT_OK, result);
         if (currImageURI != null) {
             try {
                 uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
