@@ -130,6 +130,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                 games.add(game);
                 Collections.sort(games, new GameByNameComparator());
                 gamesAdapter.notifyDataSetChanged();
+                Snackbar.make(fab, "Game added successfully", Snackbar.LENGTH_SHORT).show();
             }
         } else if (requestCode == EDIT_GAME_RESULT) {
             if (resultCode == RESULT_OK) {
@@ -140,6 +141,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                     games.add(game);
                     Collections.sort(games, new GameByNameComparator());
                     gamesAdapter.notifyDataSetChanged();
+                    Snackbar.make(fab, "Game edited successfully", Snackbar.LENGTH_SHORT).show();
                 }
             }
         }
