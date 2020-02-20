@@ -212,11 +212,11 @@ public class AddPlatformActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<Platform> call, Response<Platform> response) {
                     if (response.isSuccessful()) {
-                        Platform responsePlatform = response.body();
+                        platform = response.body();
                         // Upload image cover
                         try {
                             uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
-                                    responsePlatform.getId());
+                                    platform.getId());
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
