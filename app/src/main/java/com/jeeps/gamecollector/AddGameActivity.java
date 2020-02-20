@@ -15,7 +15,6 @@ import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -69,8 +68,7 @@ public class AddGameActivity extends AppCompatActivity {
     @BindView(R.id.game_name_edit) EditText nameEdit;
     @BindView(R.id.game_shortname_edit) EditText shortNameEdit;
     @BindView(R.id.platform_game_edit) EditText platformEdit;
-    @BindView(R.id.game_publisher_spinner) Spinner mPublishersSpinner;
-    @BindView(R.id.add_publisher_button) ImageView mAddPublisher;
+    @BindView(R.id.game_publisher_edit) EditText publisherEdit;
     @BindView(R.id.radio_group) RadioGroup mRadioGroup;
     @BindView(R.id.radio_digital) RadioButton mRadioDigital;
     @BindView(R.id.radio_physical) RadioButton radioPhysical;
@@ -146,7 +144,7 @@ public class AddGameActivity extends AppCompatActivity {
         //Get publishers for spinner
 //        populateSpinner();
         //Add publishers
-        mAddPublisher.setOnClickListener(view -> promptForPublisher());
+//        mAddPublisher.setOnClickListener(view -> promptForPublisher());
 
         // Edit mode
         if (selectedGame != null) {
@@ -157,8 +155,6 @@ public class AddGameActivity extends AppCompatActivity {
         }
 
         fab.setOnClickListener(view -> {
-//            if (selectedGame != null)
-//                deleteGame();
             saveGame();
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -205,7 +201,7 @@ public class AddGameActivity extends AppCompatActivity {
                 mSpinnerAdapter = new ArrayAdapter<>(context,
                         android.R.layout.simple_spinner_item, publisherNames);
                 mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                mPublishersSpinner.setAdapter(mSpinnerAdapter);
+//                mPublishersSpinner.setAdapter(mSpinnerAdapter);
 
                 // In case a game is being edited, map the values after this finishes
                 /*if (selectedGame != null)
@@ -224,9 +220,8 @@ public class AddGameActivity extends AppCompatActivity {
         //Get values from text fields
         String name = nameEdit.getText().toString();
         String shortName = shortNameEdit.getText().toString();
-//        String publisher = mPublishersSpinner.getSelectedItem().toString();
-        String publisher = "TEMP";
-        String publisherId = "TEMP";
+        String publisher = publisherEdit.getText().toString();
+        String publisherId = "";
 
         //Get value from radio button
         boolean isPhysical = radioPhysical.isChecked();
