@@ -163,9 +163,15 @@ public class AddGameActivity extends AppCompatActivity {
 
     private void mapSelectedGameToFields(Game game) {
         //Set image
-        Picasso.with(context).load(game.getImageUri()).into(gameCover);
-        gameCover.setAlpha(1f);
-        gameCover.setBackgroundColor(Color.parseColor("#99cccccc"));
+        if (!game.getImageUri().isEmpty()) {
+            Picasso.with(context).load(game.getImageUri()).into(gameCover);
+            gameCover.setAlpha(1f);
+            gameCover.setBackgroundColor(Color.parseColor("#99cccccc"));
+        } else {
+            Picasso.with(context).load(R.drawable.edit_picture).into(gameCover);
+            gameCover.setAlpha(0.5f);
+            gameCover.setBackgroundColor(Color.parseColor("#cccccc"));
+        }
         previousUri = game.getImageUri();
         //Set name
         nameEdit.setText(game.getName());
