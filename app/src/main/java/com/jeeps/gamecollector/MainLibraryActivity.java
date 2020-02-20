@@ -37,6 +37,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -156,7 +157,7 @@ public class MainLibraryActivity extends AppCompatActivity {
 
         // Receive logged user
         if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
+            IdpResponse authResponse = IdpResponse.fromResultIntent(data);
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -164,32 +165,31 @@ public class MainLibraryActivity extends AppCompatActivity {
                     // Save current user data
                     String token = task.getResult().getToken();
                     String uid = user.getUid();
-                    // Get username from service
-                    UserService userService = ApiClient.createService(UserService.class);
-                    Call<UserDetails> call = userService.getUser("Bearer " + token);
-                    call.enqueue(new Callback<UserDetails>() {
-                        @Override
-                        public void onResponse(Call<UserDetails> call, Response<UserDetails> response) {
-                            if (response.isSuccessful()) {
-                                if (response.body() != null) {
-                                    User currentUser = response.body().getCredentials();
-                                    UserUtils.saveCurrentUserData(
-                                            context, sharedPreferences,
-                                            currentUser.getUsername(), uid, token);
-                                }
-                            } else {
-                                Log.e(TAG, "Authentication error on login");
+
+                    // Save user details if it's a new user
+                    if (authResponse.isNewUser()) {
+                        // Create new user details in DB
+                        String email = authResponse.getEmail();
+                        String newUsername = email.split("@")[0];
+                        UserService userService = ApiClient.createService(UserService.class);
+                        Call<ResponseBody> signupUserDetails = userService.signupUserdetails(new User(uid, newUsername, email));
+                        signupUserDetails.enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                if (response.isSuccessful())
+                                    storeCurrentUser(token, uid);
+                                else
+                                    Log.e(TAG, "There was an error registering user details");
                             }
-                            populatePlatforms();
-                        }
 
-                        @Override
-                        public void onFailure(Call<UserDetails> call, Throwable t) {
-                            Log.e(TAG, "Failed retrieving user details");
-                        }
-                    });
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                Log.e(TAG, "Failed to request signupUserdetails");
+                            }
+                        });
+                    }
+
                 });
-
             } else {
                 // Error signing in
                 Toast.makeText(context, "There was an error signing you in, Please try again", Toast.LENGTH_SHORT).show();
@@ -215,6 +215,33 @@ public class MainLibraryActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private void storeCurrentUser(String token, String uid) {
+        // Get username from service
+        UserService userService = ApiClient.createService(UserService.class);
+        Call<UserDetails> call = userService.getUser("Bearer " + token);
+        call.enqueue(new Callback<UserDetails>() {
+            @Override
+            public void onResponse(Call<UserDetails> call, Response<UserDetails> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        User currentUser = response.body().getCredentials();
+                        UserUtils.saveCurrentUserData(
+                                context, sharedPreferences,
+                                currentUser.getUsername(), uid, token);
+                        populatePlatforms();
+                    }
+                } else {
+                    Log.e(TAG, "Authentication error on login");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserDetails> call, Throwable t) {
+                Log.e(TAG, "Failed retrieving user details");
+            }
+        });
     }
 
     private void populatePlatforms() {
