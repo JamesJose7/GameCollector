@@ -23,6 +23,11 @@ public interface PlatformService {
     Call<Platform> postPlatform(@Header("Authorization") String authorization,
                                 @Body Platform platform);
 
+    @POST("/api/platforms/{platformId}")
+    Call<Platform> editPlatform(@Header("Authorization") String authorization,
+                                @Path("platformId") String platformId,
+                                @Body Platform platform);
+
     @Multipart
     @POST("/api/platforms/{platformId}/image")
     Call<ResponseBody> uploadPlatformCover(@Header("Authorization") String authorization,

@@ -1,5 +1,7 @@
 package com.jeeps.gamecollector.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -8,24 +10,34 @@ import org.json.JSONObject;
  */
 
 public class Publisher {
-    private String mName;
+    @SerializedName("publisherId")
+    private String id;
+    private String name;
 
     public Publisher(String name) {
-        mName = name;
+        this.name = name;
     }
 
     public Publisher() {}
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getName() {
-        return mName;
+        return name;
     }
 
     public void setName(String name) {
-        mName = name;
+        this.name = name;
     }
 
 
     public void jsonToPublisher(JSONObject jsonObject) throws JSONException {
-        mName = jsonObject.getString("name");
+        name = jsonObject.getString("name");
     }
 }

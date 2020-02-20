@@ -1,13 +1,18 @@
 package com.jeeps.gamecollector;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,28 +21,52 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Platform;
+import com.jeeps.gamecollector.services.api.ApiClient;
+import com.jeeps.gamecollector.services.api.PlatformService;
 import com.jeeps.gamecollector.utils.Colors;
 import com.jeeps.gamecollector.utils.FileUtils;
+import com.jeeps.gamecollector.utils.UserUtils;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AddPlatformActivity extends AppCompatActivity {
 
     public static final String PLATFORM = "PLATFORM";
-    public static final String COVER_FILE = "COVER_FILE";
+    public static final String EDITED_PLATFORM = "EDITED PLATFORM";
+    public static final String EDITED_PLATFORM_POSITION = "EDITED PLATFORM POSITION";
+    private static final String TAG = AddPlatformActivity.class.getSimpleName();
 
     @BindView(R.id.add_platform_layout) ConstraintLayout rootLayout;
     @BindView(R.id.platform_cover) ImageView platformCover;
     @BindView(R.id.platform_name_edit) EditText platformNameInput;
+    @BindView(R.id.platform_color_radio_group) RadioGroup colorRadioGroup;
+    @BindView(R.id.fab) FloatingActionButton fab;
+
+    private Context context;
 
     private Platform platform;
     private Uri currImageURI;
+    private SharedPreferences sharedPreferences;
+    private CurrentUser currentUser;
+    private boolean isEdit = false;
+    private boolean isImageEdited = false;
+    private int editedPlatformPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +76,41 @@ public class AddPlatformActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
 
+        context = this;
+
         platform = new Platform();
         platform.setColor(Colors.NORMIE_WHITE.getColor());
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> createAndReturnPlatform());
+        fab.setOnClickListener(view -> validatePlatformDetails());
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        sharedPreferences = getSharedPreferences(
+                getString(R.string.shared_preferences_global), Context.MODE_PRIVATE);
+        currentUser = UserUtils.getCurrentUser(this, sharedPreferences);
+
+        // Get platform if being edited
+        Intent intent = getIntent();
+        Platform editedPlatform = (Platform) intent.getSerializableExtra(EDITED_PLATFORM);
+        editedPlatformPosition = intent.getIntExtra(EDITED_PLATFORM_POSITION, -1);
+        if (editedPlatform != null) {
+            mapExistingPlatformDetails(editedPlatform);
+            isEdit = true;
+        }
+    }
+
+    private void mapExistingPlatformDetails(Platform editedPlatform) {
+        platform = editedPlatform;
+        // Cover image
+        Picasso.with(context).load(editedPlatform.getImageUri()).into(platformCover);
+        platformCover.setAlpha(1f);
+        platformCover.setBackgroundColor(Color.parseColor("#99cccccc"));
+        // Platform name
+        platformNameInput.setText(editedPlatform.getName());
+        // Get appropriate color
+        Arrays.stream(Colors.values())
+                .filter(color -> color.getColor().equals(editedPlatform.getColor()))
+                .findFirst()
+                .ifPresent(color -> colorRadioGroup.check(color.getColorId()));
     }
 
     @Override
@@ -66,29 +124,33 @@ public class AddPlatformActivity extends AppCompatActivity {
                 Picasso.with(this).load(currImageURI).into(platformCover);
                 platformCover.setAlpha(1f);
                 platformCover.setBackgroundColor(Color.parseColor("#99cccccc"));
+                if (isEdit)
+                    isImageEdited = true;
             }
         }
     }
 
-    private void createAndReturnPlatform() {
+    private void validatePlatformDetails() {
         // Get platform details
         String name = platformNameInput.getText().toString();
         if (name.isEmpty()) {
             dataCheckMessage("Please enter a platform name");
             return;
         }
-        platform.setName(name);
-        platform.setImageUri(currImageURI.toString());
-        try {
-            // Return platform details
-            Intent data = new Intent();
-            data.putExtra(PLATFORM, platform);
-            data.putExtra(COVER_FILE, FileUtils.compressImage(this, "temp.png", currImageURI));
-            setResult(RESULT_OK, data);
-            finish();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (currImageURI == null) {
+            if (!isEdit) {
+                dataCheckMessage("Please select a platform image cover");
+                return;
+            }
         }
+        platform.setName(name);
+        if (!isEdit)
+            platform.setImageUri(currImageURI.toString());
+        else {
+            if (isImageEdited)
+                platform.setImageUri(currImageURI.toString());
+        }
+        postPlatform(isEdit);
     }
 
     public void onColorPickerClicked(View view) {
@@ -111,6 +173,106 @@ public class AddPlatformActivity extends AppCompatActivity {
 
     private void dataCheckMessage(String message) {
         Snackbar.make(rootLayout, message, Snackbar.LENGTH_SHORT).show();
+    }
+
+    private void postPlatform(boolean isEdit) {
+        PlatformService platformService = ApiClient.createService(PlatformService.class);
+        if (isEdit) {
+            Call<Platform> editPlatform = platformService.editPlatform("Bearer " + currentUser.getToken(),
+                    platform.getId(), platform);
+            editPlatform.enqueue(new Callback<Platform>() {
+                @Override
+                public void onResponse(Call<Platform> call, Response<Platform> response) {
+                    if (response.isSuccessful()) {
+                        if (isImageEdited) {
+                            // Upload image cover
+                            try {
+                                uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
+                                        platform.getId());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else
+                            returnAddedPlatform();
+                    } else {
+                        Log.e(TAG, "Authentication error when editing platform");
+                        Toast.makeText(context, "Authentication error when editing the platform", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Platform> call, Throwable t) {
+                    Log.e(TAG, "Error editing the platform");
+                    Toast.makeText(context, "An error occurred when editing the platform", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Call<Platform> postPlatform = platformService.postPlatform("Bearer " + currentUser.getToken(), platform);
+            postPlatform.enqueue(new Callback<Platform>() {
+                @Override
+                public void onResponse(Call<Platform> call, Response<Platform> response) {
+                    if (response.isSuccessful()) {
+                        Platform responsePlatform = response.body();
+                        // Upload image cover
+                        try {
+                            uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
+                                    responsePlatform.getId());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        Log.e(TAG, "Authentication error when posting platform");
+                        Toast.makeText(context, "Authentication error when creating the platform", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Platform> call, Throwable t) {
+                    Log.e(TAG, "Error posting platform");
+                    Toast.makeText(context, "An error occurred when adding the platform", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    private void uploadImageCover(File imageFile, String platformId) {
+        PlatformService platformService = ApiClient.createService(PlatformService.class);
+        RequestBody requestFile = RequestBody.create(
+                MediaType.parse("image/png"),
+                imageFile);
+        MultipartBody.Part body =
+                MultipartBody.Part.createFormData("image", imageFile.getName(), requestFile);
+        Call<ResponseBody> uploadCall = platformService.uploadPlatformCover(
+                "Bearer " + currentUser.getToken(), platformId, body);
+        uploadCall.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful())
+                    Log.i(TAG, "Image cover uploaded correctly");
+                else
+                    Toast.makeText(context, "There was an error uploading the image", Toast.LENGTH_SHORT).show();
+                if (imageFile.exists())
+                    imageFile.delete();
+                returnAddedPlatform();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(context, "There was an error uploading the image", Toast.LENGTH_SHORT).show();
+                if (imageFile.exists())
+                    imageFile.delete();
+                returnAddedPlatform();
+            }
+        });
+    }
+
+    public void returnAddedPlatform() {
+        // Return platform details
+        Intent data = new Intent();
+        data.putExtra(PLATFORM, platform);
+        data.putExtra(EDITED_PLATFORM_POSITION, editedPlatformPosition);
+        setResult(RESULT_OK, data);
+        finish();
     }
 
     @OnClick(R.id.platform_cover)

@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -17,7 +16,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -401,26 +399,6 @@ public class AddGameActivity extends AppCompatActivity {
         Picasso.with(context).load(R.drawable.edit_picture).into(gameCover);
         gameCover.setAlpha(0.5f);
         gameCover.setBackgroundColor(Color.parseColor("#cccccc"));
-    }
-
-    private void promptForPublisher() {
-        //Prompt for publisher name
-        final EditText input = new EditText(this);
-        new AlertDialog.Builder(AddGameActivity.this)
-                .setTitle("Add publisher")
-                .setMessage("Name")
-                .setView(input)
-                .setPositiveButton("Ok", (dialog, whichButton) -> {
-                    Editable value = input.getText();
-                    mInputPublisher = value.toString();
-
-                    //Add publisher to database
-                    final DatabaseReference publishers = mDatabase.getReference("library/publishers/");
-                    Publisher publisher = new Publisher(mInputPublisher);
-                    publishers.child(mPublishers.size() + "").setValue(publisher);
-                }).setNegativeButton("Cancel", (dialog, whichButton) -> {
-                    // Do nothing.
-                }).show();
     }
 
     private void uploadImageCover(File imageFile, String gameId) {

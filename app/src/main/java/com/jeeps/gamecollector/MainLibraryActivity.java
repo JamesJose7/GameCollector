@@ -32,16 +32,11 @@ import com.jeeps.gamecollector.services.api.PlatformService;
 import com.jeeps.gamecollector.services.api.UserService;
 import com.jeeps.gamecollector.utils.UserUtils;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -51,6 +46,7 @@ public class MainLibraryActivity extends AppCompatActivity {
     private static final String TAG = MainLibraryActivity.class.getSimpleName();
     protected static final int RC_SIGN_IN = 420;
     protected static final int ADD_PLATFORM_RESULT = 13;
+    protected static final int EDIT_PLATFORM_RESULT = 97;
 
     @BindView(R.id.platforms_list) ListView platformsListView;
     @BindView(R.id.platforms_progress_bar) ProgressBar mProgressBar;
@@ -81,10 +77,6 @@ public class MainLibraryActivity extends AppCompatActivity {
         mProgressBar.setVisibility(View.VISIBLE);
 
         checkUserLogin();
-
-        // Get libraries from the database
-//        librariesDB = FirebaseDatabase.getInstance().getReference("library/platforms");
-//        readGamePlatforms();
 
         fab.setOnClickListener(view -> {
             // Create platform activity
@@ -206,30 +198,21 @@ public class MainLibraryActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // Add platform
                 Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivity.PLATFORM);
-                File imageCover = (File) data.getSerializableExtra(AddPlatformActivity.COVER_FILE);
-                PlatformService platformService = ApiClient.createService(PlatformService.class);
-                Call<Platform> postPlatform = platformService.postPlatform("Bearer " + currentUser.getToken(), platform);
-                postPlatform.enqueue(new Callback<Platform>() {
-                    @Override
-                    public void onResponse(Call<Platform> call, Response<Platform> response) {
-                        if (response.isSuccessful()) {
-                            Platform responsePlatform = response.body();
-                            platforms.add(responsePlatform);
-                            platforms.sort((p1, p2) -> p1.getName().toLowerCase().compareTo(p2.getName().toLowerCase()));
-                            platformsAdapter.notifyDataSetChanged();
-                            Snackbar.make(fab, "Successfully added platform", Snackbar.LENGTH_SHORT).show();
-                            // Upload image cover
-                            uploadImageCover(imageCover, responsePlatform.getId());
-                        } else {
-                            Log.e(TAG, "Authentication error when posting platform");
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Platform> call, Throwable t) {
-                        Log.e(TAG, "Error posting platform");
-                    }
-                });
+                platforms.add(platform);
+                platforms.sort((p1, p2) -> p1.getName().toLowerCase().compareTo(p2.getName().toLowerCase()));
+                platformsAdapter.notifyDataSetChanged();
+                Snackbar.make(fab, "Successfully added platform", Snackbar.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == EDIT_PLATFORM_RESULT) {
+            if (resultCode == RESULT_OK) {
+                Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivity.PLATFORM);
+                int platformPosition = data.getIntExtra(AddPlatformActivity.EDITED_PLATFORM_POSITION, -1);
+                // Change old platform with the new one
+                if (platformPosition >= 0) {
+                    platforms.remove(platformPosition);
+                    platforms.add(platformPosition, platform);
+                    platformsAdapter.notifyDataSetChanged();
+                }
             }
         }
     }
@@ -247,6 +230,7 @@ public class MainLibraryActivity extends AppCompatActivity {
                     platforms = response.body();
                     platformsAdapter = new PlatformsListAdapter(context, R.layout.platform_list_item, platforms);
                     platformsListView.setAdapter(platformsAdapter);
+                    // Click listener to open a platform activity
                     platformsListView.setOnItemClickListener((adapterView, view, i, l) -> {
                         //Get selected platform
                         Platform platform = (Platform) adapterView.getItemAtPosition(i);
@@ -255,6 +239,16 @@ public class MainLibraryActivity extends AppCompatActivity {
                         intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.getId());
                         intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME, platform.getName());
                         startActivity(intent);
+                    });
+                    platformsListView.setOnItemLongClickListener((adapterView, view, i, l) -> {
+                        //Get selected platform
+                        Platform platform = (Platform) adapterView.getItemAtPosition(i);
+                        // Start add platform activity to edit the selected platform
+                        Intent intent = new Intent(context, AddPlatformActivity.class);
+                        intent.putExtra(AddPlatformActivity.EDITED_PLATFORM, platform);
+                        intent.putExtra(AddPlatformActivity.EDITED_PLATFORM_POSITION, i);
+                        startActivityForResult(intent, EDIT_PLATFORM_RESULT);
+                        return true;
                     });
                 }
 
@@ -268,35 +262,6 @@ public class MainLibraryActivity extends AppCompatActivity {
                 mProgressBar.setVisibility(View.INVISIBLE);
                 Log.e(TAG, "There was an error retrieving user platforms");
                 Toast.makeText(context, "An error has occurred, please try again", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void uploadImageCover(File imageFile, String platformId) {
-        PlatformService platformService = ApiClient.createService(PlatformService.class);
-        RequestBody requestFile = RequestBody.create(
-                MediaType.parse("image/png"),
-                imageFile);
-        MultipartBody.Part body =
-                MultipartBody.Part.createFormData("image", imageFile.getName(), requestFile);
-        Call<ResponseBody> uploadCall = platformService.uploadPlatformCover(
-                "Bearer " + currentUser.getToken(), platformId, body);
-        uploadCall.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful())
-                    Log.i(TAG, "Image cover uploaded correctly");
-                else
-                    Snackbar.make(fab, "There was an error uploading the image", Snackbar.LENGTH_SHORT);
-                if (imageFile.exists())
-                    imageFile.delete();
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Snackbar.make(fab, "There was an error uploading the image", Snackbar.LENGTH_SHORT);
-                if (imageFile.exists())
-                    imageFile.delete();
             }
         });
     }
