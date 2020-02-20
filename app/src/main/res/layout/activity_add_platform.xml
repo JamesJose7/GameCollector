@@ -30,4 +30,12 @@
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@drawable/checked" />
 
+    <ProgressBar
+        android:id="@+id/add_platform_progressbar"
+        android:visibility="invisible"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:layout_width="60dp"
+        android:layout_height="60dp"/>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

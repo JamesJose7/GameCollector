@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -57,6 +58,7 @@ public class AddPlatformActivity extends AppCompatActivity {
     @BindView(R.id.platform_name_edit) EditText platformNameInput;
     @BindView(R.id.platform_color_radio_group) RadioGroup colorRadioGroup;
     @BindView(R.id.fab) FloatingActionButton fab;
+    @BindView(R.id.add_platform_progressbar) ProgressBar progressBar;
 
     private Context context;
 
@@ -81,7 +83,10 @@ public class AddPlatformActivity extends AppCompatActivity {
         platform = new Platform();
         platform.setColor(Colors.NORMIE_WHITE.getColor());
 
-        fab.setOnClickListener(view -> validatePlatformDetails());
+        fab.setOnClickListener(view -> {
+            toggleProgressbar(true);
+            validatePlatformDetails();
+        });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         sharedPreferences = getSharedPreferences(
@@ -197,6 +202,7 @@ public class AddPlatformActivity extends AppCompatActivity {
                     } else {
                         Log.e(TAG, "Authentication error when editing platform");
                         Toast.makeText(context, "Authentication error when editing the platform", Toast.LENGTH_SHORT).show();
+                        toggleProgressbar(false);
                     }
                 }
 
@@ -204,6 +210,7 @@ public class AddPlatformActivity extends AppCompatActivity {
                 public void onFailure(Call<Platform> call, Throwable t) {
                     Log.e(TAG, "Error editing the platform");
                     Toast.makeText(context, "An error occurred when editing the platform", Toast.LENGTH_SHORT).show();
+                    toggleProgressbar(false);
                 }
             });
         } else {
@@ -223,6 +230,7 @@ public class AddPlatformActivity extends AppCompatActivity {
                     } else {
                         Log.e(TAG, "Authentication error when posting platform");
                         Toast.makeText(context, "Authentication error when creating the platform", Toast.LENGTH_SHORT).show();
+                        toggleProgressbar(false);
                     }
                 }
 
@@ -230,6 +238,7 @@ public class AddPlatformActivity extends AppCompatActivity {
                 public void onFailure(Call<Platform> call, Throwable t) {
                     Log.e(TAG, "Error posting platform");
                     Toast.makeText(context, "An error occurred when adding the platform", Toast.LENGTH_SHORT).show();
+                    toggleProgressbar(false);
                 }
             });
         }
@@ -282,5 +291,15 @@ public class AddPlatformActivity extends AppCompatActivity {
         intent1.setType("image/*");
         intent1.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent1, "Select Picture"),1);
+    }
+
+    private void toggleProgressbar(boolean isLoading) {
+        if (isLoading) {
+            progressBar.setVisibility(View.VISIBLE);
+            fab.setVisibility(View.INVISIBLE);
+        } else {
+            progressBar.setVisibility(View.INVISIBLE);
+            fab.setVisibility(View.VISIBLE);
+        }
     }
 }

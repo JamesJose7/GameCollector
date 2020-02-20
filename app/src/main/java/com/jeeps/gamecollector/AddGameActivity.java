@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -72,6 +73,7 @@ public class AddGameActivity extends AppCompatActivity {
     @BindView(R.id.radio_physical) RadioButton radioPhysical;
     @BindView(R.id.card_game_completed_selector) NumberPicker mNumberPicker;
     @BindView(R.id.fab) FloatingActionButton fab;
+    @BindView(R.id.add_game_progressbar) ProgressBar progressBar;
 
     private SharedPreferences sharedPreferences;
     private CurrentUser currentUser;
@@ -153,6 +155,7 @@ public class AddGameActivity extends AppCompatActivity {
         }
 
         fab.setOnClickListener(view -> {
+            toggleProgressbar(true);
             saveGame();
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -321,6 +324,7 @@ public class AddGameActivity extends AppCompatActivity {
                     else {
                         Log.e(TAG, "Authentication error");
                         Toast.makeText(context, "There was an error when adding the game, please try again", Toast.LENGTH_SHORT).show();
+                        toggleProgressbar(false);
                     }
                 }
 
@@ -328,6 +332,7 @@ public class AddGameActivity extends AppCompatActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     Log.e(TAG, "Edit game request failed");
                     Toast.makeText(context, "There was an error when editing the game, please try again", Toast.LENGTH_SHORT).show();
+                    toggleProgressbar(false);
                 }
             });
         } else {
@@ -341,6 +346,7 @@ public class AddGameActivity extends AppCompatActivity {
                     } else {
                         Log.e(TAG, "Authentication error");
                         Toast.makeText(context, "There was an error when adding the game, please try again", Toast.LENGTH_SHORT).show();
+                        toggleProgressbar(false);
                     }
                 }
 
@@ -348,6 +354,7 @@ public class AddGameActivity extends AppCompatActivity {
                 public void onFailure(Call<Game> call, Throwable t) {
                     Log.e(TAG, "Post game request failed");
                     Toast.makeText(context, "There was an error when adding the game, please try again", Toast.LENGTH_SHORT).show();
+                    toggleProgressbar(false);
                 }
             });
         }
@@ -435,5 +442,15 @@ public class AddGameActivity extends AppCompatActivity {
     @OnClick(R.id.remove_cover_button)
     protected void removeGameCoverButton(View v) {
         removeCover();
+    }
+
+    private void toggleProgressbar(boolean isLoading) {
+        if (isLoading) {
+            progressBar.setVisibility(View.VISIBLE);
+            fab.setVisibility(View.INVISIBLE);
+        } else {
+            progressBar.setVisibility(View.INVISIBLE);
+            fab.setVisibility(View.VISIBLE);
+        }
     }
 }
