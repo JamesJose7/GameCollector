@@ -117,6 +117,9 @@ public class MainLibraryActivity extends AppCompatActivity {
     }
 
     private void signOut() {
+        platforms.clear();
+        platformsAdapter.notifyDataSetChanged();
+        mProgressBar.setVisibility(View.VISIBLE);
         AuthUI.getInstance()
                 .signOut(this)
                 .addOnCompleteListener(task -> {
@@ -187,8 +190,8 @@ public class MainLibraryActivity extends AppCompatActivity {
                                 Log.e(TAG, "Failed to request signupUserdetails");
                             }
                         });
-                    }
-
+                    } else
+                        storeCurrentUser(token, uid);
                 });
             } else {
                 // Error signing in
