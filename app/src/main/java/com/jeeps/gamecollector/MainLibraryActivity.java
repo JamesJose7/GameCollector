@@ -104,21 +104,24 @@ public class MainLibraryActivity extends AppCompatActivity {
     private void promptUserLogin() {
         // Sign in auth providers
         List<AuthUI.IdpConfig> providers = Arrays.asList(
-//                new AuthUI.IdpConfig.GoogleBuilder().build(),
+                new AuthUI.IdpConfig.GoogleBuilder().build(),
                 new AuthUI.IdpConfig.EmailBuilder().build());
         // Launch sign in activity
         startActivityForResult(
                 AuthUI.getInstance()
                     .createSignInIntentBuilder()
                     .setAvailableProviders(providers)
-                    .setLogo(R.drawable.switch_cover)
+                    .setTheme(R.style.LoginTheme)
+                    .setLogo(R.drawable.login_text_logo)
                     .build(),
                 RC_SIGN_IN);
     }
 
     private void signOut() {
-        platforms.clear();
-        platformsAdapter.notifyDataSetChanged();
+        if (platforms != null && platformsAdapter != null) {
+            platforms.clear();
+            platformsAdapter.notifyDataSetChanged();
+        }
         mProgressBar.setVisibility(View.VISIBLE);
         AuthUI.getInstance()
                 .signOut(this)
