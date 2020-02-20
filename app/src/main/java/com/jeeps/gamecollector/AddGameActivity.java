@@ -168,6 +168,7 @@ public class AddGameActivity extends AppCompatActivity {
             gameCover.setAlpha(1f);
             gameCover.setBackgroundColor(Color.parseColor("#99cccccc"));
         } else {
+            coverDeleted = true;
             Picasso.with(context).load(R.drawable.edit_picture).into(gameCover);
             gameCover.setAlpha(0.5f);
             gameCover.setBackgroundColor(Color.parseColor("#cccccc"));
