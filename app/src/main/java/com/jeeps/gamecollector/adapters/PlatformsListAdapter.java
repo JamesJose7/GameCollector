@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.jeeps.gamecollector.R;
 import com.jeeps.gamecollector.model.Platform;
+import com.jeeps.gamecollector.utils.Colors;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -51,8 +52,13 @@ public class PlatformsListAdapter extends ArrayAdapter<Platform> {
             ImageView logo = v.findViewById(R.id.platform_image);
             TextView name = v.findViewById(R.id.platform_name);
 
-            if (background != null)
+            if (background != null) {
                 background.setBackgroundColor(Color.parseColor(platform.getColor()));
+                if (!platform.getColor().equals(Colors.NORMIE_WHITE.getColor()))
+                    name.setTextColor(Color.parseColor(Colors.NORMIE_WHITE.getColor()));
+                else
+                    name.setTextColor(Color.parseColor("#000000"));
+            }
 
             if (logo != null)
                 Picasso.with(mContext).load(platform.getImageUri()).into(logo);
