@@ -140,11 +140,13 @@ public class AddPlatformActivity extends AppCompatActivity {
         String name = platformNameInput.getText().toString();
         if (name.isEmpty()) {
             dataCheckMessage("Please enter a platform name");
+            toggleProgressbar(false);
             return;
         }
         if (currImageURI == null) {
             if (!isEdit) {
                 dataCheckMessage("Please select a platform image cover");
+                toggleProgressbar(false);
                 return;
             }
         }
