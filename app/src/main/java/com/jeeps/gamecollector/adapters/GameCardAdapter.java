@@ -42,11 +42,11 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
 
         public MyViewHolder(View view) {
             super(view);
-            cover = (ImageView) view.findViewById(R.id.card_game_cover);
-            title = (TextView) view.findViewById(R.id.card_game_title);
-            isDigital = (ImageView) view.findViewById(R.id.card_is_digital);
-            completed = (ImageView) view.findViewById(R.id.card_game_completed);
-            coverProgressBar = (ProgressBar) view.findViewById(R.id.cover_progressbar);
+            cover = view.findViewById(R.id.card_game_cover);
+            title = view.findViewById(R.id.card_game_title);
+            isDigital = view.findViewById(R.id.card_is_digital);
+            completed = view.findViewById(R.id.card_game_completed);
+            coverProgressBar = view.findViewById(R.id.cover_progressbar);
         }
     }
 

@@ -1,6 +1,6 @@
 package com.jeeps.gamecollector.model;
 
-class PlatformStats {
+public class PlatformStats {
     private String platformId;
     private String platformName;
     private int physicalTotal;

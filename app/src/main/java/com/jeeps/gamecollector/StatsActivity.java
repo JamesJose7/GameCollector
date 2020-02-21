@@ -17,16 +17,22 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.db.williamchart.view.DonutChartView;
 import com.github.ybq.android.spinkit.style.DoubleBounce;
+import com.jeeps.gamecollector.adapters.PlatformStatsAdapter;
 import com.jeeps.gamecollector.model.CurrentUser;
+import com.jeeps.gamecollector.model.PlatformStats;
 import com.jeeps.gamecollector.model.UserStats;
 import com.jeeps.gamecollector.services.api.ApiClient;
 import com.jeeps.gamecollector.services.api.StatsService;
 import com.jeeps.gamecollector.utils.UserUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,9 +56,14 @@ public class StatsActivity extends AppCompatActivity {
     @BindView(R.id.platforms_card) CardView platformsCard;
     @BindView(R.id.stats_progress_bar) ProgressBar statsProgressBar;
 
+    @BindView(R.id.platform_stats_recyclerview) RecyclerView platformsRecyclerView;
+
     private CurrentUser currentUser;
     private Context context;
     private SharedPreferences sharedPreferences;
+    private RecyclerView.LayoutManager layoutManager;
+    private PlatformStatsAdapter platformStatsAdapter;
+    private List<PlatformStats> platformsStats;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,8 +86,22 @@ public class StatsActivity extends AppCompatActivity {
         DoubleBounce doubleBounce = new DoubleBounce();
         statsProgressBar.setIndeterminateDrawable(doubleBounce);
 
+        // Configure recycler view
+        layoutManager = new LinearLayoutManager(context);
+        platformsRecyclerView.setHasFixedSize(true);
+        platformsRecyclerView.setLayoutManager(layoutManager);
+        platformsStats = new ArrayList<>();
+        platformStatsAdapter = new PlatformStatsAdapter(context, platformsStats);
+        platformsRecyclerView.setAdapter(platformStatsAdapter);
+
+        // Overall Chart
+        int[] colors = {Color.parseColor("#FF5722")};
+        overallCompletionChart.setDonutColors(colors);
+        overallCompletionChart.getAnimation().setDuration(1000L);
+        overallCompletionChart.animate(Collections.singletonList(0f));
+
         //Hide card stats
-        cardStatsContainer.setVisibility(View.INVISIBLE);
+//        cardStatsContainer.setVisibility(View.INVISIBLE);
         //Show progress bar
         statsProgressBar.setVisibility(View.VISIBLE);
 
@@ -119,15 +144,15 @@ public class StatsActivity extends AppCompatActivity {
         overallCompletionPercentage.setText(String.format("%d%%", (int) completionPercentage));
         overallLastGameCompleted.setText(userStats.getLastGameCompleted());
         // Chart
-        int[] colors = {Color.parseColor("#FF5722")};
-        overallCompletionChart.setDonutColors(colors);
-        overallCompletionChart.getAnimation().setDuration(1000L);
         overallCompletionChart.animate(Collections.singletonList(completionPercentage));
+        // PLatform stats
+        platformsStats.addAll(userStats.getPlatformStats());
+        platformStatsAdapter.notifyDataSetChanged();
 
         //Hide Progress bar and show cards
         statsProgressBar.setVisibility(View.INVISIBLE);
         //cardStatsContainer.setVisibility(View.VISIBLE);
-        animateAppearance();
+//        animateAppearance();
     }
 
     private void animateAppearance() {
