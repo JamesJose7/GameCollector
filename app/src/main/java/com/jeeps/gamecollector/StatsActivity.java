@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.db.williamchart.view.DonutChartView;
 import com.github.ybq.android.spinkit.style.DoubleBounce;
+import com.google.android.material.snackbar.Snackbar;
 import com.jeeps.gamecollector.adapters.PlatformStatsAdapter;
 import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.PlatformStats;
@@ -132,10 +133,16 @@ public class StatsActivity extends AppCompatActivity {
     }
 
     private void populateDashboard(UserStats userStats) {
+        if (userStats.getPlatformStats().isEmpty()) {
+            Snackbar.make(cardStatsContainer, "You don't have any stats yet, Start by creating a platform", Snackbar.LENGTH_SHORT).show();
+            statsProgressBar.setVisibility(View.INVISIBLE);
+            return;
+        }
         // Calculate total games and completion percentage
         int totalGames = userStats.getPhysicalTotal() + userStats.getDigitalTotal();
-        float completionPercentage = Math.round((userStats.getCompletedGamesTotal() * 100) / totalGames);
-        System.out.println(completionPercentage);
+        float completionPercentage = 0;
+        if (totalGames > 0)
+            completionPercentage = Math.round((userStats.getCompletedGamesTotal() * 100) / totalGames);
         // Populate views
         overallTotal.setText(String.valueOf(totalGames));
         overallCompleted.setText(String.valueOf(userStats.getCompletedGamesTotal()));

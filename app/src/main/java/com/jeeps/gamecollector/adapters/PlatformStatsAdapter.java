@@ -37,7 +37,9 @@ public class PlatformStatsAdapter extends RecyclerView.Adapter<PlatformStatsAdap
         PlatformStats platformStats = platformsStats.get(position);
         // Calculate total games and completion percentages
         int totalGames = platformStats.getDigitalTotal() + platformStats.getPhysicalTotal();
-        float completionPercentage = Math.round((platformStats.getCompletedGamesTotal() * 100) / totalGames);
+        float completionPercentage = 0;
+        if (totalGames > 0)
+            completionPercentage = Math.round((platformStats.getCompletedGamesTotal() * 100) / totalGames);
         // Populate views
         holder.platformName.setText(platformStats.getPlatformName());
         holder.platformTotal.setText(String.valueOf(totalGames));
