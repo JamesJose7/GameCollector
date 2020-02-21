@@ -99,6 +99,7 @@
                         android:orientation="horizontal"
                         android:padding="8dp"
                         android:weightSum="100"
+                        app:layout_constraintBottom_toTopOf="@+id/overall_stats_container2"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/overall_completion_chart">
@@ -116,10 +117,10 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                tools:text="300"
+                                android:textAlignment="center"
                                 android:textColor="@color/colorPrimary"
                                 android:textSize="30sp"
-                                android:textAlignment="center" />
+                                tools:text="300" />
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -142,10 +143,10 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                tools:text="300"
+                                android:textAlignment="center"
                                 android:textColor="@color/colorPrimary"
                                 android:textSize="30sp"
-                                android:textAlignment="center" />
+                                tools:text="300" />
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -161,10 +162,10 @@
                         android:id="@+id/overall_stats_container2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
                         android:orientation="horizontal"
                         android:padding="8dp"
                         android:weightSum="100"
+                        app:layout_constraintBottom_toTopOf="@+id/relativeLayout"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/overall_stats_container1">
@@ -182,10 +183,10 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                tools:text="300"
+                                android:textAlignment="center"
                                 android:textColor="@color/colorPrimary"
                                 android:textSize="30sp"
-                                android:textAlignment="center" />
+                                tools:text="300" />
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -208,10 +209,10 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                tools:text="300"
+                                android:textAlignment="center"
                                 android:textColor="@color/colorPrimary"
                                 android:textSize="30sp"
-                                android:textAlignment="center" />
+                                tools:text="300" />
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -223,9 +224,42 @@
 
                     </LinearLayout>
 
+                    <RelativeLayout
+                        android:id="@+id/relativeLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="#22BDBDBD"
+                        android:padding="5dp"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/overall_stats_container2">
+
+                        <TextView
+                            android:id="@+id/overall_last_game_completed"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAlignment="center"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="18sp"
+                            tools:text="The Legend of Zelda: Breath of the Wild" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/overall_last_game_completed"
+                            android:text="Last Game Completed"
+                            android:textAlignment="center" />
+
+                    </RelativeLayout>
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.cardview.widget.CardView>
+
+            <!-- //////////////////////// PLATFORM STATS ///////////////////////////// -->
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/platforms_card"

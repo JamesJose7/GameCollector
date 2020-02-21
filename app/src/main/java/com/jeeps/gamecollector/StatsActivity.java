@@ -43,6 +43,7 @@ public class StatsActivity extends AppCompatActivity {
     @BindView(R.id.overall_completed) TextView overallCompleted;
     @BindView(R.id.overall_total_physical) TextView overallTotalPhysical;
     @BindView(R.id.overall_total_digital) TextView overallTotalDigital;
+    @BindView(R.id.overall_last_game_completed) TextView overallLastGameCompleted;
 
     @BindView(R.id.card_stats_container) RelativeLayout cardStatsContainer;
     @BindView(R.id.overall_card) CardView overallCard;
@@ -116,6 +117,7 @@ public class StatsActivity extends AppCompatActivity {
         overallTotalPhysical.setText(String.valueOf(userStats.getPhysicalTotal()));
         overallTotalDigital.setText(String.valueOf(userStats.getDigitalTotal()));
         overallCompletionPercentage.setText(String.format("%d%%", (int) completionPercentage));
+        overallLastGameCompleted.setText(userStats.getLastGameCompleted());
         // Chart
         int[] colors = {Color.parseColor("#FF5722")};
         overallCompletionChart.setDonutColors(colors);
