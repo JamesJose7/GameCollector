@@ -12,7 +12,11 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <RelativeLayout
             android:id="@+id/card_stats_container"
@@ -28,123 +32,198 @@
                 android:layout_margin="10dp"
                 app:cardElevation="6dp">
 
-                <RelativeLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8dp">
 
                     <TextView
-                        android:id="@+id/overall"
+                        android:id="@+id/overall_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="5dp"
+                        android:text="Overall"
+                        android:textColor="@color/colorPrimaryDark"
                         android:textSize="25sp"
-                        android:text="Overall"/>
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.db.williamchart.view.DonutChartView
+                        android:id="@+id/overall_completion_chart"
+                        android:layout_width="140dp"
+                        android:layout_height="140dp"
+                        android:layout_marginStart="32dp"
+                        android:layout_marginEnd="32dp"
+                        android:background="@android:color/transparent"
+                        app:chart_donutBackgroundColor="@color/dividerColor"
+                        app:chart_donutRoundCorners="true"
+                        app:chart_donutThickness="15dp"
+                        app:chart_donutTotal="100"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/overall_text" />
+
+                    <TextView
+                        android:id="@+id/overall_completion_percentage"
+                        android:layout_width="140dp"
+                        android:layout_height="140dp"
+                        android:textAlignment="center"
+                        android:gravity="center_vertical"
+                        android:text="0%"
+                        tools:text="100%"
+                        android:paddingBottom="10dp"
+                        android:textColor="@color/colorPrimaryLight"
+                        android:textSize="35sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/overall_text"/>
+
+                    <TextView
+                        android:layout_width="140dp"
+                        android:layout_height="140dp"
+                        android:textAlignment="center"
+                        android:gravity="center_vertical"
+                        android:text="Completed"
+                        android:paddingTop="45dp"
+                        android:textColor="@color/colorPrimaryLight"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/overall_text"/>
 
                     <LinearLayout
+                        android:id="@+id/overall_stats_container1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_below="@id/overall"
+                        android:layout_marginTop="20dp"
                         android:orientation="horizontal"
-                        android:weightSum="100">
+                        android:padding="8dp"
+                        android:weightSum="100"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/overall_completion_chart">
 
-                        <LinearLayout
+                        <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="20"
-                            android:orientation="vertical">
+                            android:layout_marginEnd="8dp"
+                            android:layout_weight="50"
+                            android:background="#22BDBDBD"
+                            android:padding="5dp">
+
+                            <TextView
+                                android:id="@+id/overall_total"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                tools:text="300"
+                                android:textColor="@color/colorPrimary"
+                                android:textSize="30sp"
+                                android:textAlignment="center" />
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:textSize="18sp"
-                                android:text="Total games"/>
+                                android:layout_below="@id/overall_total"
+                                android:text="Total"
+                                android:textAlignment="center" />
+                        </RelativeLayout>
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:text="Total publishers"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:text="Games finished"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:text="Games Pending"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:text="Completion Percentage"/>
-
-                        </LinearLayout>
-
-                        <LinearLayout
+                        <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="80"
-                            android:orientation="vertical">
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="50"
+                            android:background="#22BDBDBD"
+                            android:padding="5dp">
 
                             <TextView
-                                android:id="@+id/total_games"
+                                android:id="@+id/overall_completed"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:layout_marginBottom="5dp"
-                                android:textAlignment="textEnd"
                                 android:text="0"
-                                tools:text="100"/>
+                                tools:text="300"
+                                android:textColor="@color/colorPrimary"
+                                android:textSize="30sp"
+                                android:textAlignment="center" />
 
                             <TextView
-                                android:id="@+id/total_publishers"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <TextView
-                                android:id="@+id/games_finished_counter"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <TextView
-                                android:id="@+id/games_not_finished_counter"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <TextView
-                                android:id="@+id/completion_percentage"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                        </LinearLayout>
+                                android:layout_below="@id/overall_completed"
+                                android:text="Completed"
+                                android:textAlignment="center" />
+                        </RelativeLayout>
 
                     </LinearLayout>
 
-                </RelativeLayout>
+                    <LinearLayout
+                        android:id="@+id/overall_stats_container2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal"
+                        android:padding="8dp"
+                        android:weightSum="100"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/overall_stats_container1">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:layout_weight="50"
+                            android:background="#22BDBDBD"
+                            android:padding="5dp">
+
+                            <TextView
+                                android:id="@+id/overall_total_physical"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                tools:text="300"
+                                android:textColor="@color/colorPrimary"
+                                android:textSize="30sp"
+                                android:textAlignment="center" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/overall_total_physical"
+                                android:text="Physical"
+                                android:textAlignment="center" />
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="50"
+                            android:background="#22BDBDBD"
+                            android:padding="5dp">
+
+                            <TextView
+                                android:id="@+id/overall_total_digital"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                tools:text="300"
+                                android:textColor="@color/colorPrimary"
+                                android:textSize="30sp"
+                                android:textAlignment="center" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/overall_total_digital"
+                                android:text="Digital"
+                                android:textAlignment="center" />
+                        </RelativeLayout>
+
+                    </LinearLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.cardview.widget.CardView>
 
@@ -153,13 +232,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/overall_card"
-                android:layout_marginTop="0dp"
                 android:layout_marginStart="10dp"
+                android:layout_marginTop="0dp"
                 android:layout_marginEnd="10dp"
                 android:layout_marginBottom="10dp"
                 app:cardElevation="6dp">
 
-                <RelativeLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8dp">
@@ -168,310 +247,16 @@
                         android:id="@+id/platforms"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="5dp"
+                        android:layout_marginStart="8dp"
+                        android:text="Platforms"
+                        android:textColor="@color/colorPrimaryDark"
                         android:textSize="25sp"
-                        android:text="Platforms"/>
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/platforms"
-                        android:orientation="horizontal"
-                        android:weightSum="100">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="20"
-                            android:orientation="vertical">
-
-                            <!-- Switch -->
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="#55cccccc"
-                                android:textStyle="bold"
-                                android:textSize="18sp"
-                                android:text="Nintendo Switch"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:text="Physical"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:textSize="18sp"
-                                android:text="Digital"/>
-
-                            <!-- Wii U -->
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="#55cccccc"
-                                android:textStyle="bold"
-                                android:textSize="18sp"
-                                android:text="Nintendo Wii U"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:text="Physical"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:textSize="18sp"
-                                android:text="Digital"/>
-
-                            <!-- 3DS -->
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="#55cccccc"
-                                android:textStyle="bold"
-                                android:textSize="18sp"
-                                android:text="Nintendo 3DS"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:text="Physical"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:textSize="18sp"
-                                android:text="Digital"/>
-
-                            <!-- Wii -->
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="#55cccccc"
-                                android:textStyle="bold"
-                                android:textSize="18sp"
-                                android:text="Nintendo Wii"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:text="Physical"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:textSize="18sp"
-                                android:text="Digital"/>
-
-                            <!-- DS -->
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="#55cccccc"
-                                android:textStyle="bold"
-                                android:textSize="18sp"
-                                android:text="Nintendo DS"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:text="Physical"/>
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:textSize="18sp"
-                                android:text="Digital"/>
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="80"
-                            android:orientation="vertical">
-
-                            <!-- Switch -->
-
-                            <TextView
-                                android:id="@+id/total_switch"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="#55cccccc"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <TextView
-                                android:id="@+id/physical_switch"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <TextView
-                                android:id="@+id/digital_switch"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <!-- Wii U -->
-
-                            <TextView
-                                android:id="@+id/total_wiiu"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="#55cccccc"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <TextView
-                                android:id="@+id/physical_wiiu"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <TextView
-                                android:id="@+id/digital_wiiu"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <!-- 3DS-->
-
-                            <TextView
-                                android:id="@+id/total_3ds"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="#55cccccc"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <TextView
-                                android:id="@+id/physical_3ds"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <TextView
-                                android:id="@+id/digital_3ds"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <!-- Wii -->
-
-                            <TextView
-                                android:id="@+id/total_wii"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="#55cccccc"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <TextView
-                                android:id="@+id/physical_wii"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <TextView
-                                android:id="@+id/digital_wii"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <!-- DS -->
-
-                            <TextView
-                                android:id="@+id/total_ds"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="#55cccccc"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <TextView
-                                android:id="@+id/physical_ds"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-                            <TextView
-                                android:id="@+id/digital_ds"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="5dp"
-                                android:textSize="18sp"
-                                android:textAlignment="textEnd"
-                                android:text="0"
-                                tools:text="100"/>
-
-
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </RelativeLayout>
-
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.cardview.widget.CardView>
 

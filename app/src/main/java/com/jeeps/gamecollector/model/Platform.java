@@ -2,9 +2,6 @@ package com.jeeps.gamecollector.model;
 
 import com.google.gson.annotations.SerializedName;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.Serializable;
 
 /**
@@ -63,12 +60,5 @@ public class Platform implements Serializable {
 
     public void setColor(String color) {
         this.color = color;
-    }
-
-    public void jsonToPlatform(JSONObject jsonObject) throws JSONException {
-        id = jsonObject.getString("id");
-        name = jsonObject.getString("name");
-        imageUri = jsonObject.getString("imageUri");
-        color = jsonObject.getString("color");
     }
 }

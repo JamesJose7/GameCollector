@@ -2,9 +2,6 @@ package com.jeeps.gamecollector.model;
 
 import com.google.gson.annotations.SerializedName;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 /**
  * Created by jeeps on 12/23/2017.
  */
@@ -34,10 +31,5 @@ public class Publisher {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-
-    public void jsonToPublisher(JSONObject jsonObject) throws JSONException {
-        name = jsonObject.getString("name");
     }
 }

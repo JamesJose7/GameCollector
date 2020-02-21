@@ -2,116 +2,56 @@ package com.jeeps.gamecollector;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 
+import com.db.williamchart.view.DonutChartView;
 import com.github.ybq.android.spinkit.style.DoubleBounce;
-import com.jeeps.gamecollector.model.Game;
-import com.jeeps.gamecollector.model.Platform;
-import com.jeeps.gamecollector.model.Publisher;
+import com.jeeps.gamecollector.model.CurrentUser;
+import com.jeeps.gamecollector.model.UserStats;
+import com.jeeps.gamecollector.services.api.ApiClient;
+import com.jeeps.gamecollector.services.api.StatsService;
+import com.jeeps.gamecollector.utils.UserUtils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Headers;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+import retrofit2.Call;
 
 public class StatsActivity extends AppCompatActivity {
 
     private static final String LIBRARY_URL = "https://gamecollector-59155.firebaseio.com/library.json";
+    private static final String TAG = StatsActivity.class.getSimpleName();
 
-    private final OkHttpClient client = new OkHttpClient();
+    @BindView(R.id.overall_completion_chart) DonutChartView overallCompletionChart;
+    @BindView(R.id.overall_completion_percentage) TextView overallCompletionPercentage;
+    @BindView(R.id.overall_total) TextView overallTotal;
+    @BindView(R.id.overall_completed) TextView overallCompleted;
+    @BindView(R.id.overall_total_physical) TextView overallTotalPhysical;
+    @BindView(R.id.overall_total_digital) TextView overallTotalDigital;
 
-    private List<Integer> gameCountPerPlatform = new ArrayList<>();
+    @BindView(R.id.card_stats_container) RelativeLayout cardStatsContainer;
+    @BindView(R.id.overall_card) CardView overallCard;
+    @BindView(R.id.platforms_card) CardView platformsCard;
+    @BindView(R.id.stats_progress_bar) ProgressBar statsProgressBar;
 
-    //Views
-    @BindView(R.id.total_games)
-    TextView totalGamesText;
-    @BindView(R.id.total_publishers)
-    TextView totalPublishersText;
-
-    @BindView(R.id.total_switch)
-    TextView totalSwitchGames;
-    @BindView(R.id.physical_switch)
-    TextView physicalSwitchGames;
-    @BindView(R.id.digital_switch)
-    TextView digitalSwitchGames;
-    @BindView(R.id.total_wiiu)
-    TextView totalWiiuGames;
-    @BindView(R.id.physical_wiiu)
-    TextView physicalWiiuGames;
-    @BindView(R.id.digital_wiiu)
-    TextView digitalWiiuGames;
-    @BindView(R.id.total_3ds)
-    TextView total3DSGames;
-    @BindView(R.id.physical_3ds)
-    TextView physical3DSGames;
-    @BindView(R.id.digital_3ds)
-    TextView digital3DSGames;
-    @BindView(R.id.total_wii)
-    TextView totalWiiGames;
-    @BindView(R.id.physical_wii)
-    TextView physicalWiiGames;
-    @BindView(R.id.digital_wii)
-    TextView digitalWiiGames;
-    @BindView(R.id.total_ds)
-    TextView totalDSGames;
-    @BindView(R.id.physical_ds)
-    TextView physicalDSGames;
-    @BindView(R.id.digital_ds)
-    TextView digitalDSGames;
-    @BindView(R.id.games_finished_counter)
-    TextView gamesFinishedText;
-    @BindView(R.id.games_not_finished_counter)
-    TextView gamesNotFinishedText;
-    @BindView(R.id.completion_percentage)
-    TextView gamesCompletionPercentageText;
-
-    @BindView(R.id.card_stats_container)
-    RelativeLayout cardStatsContainer;
-    @BindView(R.id.overall_card)
-    CardView overallCard;
-    @BindView(R.id.platforms_card)
-    CardView platformsCard;
-    @BindView(R.id.stats_progress_bar)
-    ProgressBar statsProgressBar;
-
-    private List<Game> mGames;
-    private List<Platform> mPlatforms;
-    private List<Publisher> mPublishers;
-
-    //Stats
-    private int gamesFinishedCounter;
-    private int gamesNotFinishedCounter;
-    private int gameCompletionPercentage;
-
-    //Platform stats
-    private int nintendoSwitchCount[] = {0,0,0};
-    private int wiiuCount[] = {0,0,0};
-    private int _3dsCount[] = {0,0,0};
-    private int wiiCount[] = {0,0,0};
-    private int dsCount[] = {0,0,0};
+    private CurrentUser currentUser;
+    private Context context;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +64,12 @@ public class StatsActivity extends AppCompatActivity {
         //Change title
         getSupportActionBar().setTitle("Statistics");
 
+        context = this;
+        sharedPreferences = context.getSharedPreferences(
+                getString(R.string.shared_preferences_global), Context.MODE_PRIVATE);
+        // Load current user
+        currentUser = UserUtils.getCurrentUser(context, sharedPreferences);
+
         //Progress bar animation
         DoubleBounce doubleBounce = new DoubleBounce();
         statsProgressBar.setIndeterminateDrawable(doubleBounce);
@@ -133,193 +79,53 @@ public class StatsActivity extends AppCompatActivity {
         //Show progress bar
         statsProgressBar.setVisibility(View.VISIBLE);
 
-        try {
-            getJson();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        // Get stats
+        getUserStats();
     }
 
-    public void getJson() throws Exception {
-        Request request = new Request.Builder()
-                .url(LIBRARY_URL)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
+    private void getUserStats() {
+        StatsService statsService = ApiClient.createService(StatsService.class);
+        Call<UserStats> getUserStats = statsService.getUserStats("Bearer " + currentUser.getToken());
+        getUserStats.enqueue(new retrofit2.Callback<UserStats>() {
+            @Override
+            public void onResponse(Call<UserStats> call, retrofit2.Response<UserStats> response) {
+                if (response.isSuccessful())
+                    populateDashboard(response.body());
+                else {
+                    Log.e(TAG, "There was an error retrieving the user stats");
+                    Toast.makeText(context, "There was an error retrieving your stats", Toast.LENGTH_SHORT).show();
+                }
             }
 
-            @Override public void onResponse(Call call, Response response) throws IOException {
-                try (ResponseBody responseBody = response.body()) {
-                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-                    Headers responseHeaders = response.headers();
-                    for (int i = 0, size = responseHeaders.size(); i < size; i++) {
-                        System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
-                    }
-
-                    //Parse json
-                    parseJson(responseBody.string());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+            @Override
+            public void onFailure(Call<UserStats> call, Throwable t) {
+                Log.e(TAG, "There was an error requesting user stats");
+                Toast.makeText(context, "There was an error retrieving your stats", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void parseJson(String string) throws JSONException {
-        JSONObject jsonObject = new JSONObject(string);
-
-        //Get json arrays
-        JSONArray gamesJSON = jsonObject.getJSONArray("games");
-        JSONArray platformsJSON = jsonObject.getJSONArray("platforms");
-        JSONArray publishersJSON = jsonObject.getJSONArray("publishers");
-
-        //Parse json into objects
-        mGames = getGames(gamesJSON);
-        mPlatforms = getPlatforms(platformsJSON);
-        mPublishers = getPublishers(publishersJSON);
-
-        //Overall Stats
-        for (Game game : mGames) {
-            if (game.getTimesCompleted() > 0)
-                gamesFinishedCounter++;
-            else
-                gamesNotFinishedCounter++;
-        }
-        //Calculate completion percentage
-        gameCompletionPercentage = (gamesFinishedCounter * 100) / mGames.size();
-
-        //Stats per platform
-        for (Game game : mGames) {
-            String platform = game.getPlatform();
-            switch (platform) {
-                case "Nintendo Switch":
-                    nintendoSwitchCount[0]++;
-                    if (game.isPhysical())
-                        nintendoSwitchCount[1]++;
-                    else
-                        nintendoSwitchCount[2]++;
-                    break;
-                case "Nintendo Wii U":
-                    wiiuCount[0]++;
-                    if (game.isPhysical())
-                        wiiuCount[1]++;
-                    else
-                        wiiuCount[2]++;
-                    break;
-                case "Nintendo 3DS":
-                    _3dsCount[0]++;
-                    if (game.isPhysical())
-                        _3dsCount[1]++;
-                    else
-                        _3dsCount[2]++;
-                    break;
-                case "Nintendo Wii":
-                    wiiCount[0]++;
-                    if (game.isPhysical())
-                        wiiCount[1]++;
-                    else
-                        wiiCount[2]++;
-                    break;
-                case "NintendoDS":
-                    dsCount[0]++;
-                    if (game.isPhysical())
-                        dsCount[1]++;
-                    else
-                        dsCount[2]++;
-                    break;
-                default:
-            }
-        }
-
-        //Display data on UI thread
-        runOnUiThread(() -> displayData());
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void displayData() {
-        //Overall stats
-        totalGamesText.setText(mGames.size() + "");
-        totalPublishersText.setText(mPublishers.size() + "");
-        gamesFinishedText.setText(gamesFinishedCounter + "");
-        gamesNotFinishedText.setText(gamesNotFinishedCounter + "");
-        gamesCompletionPercentageText.setText(gameCompletionPercentage + "%");
-
-        //Stats per platform
-        //Total
-        total3DSGames.setText(_3dsCount[0] + "");
-        totalDSGames.setText(dsCount[0] + "");
-        totalSwitchGames.setText(nintendoSwitchCount[0] + "");
-        totalWiiGames.setText(wiiCount[0] + "");
-        totalWiiuGames.setText(wiiuCount[0] + "");
-        //Physical
-        physical3DSGames.setText(_3dsCount[1] + "");
-        physicalDSGames.setText(dsCount[1] + "");
-        physicalSwitchGames.setText(nintendoSwitchCount[1] + "");
-        physicalWiiGames.setText(wiiCount[1] + "");
-        physicalWiiuGames.setText(wiiuCount[1] + "");
-        //Digital
-        digital3DSGames.setText(_3dsCount[2] + "");
-        digitalDSGames.setText(dsCount[2] + "");
-        digitalSwitchGames.setText(nintendoSwitchCount[2] + "");
-        digitalWiiGames.setText(wiiCount[2] + "");
-        digitalWiiuGames.setText(wiiuCount[2] + "");
+    private void populateDashboard(UserStats userStats) {
+        // Calculate total games and completion percentage
+        int totalGames = userStats.getPhysicalTotal() + userStats.getDigitalTotal();
+        float completionPercentage = Math.round((userStats.getCompletedGamesTotal() * 100) / totalGames);
+        System.out.println(completionPercentage);
+        // Populate views
+        overallTotal.setText(String.valueOf(totalGames));
+        overallCompleted.setText(String.valueOf(userStats.getCompletedGamesTotal()));
+        overallTotalPhysical.setText(String.valueOf(userStats.getPhysicalTotal()));
+        overallTotalDigital.setText(String.valueOf(userStats.getDigitalTotal()));
+        overallCompletionPercentage.setText(String.format("%d%%", (int) completionPercentage));
+        // Chart
+        int[] colors = {Color.parseColor("#FF5722")};
+        overallCompletionChart.setDonutColors(colors);
+        overallCompletionChart.getAnimation().setDuration(1000L);
+        overallCompletionChart.animate(Collections.singletonList(completionPercentage));
 
         //Hide Progress bar and show cards
         statsProgressBar.setVisibility(View.INVISIBLE);
         //cardStatsContainer.setVisibility(View.VISIBLE);
         animateAppearance();
-    }
-
-    private List<Game> getGames(JSONArray games) throws JSONException {
-        List<Game> gamesList = new ArrayList<>();
-        List<JSONArray> gamesKeysPerPlatform = new ArrayList<>();
-        //Game keys names and count per platform
-        for (int i = 0; i < games.length(); i++) {
-            JSONArray keys = games.getJSONObject(i).names();
-            gamesKeysPerPlatform.add(keys);
-            gameCountPerPlatform.add(keys.length());
-
-            //Get all games
-            JSONArray gameKeys = gamesKeysPerPlatform.get(i);
-            for (int j = 0; j < gameKeys.length(); j++) {
-                String key = gameKeys.getString(j);
-
-                //Map game
-                JSONObject platformGames = games.getJSONObject(i);
-                JSONObject gameJson = platformGames.getJSONObject(key);
-                //Create game and parse it from json
-                Game game = new Game();
-                game.jsonToGame(gameJson);
-                gamesList.add(game);
-            }
-        }
-
-        return gamesList;
-    }
-
-
-    private List<Publisher> getPublishers(JSONArray publishers) throws JSONException {
-        List<Publisher> publishersList = new ArrayList<>();
-        for (int i = 0; i < publishers.length(); i++) {
-            Publisher publisher = new Publisher();
-            publisher.jsonToPublisher(publishers.getJSONObject(i));
-            publishersList.add(publisher);
-        }
-        return publishersList;
-    }
-
-    private List<Platform> getPlatforms(JSONArray platforms) throws JSONException {
-        List<Platform> platformsList = new ArrayList<>();
-        for (int i = 0; i < platforms.length(); i++) {
-            Platform platform = new Platform();
-            platform.jsonToPlatform(platforms.getJSONObject(i));
-            platformsList.add(platform);
-        }
-        return platformsList;
     }
 
     private void animateAppearance() {
