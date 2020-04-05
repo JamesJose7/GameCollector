@@ -176,7 +176,7 @@ public class MainLibraryActivity extends AppCompatActivity {
                     if (authResponse.isNewUser()) {
                         // Create new user details in DB
                         String email = authResponse.getEmail();
-                        String newUsername = email.split("@")[0];
+                        String newUsername = email.split("@")[0].replaceAll("\\.", "");
                         UserService userService = ApiClient.createService(UserService.class);
                         Call<ResponseBody> signupUserDetails = userService.signupUserdetails(new User(uid, newUsername, email));
                         signupUserDetails.enqueue(new Callback<ResponseBody>() {
