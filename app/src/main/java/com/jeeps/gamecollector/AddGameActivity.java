@@ -182,11 +182,8 @@ public class AddGameActivity extends AppCompatActivity {
             mRadioGroup.check(mRadioDigital.getId());
         //Set times commpleted
         mNumberPicker.setValue(game.getTimesCompleted());
-        //Set publisher in spinner
-        /*if (mSpinnerAdapter != null) {
-            int spinnerPosition = mSpinnerAdapter.getPosition(game.getPublisher());
-            mPublishersSpinner.setSelection(spinnerPosition);
-        }*/
+        //Set publisher
+        publisherEdit.setText(game.getPublisher());
     }
 
     private void populateSpinner() {
