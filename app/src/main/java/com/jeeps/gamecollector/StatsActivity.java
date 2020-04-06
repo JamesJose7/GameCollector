@@ -23,12 +23,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.db.williamchart.view.DonutChartView;
 import com.github.ybq.android.spinkit.style.DoubleBounce;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.jeeps.gamecollector.adapters.PlatformStatsAdapter;
 import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.PlatformStats;
 import com.jeeps.gamecollector.model.UserStats;
-import com.jeeps.gamecollector.services.api.ApiClient;
-import com.jeeps.gamecollector.services.api.StatsService;
 import com.jeeps.gamecollector.utils.UserUtils;
 
 import java.util.ArrayList;
@@ -37,7 +36,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
 
 public class StatsActivity extends AppCompatActivity {
 
@@ -65,6 +63,7 @@ public class StatsActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager layoutManager;
     private PlatformStatsAdapter platformStatsAdapter;
     private List<PlatformStats> platformsStats;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +75,9 @@ public class StatsActivity extends AppCompatActivity {
 
         //Change title
         getSupportActionBar().setTitle("Statistics");
+
+        // Get Firestore instance
+        db = FirebaseFirestore.getInstance();
 
         context = this;
         sharedPreferences = context.getSharedPreferences(
@@ -111,25 +113,21 @@ public class StatsActivity extends AppCompatActivity {
     }
 
     private void getUserStats() {
-        StatsService statsService = ApiClient.createService(StatsService.class);
-        Call<UserStats> getUserStats = statsService.getUserStats("Bearer " + currentUser.getToken());
-        getUserStats.enqueue(new retrofit2.Callback<UserStats>() {
-            @Override
-            public void onResponse(Call<UserStats> call, retrofit2.Response<UserStats> response) {
-                if (response.isSuccessful())
-                    populateDashboard(response.body());
-                else {
-                    Log.e(TAG, "There was an error retrieving the user stats");
-                    Toast.makeText(context, "There was an error retrieving your stats", Toast.LENGTH_SHORT).show();
-                }
-            }
+        db.collection("stats")
+                .whereEqualTo("user", currentUser.getUsername())
+                .limit(1)
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        Log.e(TAG, "There was an error requesting user stats");
+                        Toast.makeText(context, "There was an error retrieving your stats", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-            @Override
-            public void onFailure(Call<UserStats> call, Throwable t) {
-                Log.e(TAG, "There was an error requesting user stats");
-                Toast.makeText(context, "There was an error retrieving your stats", Toast.LENGTH_SHORT).show();
-            }
-        });
+                    UserStats userStats =
+                            queryDocumentSnapshots.getDocuments().get(0).toObject(UserStats.class);
+                    populateDashboard(userStats);
+                });
     }
 
     private void populateDashboard(UserStats userStats) {

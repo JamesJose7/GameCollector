@@ -22,16 +22,19 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.jeeps.gamecollector.adapters.PlatformsListAdapter;
 import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Platform;
 import com.jeeps.gamecollector.model.User;
 import com.jeeps.gamecollector.model.UserDetails;
 import com.jeeps.gamecollector.services.api.ApiClient;
-import com.jeeps.gamecollector.services.api.PlatformService;
 import com.jeeps.gamecollector.services.api.UserService;
 import com.jeeps.gamecollector.utils.UserUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -60,6 +63,7 @@ public class MainLibraryActivity extends AppCompatActivity {
     private PlatformsListAdapter platformsAdapter;
     private List<Platform> platforms;
     private CurrentUser currentUser;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +74,10 @@ public class MainLibraryActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         getSupportActionBar().setTitle("Platforms");
+
+        // Get Firestore instance
+        db = FirebaseFirestore.getInstance();
+
         context = this;
         sharedPreferences = context.getSharedPreferences(
                 getString(R.string.shared_preferences_global), Context.MODE_PRIVATE);
@@ -77,6 +85,7 @@ public class MainLibraryActivity extends AppCompatActivity {
         //Show progressbar
         mProgressBar.setVisibility(View.VISIBLE);
 
+        initializePlatformsAdapter();
         checkUserLogin();
 
         fab.setOnClickListener(view -> {
@@ -204,21 +213,12 @@ public class MainLibraryActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // Add platform
                 Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivity.PLATFORM);
-                platforms.add(platform);
-                platforms.sort((p1, p2) -> p1.getName().toLowerCase().compareTo(p2.getName().toLowerCase()));
-                platformsAdapter.notifyDataSetChanged();
                 Snackbar.make(fab, "Successfully added platform", Snackbar.LENGTH_SHORT).show();
             }
         } else if (requestCode == EDIT_PLATFORM_RESULT) {
             if (resultCode == RESULT_OK) {
                 Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivity.PLATFORM);
                 int platformPosition = data.getIntExtra(AddPlatformActivity.EDITED_PLATFORM_POSITION, -1);
-                // Change old platform with the new one
-                if (platformPosition >= 0) {
-                    platforms.remove(platformPosition);
-                    platforms.add(platformPosition, platform);
-                    platformsAdapter.notifyDataSetChanged();
-                }
             }
         }
     }
@@ -250,52 +250,59 @@ public class MainLibraryActivity extends AppCompatActivity {
         });
     }
 
+    private void initializePlatformsAdapter() {
+        platforms = new ArrayList<>();
+        platformsAdapter = new PlatformsListAdapter(context, R.layout.platform_list_item, platforms);
+        platformsListView.setAdapter(platformsAdapter);
+        // Click listener to open a platform activity
+        platformsListView.setOnItemClickListener((adapterView, view, i, l) -> {
+            //Get selected platform
+            Platform platform = (Platform) adapterView.getItemAtPosition(i);
+            //start games activity with platform id
+            Intent intent = new Intent(context, PlatformLibraryActivity.class);
+            intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.getId());
+            intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME, platform.getName());
+            startActivity(intent);
+        });
+        platformsListView.setOnItemLongClickListener((adapterView, view, i, l) -> {
+            //Get selected platform
+            Platform platform = (Platform) adapterView.getItemAtPosition(i);
+            // Start add platform activity to edit the selected platform
+            Intent intent = new Intent(context, AddPlatformActivity.class);
+            intent.putExtra(AddPlatformActivity.EDITED_PLATFORM, platform);
+            intent.putExtra(AddPlatformActivity.EDITED_PLATFORM_POSITION, i);
+            startActivityForResult(intent, EDIT_PLATFORM_RESULT);
+            return true;
+        });
+    }
+
     private void populatePlatforms() {
         // Load current user
         currentUser = UserUtils.getCurrentUser(context, sharedPreferences);
         // Load user platforms
-        PlatformService platformService = ApiClient.createService(PlatformService.class);
-        Call<List<Platform>> getPlatformsByUser = platformService.getPlatformsByUser("Bearer " + currentUser.getToken());
-        getPlatformsByUser.enqueue(new Callback<List<Platform>>() {
-            @Override
-            public void onResponse(Call<List<Platform>> call, Response<List<Platform>> response) {
-                if (response.isSuccessful()) {
-                    platforms = response.body();
-                    platformsAdapter = new PlatformsListAdapter(context, R.layout.platform_list_item, platforms);
-                    platformsListView.setAdapter(platformsAdapter);
-                    // Click listener to open a platform activity
-                    platformsListView.setOnItemClickListener((adapterView, view, i, l) -> {
-                        //Get selected platform
-                        Platform platform = (Platform) adapterView.getItemAtPosition(i);
-                        //start games activity with platform id
-                        Intent intent = new Intent(context, PlatformLibraryActivity.class);
-                        intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.getId());
-                        intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME, platform.getName());
-                        startActivity(intent);
-                    });
-                    platformsListView.setOnItemLongClickListener((adapterView, view, i, l) -> {
-                        //Get selected platform
-                        Platform platform = (Platform) adapterView.getItemAtPosition(i);
-                        // Start add platform activity to edit the selected platform
-                        Intent intent = new Intent(context, AddPlatformActivity.class);
-                        intent.putExtra(AddPlatformActivity.EDITED_PLATFORM, platform);
-                        intent.putExtra(AddPlatformActivity.EDITED_PLATFORM_POSITION, i);
-                        startActivityForResult(intent, EDIT_PLATFORM_RESULT);
-                        return true;
-                    });
-                }
+        db.collection("platforms")
+                .whereEqualTo("user", currentUser.getUsername())
+                .orderBy("name", Query.Direction.ASCENDING)
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    //Hide progressbar
+                    mProgressBar.setVisibility(View.INVISIBLE);
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        Log.e(TAG, "There was an error retrieving user platforms");
+                        Toast.makeText(context, "An error has occurred, please try again", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-                //Hide progressbar
-                mProgressBar.setVisibility(View.INVISIBLE);
-            }
-
-            @Override
-            public void onFailure(Call<List<Platform>> call, Throwable t) {
-                //Hide progressbar
-                mProgressBar.setVisibility(View.INVISIBLE);
-                Log.e(TAG, "There was an error retrieving user platforms");
-                Toast.makeText(context, "An error has occurred, please try again", Toast.LENGTH_SHORT).show();
-            }
-        });
+                    platforms.clear();
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        Platform platform = doc.toObject(Platform.class);
+                        platform.setId(doc.getId());
+                        platforms.add(platform);
+                    }
+                    // Sort by name
+                    platforms.sort((p1, p2) -> p1.getName().toLowerCase().compareTo(p2.getName().toLowerCase()));
+                    // Update adapter
+                    platformsAdapter.notifyDataSetChanged();
+                });
     }
 }

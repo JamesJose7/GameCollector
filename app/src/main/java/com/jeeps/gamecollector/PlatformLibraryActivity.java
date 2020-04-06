@@ -28,6 +28,9 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.jeeps.gamecollector.adapters.GameCardAdapter;
 import com.jeeps.gamecollector.comparators.GameByNameComparator;
 import com.jeeps.gamecollector.comparators.GameByPhysicalComparator;
@@ -76,6 +79,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     private CurrentUser currentUser;
     private SharedPreferences sharedPreferences;
     private String gameToBeDeleted;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +92,9 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         context = this;
         games = new ArrayList<>();
         initCollapsingToolbar();
+
+        // Get Firestore instance
+        db = FirebaseFirestore.getInstance();
 
         //Show progress bar
         progressBar.setVisibility(View.VISIBLE);
@@ -102,11 +109,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         //Display cover
         Picasso.with(context).load(getPlatformCover()).into(backdrop);
 
-        // Configure recycler view
-        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(context, 2);
-        gamesRecyclerView.setLayoutManager(mLayoutManager);
-        gamesRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
-        gamesRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        initializeGamesAdapter();
 
         // Add game
         fab.setOnClickListener(view -> {
@@ -120,6 +123,18 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         populateGames();
     }
 
+    private void initializeGamesAdapter() {
+        // Configure recycler view
+        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(context, 2);
+        gamesRecyclerView.setLayoutManager(mLayoutManager);
+        gamesRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
+        gamesRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        // Create adapter
+        gamesAdapter = new GameCardAdapter(context, games, PlatformLibraryActivity.this);
+        gamesRecyclerView.setAdapter(gamesAdapter);
+        gamesAdapter.notifyDataSetChanged();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -127,22 +142,13 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         if (requestCode == ADD_GAME_RESULT) {
             if (resultCode == RESULT_OK) {
                 Game game = (Game) data.getSerializableExtra(NEW_GAME);
-                games.add(game);
-                Collections.sort(games, new GameByNameComparator());
-                gamesAdapter.notifyDataSetChanged();
                 Snackbar.make(fab, "Game added successfully", Snackbar.LENGTH_SHORT).show();
             }
         } else if (requestCode == EDIT_GAME_RESULT) {
             if (resultCode == RESULT_OK) {
                 Game game = (Game) data.getSerializableExtra(NEW_GAME);
                 int position = data.getIntExtra(SELECTED_GAME_POSITION, -1);
-                if (position >= 0) {
-                    games.remove(position);
-                    games.add(game);
-                    Collections.sort(games, new GameByNameComparator());
-                    gamesAdapter.notifyDataSetChanged();
-                    Snackbar.make(fab, "Game edited successfully", Snackbar.LENGTH_SHORT).show();
-                }
+                Snackbar.make(fab, "Game edited successfully", Snackbar.LENGTH_SHORT).show();
             }
         }
     }
@@ -151,31 +157,31 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         // Load current user
         currentUser = UserUtils.getCurrentUser(context, sharedPreferences);
         // Load games
-        GameService gameService = ApiClient.createService(GameService.class);
-        Call<List<Game>> getGamesByUserAndPlatform = gameService.getGamesByUserAndPlatform(
-                "Bearer " + currentUser.getToken(), currentUser.getUsername(), platformId);
-        getGamesByUserAndPlatform.enqueue(new Callback<List<Game>>() {
-            @Override
-            public void onResponse(Call<List<Game>> call, Response<List<Game>> response) {
-                if (response.isSuccessful()) {
-                    games = response.body();
-                    // Sort A-z
-                    Collections.sort(games, new GameByNameComparator());
-                    // Create adapter
-                    gamesAdapter = new GameCardAdapter(context, games, PlatformLibraryActivity.this);
-                    gamesRecyclerView.setAdapter(gamesAdapter);
-                    gamesAdapter.notifyDataSetChanged();
+        db.collection("games")
+                .whereEqualTo("user", currentUser.getUsername())
+                .whereEqualTo("platformId", platformId)
+                .orderBy("name", Query.Direction.ASCENDING)
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
                     // Hide progressbar
                     progressBar.setVisibility(View.INVISIBLE);
-                } else
-                    Log.e(TAG, "Something went wrong when retrieving games");
-            }
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        Log.e(TAG, "Something went wrong when retrieving games");
+                        Toast.makeText(context, "An error has occurred, please try again", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-            @Override
-            public void onFailure(Call<List<Game>> call, Throwable t) {
-                Log.e(TAG, "Something went wrong when retrieving games");
-            }
-        });
+                    games.clear();
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        Game game = doc.toObject(Game.class);
+                        game.setId(doc.getId());
+                        games.add(game);
+                    }
+                    // Sort A-z
+                    Collections.sort(games, new GameByNameComparator());
+                    // Update adapter
+                    gamesAdapter.notifyDataSetChanged();
+                });
     }
 
     /**

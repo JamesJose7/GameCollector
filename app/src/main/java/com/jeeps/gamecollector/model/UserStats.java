@@ -1,5 +1,6 @@
 package com.jeeps.gamecollector.model;
 
+import com.google.firebase.firestore.PropertyName;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
@@ -75,10 +76,12 @@ public class UserStats {
         this.lastGameCompleted = lastGameCompleted;
     }
 
+    @PropertyName("platforms")
     public List<PlatformStats> getPlatformStats() {
         return platformStats;
     }
 
+    @PropertyName("platforms")
     public void setPlatformStats(List<PlatformStats> platformStats) {
         this.platformStats = platformStats;
     }
