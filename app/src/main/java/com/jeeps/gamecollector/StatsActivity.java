@@ -90,7 +90,12 @@ public class StatsActivity extends AppCompatActivity {
         statsProgressBar.setIndeterminateDrawable(doubleBounce);
 
         // Configure recycler view
-        layoutManager = new LinearLayoutManager(context);
+        layoutManager = new LinearLayoutManager(context) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
         platformsRecyclerView.setHasFixedSize(true);
         platformsRecyclerView.setLayoutManager(layoutManager);
         platformsStats = new ArrayList<>();
