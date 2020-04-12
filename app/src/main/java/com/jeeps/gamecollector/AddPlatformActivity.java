@@ -100,6 +100,9 @@ public class AddPlatformActivity extends AppCompatActivity {
         if (editedPlatform != null) {
             mapExistingPlatformDetails(editedPlatform);
             isEdit = true;
+            // Invalidate picasso cache
+            if (platform.getImageUri() != null)
+                Picasso.with(context).invalidate(platform.getImageUri());
         }
     }
 
