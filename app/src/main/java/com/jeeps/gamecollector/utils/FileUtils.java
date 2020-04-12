@@ -1,6 +1,7 @@
 package com.jeeps.gamecollector.utils;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 
 import java.io.File;
@@ -36,6 +37,7 @@ public class FileUtils {
         final File compressedImageFile = new Compressor(context)
                 .setMaxWidth(300)
                 .setQuality(75)
+                .setCompressFormat(Bitmap.CompressFormat.PNG)
                 .compressToFile(tempFile);
         // Cleanup
         if (tempFile.exists())
