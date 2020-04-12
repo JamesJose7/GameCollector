@@ -22,12 +22,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
 import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Game;
 import com.jeeps.gamecollector.model.Publisher;
@@ -44,7 +39,6 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -84,7 +78,6 @@ public class AddGameActivity extends AppCompatActivity {
     private String previousUri;
 
     private Context context;
-    private FirebaseDatabase mDatabase;
     private String mInputPublisher;
     private int timesCompleted;
     private Game selectedGame;
@@ -126,14 +119,15 @@ public class AddGameActivity extends AppCompatActivity {
         mNumberPicker.setMaxValue(10);
         mNumberPicker.setOnValueChangedListener((numberPicker, i, i1) -> timesCompleted = i1);
 
-        //Database
-        mDatabase = FirebaseDatabase.getInstance();
-
         //Get current platform
         platformEdit.setText(platformName);
 
         //Select image for cover
         gameCover.setOnClickListener(view -> {
+            // Invalidate picasso cache
+            if (selectedGame != null)
+                if (selectedGame.getImageUri() != null)
+                    Picasso.with(context).invalidate(selectedGame.getImageUri());
             // To open up a gallery browser
             Intent intent1 = new Intent();
             intent1.setType("image/*");
@@ -187,7 +181,7 @@ public class AddGameActivity extends AppCompatActivity {
     }
 
     private void populateSpinner() {
-        final DatabaseReference publishers = mDatabase.getReference("library/publishers/");
+        /*final DatabaseReference publishers = mDatabase.getReference("library/publishers/");
 
         // Read from the database
         publishers.addValueEventListener(new ValueEventListener() {
@@ -209,8 +203,8 @@ public class AddGameActivity extends AppCompatActivity {
 //                mPublishersSpinner.setAdapter(mSpinnerAdapter);
 
                 // In case a game is being edited, map the values after this finishes
-                /*if (selectedGame != null)
-                    mapSelectedGameToFields();*/
+                *//*if (selectedGame != null)
+                    mapSelectedGameToFields();*//*
             }
 
             @Override
@@ -218,7 +212,7 @@ public class AddGameActivity extends AppCompatActivity {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
             }
-        });
+        });*/
     }
 
     private void saveGame() {
