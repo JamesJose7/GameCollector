@@ -39,6 +39,7 @@ import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Game;
 import com.jeeps.gamecollector.services.api.ApiClient;
 import com.jeeps.gamecollector.services.api.GameService;
+import com.jeeps.gamecollector.utils.PlatformCovers;
 import com.jeeps.gamecollector.utils.UserUtils;
 import com.jeeps.gamecollector.views.GridSpacingItemDecoration;
 import com.squareup.picasso.Picasso;
@@ -107,7 +108,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         platformName = intent.getStringExtra(CURRENT_PLATFORM_NAME);
 
         //Display cover
-        Picasso.with(context).load(getPlatformCover()).into(backdrop);
+        Picasso.with(context).load(PlatformCovers.getPlatformCover(platformName)).into(backdrop);
 
         initializeGamesAdapter();
 
@@ -213,22 +214,6 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                 }
             }
         });
-    }
-
-    public int getPlatformCover() {
-        switch (platformId) {
-            case "0":
-                return R.drawable.switch_cover;
-            case "1":
-                return R.drawable.wiiu_cover;
-            case "2":
-                return R.drawable.n3ds_cover;
-            case "3":
-                return R.drawable.wii_cover;
-            case "4":
-                return R.drawable.ds_cover;
-        }
-        return R.drawable.switch_cover;
     }
 
     @Override
