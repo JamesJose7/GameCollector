@@ -26,6 +26,7 @@
                 android:id="@+id/platform_card_image"
                 android:background="#5fD5D5D5"
                 android:layout_width="match_parent"
+                android:src="@drawable/game_controller"
                 android:layout_height="0dp"
                 android:scaleType="centerCrop"
                 app:layout_constraintBottom_toTopOf="@+id/platform_card_border"

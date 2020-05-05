@@ -73,7 +73,13 @@ public class PlatformsListAdapter extends RecyclerView.Adapter<PlatformsListAdap
 //            else
 //                name.setTextColor(Color.parseColor("#000000"));
 
-            Picasso.with(mContext).load(platform.getImageUri()).into(holder.platformImage);
+            if (platform.getImageUri() != null)
+                if (!platform.getImageUri().isEmpty())
+                    Picasso.with(mContext).load(platform.getImageUri()).into(holder.platformImage);
+                else
+                    Picasso.with(mContext).load(R.drawable.game_controller).into(holder.platformImage);
+            else
+                Picasso.with(mContext).load(R.drawable.game_controller).into(holder.platformImage);
 
             holder.platformName.setText(platform.getName());
 

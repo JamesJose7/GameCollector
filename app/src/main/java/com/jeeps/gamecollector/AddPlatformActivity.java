@@ -109,7 +109,9 @@ public class AddPlatformActivity extends AppCompatActivity {
     private void mapExistingPlatformDetails(Platform editedPlatform) {
         platform = editedPlatform;
         // Cover image
-        Picasso.with(context).load(editedPlatform.getImageUri()).into(platformCover);
+        if (platform.getImageUri() != null)
+            if (!platform.getImageUri().isEmpty())
+                Picasso.with(context).load(editedPlatform.getImageUri()).into(platformCover);
         platformCover.setAlpha(1f);
         platformCover.setBackgroundColor(Color.parseColor("#99cccccc"));
         // Platform name
