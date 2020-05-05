@@ -1,73 +1,103 @@
 package com.jeeps.gamecollector.adapters;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.jeeps.gamecollector.AddPlatformActivity;
+import com.jeeps.gamecollector.MainLibraryActivity;
+import com.jeeps.gamecollector.PlatformLibraryActivity;
 import com.jeeps.gamecollector.R;
 import com.jeeps.gamecollector.model.Platform;
-import com.jeeps.gamecollector.utils.Colors;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by jeeps on 12/23/2017.
  */
 
-public class PlatformsListAdapter extends ArrayAdapter<Platform> {
+public class PlatformsListAdapter extends RecyclerView.Adapter<PlatformsListAdapter.PlatformsViewHolder> {
 
+    private Activity parentActivity;
     private Context mContext;
+    private List<Platform> platforms;
 
-    public PlatformsListAdapter(Context context, int textViewResourceId) {
-        super(context, textViewResourceId);
+    public PlatformsListAdapter(Activity activity, Context context, List<Platform> platforms) {
+        parentActivity = activity;
         mContext = context;
+        this.platforms = platforms;
     }
 
-    public PlatformsListAdapter(Context context, int resource, List<Platform> items) {
-        super(context, resource, items);
-        mContext = context;
+    public class PlatformsViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.platform_card) CardView platformCard;
+        @BindView(R.id.platform_card_image) ImageView platformImage;
+        @BindView(R.id.platform_card_border) View platformBorder;
+        @BindView(R.id.platform_card_name) TextView platformName;
+
+        public PlatformsViewHolder(@NonNull View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
+    }
+
+    @NonNull
+    @Override
+    public PlatformsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.platform_card_layout, parent, false);
+        return new PlatformsViewHolder(itemView);
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-        View v = convertView;
-
-        if (v == null) {
-            LayoutInflater vi;
-            vi = LayoutInflater.from(getContext());
-            v = vi.inflate(R.layout.platform_list_item, null);
-        }
-
-        Platform platform = getItem(position);
+    public void onBindViewHolder(@NonNull PlatformsViewHolder holder, int position) {
+        Platform platform = platforms.get(position);
 
         if (platform != null) {
-            TextView background = v.findViewById(R.id.platform_background_color);
-            ImageView logo = v.findViewById(R.id.platform_image);
-            TextView name = v.findViewById(R.id.platform_name);
+            holder.platformBorder.setBackgroundColor(Color.parseColor(platform.getColor()));
+//            if (!platform.getColor().equals(Colors.NORMIE_WHITE.getColor()))
+//                name.setTextColor(Color.parseColor(Colors.NORMIE_WHITE.getColor()));
+//            else
+//                name.setTextColor(Color.parseColor("#000000"));
 
-            if (background != null) {
-                background.setBackgroundColor(Color.parseColor(platform.getColor()));
-                if (!platform.getColor().equals(Colors.NORMIE_WHITE.getColor()))
-                    name.setTextColor(Color.parseColor(Colors.NORMIE_WHITE.getColor()));
-                else
-                    name.setTextColor(Color.parseColor("#000000"));
-            }
+            Picasso.with(mContext).load(platform.getImageUri()).into(holder.platformImage);
 
-            if (logo != null)
-                Picasso.with(mContext).load(platform.getImageUri()).into(logo);
+            holder.platformName.setText(platform.getName());
 
-            if (name != null)
-                name.setText(platform.getName());
+            // Click listener to open a platform activity
+            holder.platformCard.setOnClickListener(view -> {
+                //start games activity with platform id
+                Intent intent = new Intent(mContext, PlatformLibraryActivity.class);
+                intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.getId());
+                intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME, platform.getName());
+                mContext.startActivity(intent);
+            });
+            holder.platformCard.setOnLongClickListener(view -> {
+                // Start add platform activity to edit the selected platform
+                Intent intent = new Intent(mContext, AddPlatformActivity.class);
+                intent.putExtra(AddPlatformActivity.EDITED_PLATFORM, platform);
+                intent.putExtra(AddPlatformActivity.EDITED_PLATFORM_POSITION, position);
+                parentActivity.startActivityForResult(intent, MainLibraryActivity.EDIT_PLATFORM_RESULT);
+                return true;
+            });
         }
-
-        return v;
     }
 
+    @Override
+    public int getItemCount() {
+        return platforms.size();
+    }
 }

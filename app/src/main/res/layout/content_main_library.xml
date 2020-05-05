@@ -9,11 +9,15 @@
     tools:context="com.jeeps.gamecollector.MainLibraryActivity"
     tools:showIn="@layout/activity_main_library">
 
-    <ListView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/platforms_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </ListView>
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
+        android:paddingBottom="60dp"
+        android:paddingTop="5dp"
+        />
 
     <ProgressBar
         android:id="@+id/platforms_progress_bar"

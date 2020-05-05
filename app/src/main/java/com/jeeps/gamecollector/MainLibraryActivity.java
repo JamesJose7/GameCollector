@@ -8,13 +8,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
@@ -49,10 +51,10 @@ public class MainLibraryActivity extends AppCompatActivity {
 
     private static final String TAG = MainLibraryActivity.class.getSimpleName();
     protected static final int RC_SIGN_IN = 420;
-    protected static final int ADD_PLATFORM_RESULT = 13;
-    protected static final int EDIT_PLATFORM_RESULT = 97;
+    public static final int ADD_PLATFORM_RESULT = 13;
+    public static final int EDIT_PLATFORM_RESULT = 97;
 
-    @BindView(R.id.platforms_list) ListView platformsListView;
+    @BindView(R.id.platforms_list) RecyclerView platformsRecyclerView;
     @BindView(R.id.platforms_progress_bar) ProgressBar mProgressBar;
     @BindView(R.id.fab) FloatingActionButton fab;
 
@@ -104,7 +106,8 @@ public class MainLibraryActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             UserUtils.updateToken(context, sharedPreferences, task.getResult().getToken());
                             populatePlatforms();
-                        }
+                        } else
+                            promptUserLogin();
                     });
         } else
             promptUserLogin();
@@ -252,28 +255,14 @@ public class MainLibraryActivity extends AppCompatActivity {
 
     private void initializePlatformsAdapter() {
         platforms = new ArrayList<>();
-        platformsAdapter = new PlatformsListAdapter(context, R.layout.platform_list_item, platforms);
-        platformsListView.setAdapter(platformsAdapter);
-        // Click listener to open a platform activity
-        platformsListView.setOnItemClickListener((adapterView, view, i, l) -> {
-            //Get selected platform
-            Platform platform = (Platform) adapterView.getItemAtPosition(i);
-            //start games activity with platform id
-            Intent intent = new Intent(context, PlatformLibraryActivity.class);
-            intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.getId());
-            intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME, platform.getName());
-            startActivity(intent);
-        });
-        platformsListView.setOnItemLongClickListener((adapterView, view, i, l) -> {
-            //Get selected platform
-            Platform platform = (Platform) adapterView.getItemAtPosition(i);
-            // Start add platform activity to edit the selected platform
-            Intent intent = new Intent(context, AddPlatformActivity.class);
-            intent.putExtra(AddPlatformActivity.EDITED_PLATFORM, platform);
-            intent.putExtra(AddPlatformActivity.EDITED_PLATFORM_POSITION, i);
-            startActivityForResult(intent, EDIT_PLATFORM_RESULT);
-            return true;
-        });
+        // Configure recycler view
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context);
+        platformsRecyclerView.setLayoutManager(layoutManager);
+        platformsRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        // Create adapter
+        platformsAdapter = new PlatformsListAdapter(this, context, platforms);
+        platformsRecyclerView.setAdapter(platformsAdapter);
+        platformsAdapter.notifyDataSetChanged();
     }
 
     private void populatePlatforms() {
