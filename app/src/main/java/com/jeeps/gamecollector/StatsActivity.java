@@ -156,6 +156,7 @@ public class StatsActivity extends AppCompatActivity {
         // Chart
         overallCompletionChart.animate(Collections.singletonList(completionPercentage));
         // PLatform stats
+        platformsStats.clear();
         platformsStats.addAll(userStats.getPlatformStats());
         platformStatsAdapter.notifyDataSetChanged();
 
