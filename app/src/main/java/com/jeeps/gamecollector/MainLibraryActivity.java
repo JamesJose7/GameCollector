@@ -34,6 +34,7 @@ import com.jeeps.gamecollector.model.User;
 import com.jeeps.gamecollector.model.UserDetails;
 import com.jeeps.gamecollector.services.api.ApiClient;
 import com.jeeps.gamecollector.services.api.UserService;
+import com.jeeps.gamecollector.services.igdb.IgdbApiClient;
 import com.jeeps.gamecollector.utils.UserUtils;
 
 import java.util.ArrayList;
@@ -89,6 +90,9 @@ public class MainLibraryActivity extends AppCompatActivity {
 
         initializePlatformsAdapter();
         checkUserLogin();
+
+        // Authenticate with twitch API for IGDB
+        IgdbApiClient.setToken();
 
         fab.setOnClickListener(view -> {
             // Create platform activity
