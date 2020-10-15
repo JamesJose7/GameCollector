@@ -74,8 +74,12 @@ public class Game implements Serializable {
         return isPhysical;
     }
 
-    public void setPhysical(boolean physical) {
-        isPhysical = physical;
+    public boolean getIsPhysical() {
+        return isPhysical;
+    }
+
+    public void setPhysical(boolean isPhysical) {
+        this.isPhysical = isPhysical;
     }
 
     public String getName() {
