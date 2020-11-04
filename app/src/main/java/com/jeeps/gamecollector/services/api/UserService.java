@@ -2,6 +2,7 @@ package com.jeeps.gamecollector.services.api;
 
 import com.jeeps.gamecollector.model.User;
 import com.jeeps.gamecollector.model.UserDetails;
+import com.jeeps.gamecollector.services.igdb.TwitchAuthToken;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -16,4 +17,7 @@ public interface UserService {
 
     @POST("/api/signupUserdetails")
     Call<ResponseBody> signupUserdetails(@Body User user);
+
+    @GET("/api/igdbAuth")
+    Call<TwitchAuthToken> igdbAuth();
 }
