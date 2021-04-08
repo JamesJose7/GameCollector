@@ -11,9 +11,9 @@ import retrofit2.http.POST;
 
 public interface IgdbService {
 
-    @POST("/games")
+    @POST("/v4/games")
     Call<List<GameIG>> searchGames(@Body String body);
 
-    @POST("/covers")
+    @POST("/v4/covers")
     Call<List<GameCoverIG>> getImageCoverById(@Body String body);
 }
