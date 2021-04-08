@@ -102,7 +102,7 @@ public class AddPlatformActivity extends AppCompatActivity {
             isEdit = true;
             // Invalidate picasso cache
             if (platform.getImageUri() != null)
-                Picasso.with(context).invalidate(platform.getImageUri());
+                Picasso.get().invalidate(platform.getImageUri());
         }
     }
 
@@ -111,7 +111,7 @@ public class AddPlatformActivity extends AppCompatActivity {
         // Cover image
         if (platform.getImageUri() != null)
             if (!platform.getImageUri().isEmpty())
-                Picasso.with(context).load(editedPlatform.getImageUri()).into(platformCover);
+                Picasso.get().load(editedPlatform.getImageUri()).into(platformCover);
         platformCover.setAlpha(1f);
         platformCover.setBackgroundColor(Color.parseColor("#99cccccc"));
         // Platform name
@@ -131,7 +131,7 @@ public class AddPlatformActivity extends AppCompatActivity {
             if (requestCode == 1) {
                 currImageURI = data.getData();
                 // Load local image for displaying purposes
-                Picasso.with(this).load(currImageURI).into(platformCover);
+                Picasso.get().load(currImageURI).into(platformCover);
                 platformCover.setAlpha(1f);
                 platformCover.setBackgroundColor(Color.parseColor("#99cccccc"));
                 if (isEdit)

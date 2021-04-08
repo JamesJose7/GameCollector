@@ -127,7 +127,7 @@ public class AddGameActivity extends AppCompatActivity {
             // Invalidate picasso cache
             if (selectedGame != null)
                 if (selectedGame.getImageUri() != null)
-                    Picasso.with(context).invalidate(selectedGame.getImageUri());
+                    Picasso.get().invalidate(selectedGame.getImageUri());
             // To open up a gallery browser
             Intent intent1 = new Intent();
             intent1.setType("image/*");
@@ -158,12 +158,12 @@ public class AddGameActivity extends AppCompatActivity {
     private void mapSelectedGameToFields(Game game) {
         //Set image
         if (!game.getImageUri().isEmpty()) {
-            Picasso.with(context).load(game.getImageUri()).into(gameCover);
+            Picasso.get().load(game.getImageUri()).into(gameCover);
             gameCover.setAlpha(1f);
             gameCover.setBackgroundColor(Color.parseColor("#99cccccc"));
         } else {
             coverDeleted = true;
-            Picasso.with(context).load(R.drawable.edit_picture).into(gameCover);
+            Picasso.get().load(R.drawable.edit_picture).into(gameCover);
             gameCover.setAlpha(0.5f);
             gameCover.setBackgroundColor(Color.parseColor("#cccccc"));
         }
@@ -392,7 +392,7 @@ public class AddGameActivity extends AppCompatActivity {
         coverDeleted = false;
         currImageURI = uri;
         //Load local image for displaying purposes
-        Picasso.with(context).load(currImageURI).into(gameCover);
+        Picasso.get().load(currImageURI).into(gameCover);
         gameCover.setAlpha(1f);
         gameCover.setBackgroundColor(Color.parseColor("#99cccccc"));
     }
@@ -401,7 +401,7 @@ public class AddGameActivity extends AppCompatActivity {
         coverDeleted = true;
         currImageURI = null;
         // Unload image
-        Picasso.with(context).load(R.drawable.edit_picture).into(gameCover);
+        Picasso.get().load(R.drawable.edit_picture).into(gameCover);
         gameCover.setAlpha(0.5f);
         gameCover.setBackgroundColor(Color.parseColor("#cccccc"));
     }

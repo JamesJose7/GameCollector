@@ -108,7 +108,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         platformName = intent.getStringExtra(CURRENT_PLATFORM_NAME);
 
         //Display cover
-        Picasso.with(context).load(PlatformCovers.getPlatformCover(platformName)).into(backdrop);
+        Picasso.get().load(PlatformCovers.getPlatformCover(platformName)).into(backdrop);
 
         initializeGamesAdapter();
 
