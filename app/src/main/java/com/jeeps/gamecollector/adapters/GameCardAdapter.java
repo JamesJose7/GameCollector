@@ -30,7 +30,7 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
 
     public interface GameCardAdapterListener {
         void deleteSelectedGame(int position);
-        void editGame(int position);
+        void editGame(int position, View imageView, TextView titleView);
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -117,7 +117,7 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
             return true;
         });
 
-        holder.cover.setOnClickListener(view -> listener.editGame(position));
+        holder.cover.setOnClickListener(view -> listener.editGame(position, holder.cover, holder.title));
     }
 
     @Override

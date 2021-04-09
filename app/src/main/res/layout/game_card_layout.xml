@@ -26,6 +26,7 @@
 
             <ImageView
                 android:id="@+id/card_game_cover"
+                android:transitionName="cover"
                 android:layout_width="match_parent"
                 android:layout_height="255dp"
                 android:paddingTop="4dp"
@@ -38,7 +39,7 @@
                 android:layout_height="35dp"
                 android:padding="6dp"
                 android:src="@drawable/cloud"
-                android:tint="#fff"
+                app:tint="#fff"
                 android:background="@drawable/round_corners"
                 android:backgroundTint="#555"
                 android:layout_alignParentEnd="true"
@@ -60,6 +61,7 @@
                 <!--android:singleLine="true"-->
                 <TextView
                     android:id="@+id/card_game_title"
+                    android:transitionName="gameTitle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:textSize="20sp"
@@ -78,7 +80,7 @@
                         android:layout_width="30dp"
                         android:layout_height="match_parent"
                         android:src="@drawable/checked"
-                        android:tint="#ccc"
+                        app:tint="#ccc"
                         android:layout_centerInParent="true"/>
 
                 </RelativeLayout>
