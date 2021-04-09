@@ -120,7 +120,8 @@ public class GameDetailsActivity extends AppCompatActivity {
     }
 
     private void populateViews() {
-        Picasso.get().load(selectedGame.getImageUri()).into(gameCoverView);
+        if (!selectedGame.getImageUri().isEmpty())
+            Picasso.get().load(selectedGame.getImageUri()).into(gameCoverView);
         String title = !selectedGame.getShortName().isEmpty() ? selectedGame.getShortName() : selectedGame.getName();
         gameTitleText.setText(title);
         if (selectedGame.getPublisher().isEmpty())
