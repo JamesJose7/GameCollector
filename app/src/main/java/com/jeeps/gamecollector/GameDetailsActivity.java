@@ -106,14 +106,16 @@ public class GameDetailsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == EDIT_GAME_RESULT) {
-            Game game = (Game) data.getSerializableExtra(NEW_GAME);
-            int position = data.getIntExtra(SELECTED_GAME_POSITION, -1);
+            if (data != null) {
+                Game game = (Game) data.getSerializableExtra(NEW_GAME);
+                int position = data.getIntExtra(SELECTED_GAME_POSITION, -1);
 
-            Intent result = new Intent();
-            result.putExtra(PlatformLibraryActivity.NEW_GAME, game);
-            result.putExtra(PlatformLibraryActivity.SELECTED_GAME_POSITION, position);
-            setResult(resultCode, result);
-            finish();
+                Intent result = new Intent();
+                result.putExtra(PlatformLibraryActivity.NEW_GAME, game);
+                result.putExtra(PlatformLibraryActivity.SELECTED_GAME_POSITION, position);
+                setResult(resultCode, result);
+                finish();
+            }
         }
     }
 
