@@ -1,38 +1,39 @@
 package com.jeeps.gamecollector;
 
 import android.animation.ArgbEvaluator;
-import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import com.jeeps.gamecollector.model.Game;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.palette.graphics.Palette;
-
 import android.transition.Explode;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.palette.graphics.Palette;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.jeeps.gamecollector.model.Game;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.net.URL;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.jeeps.gamecollector.PlatformLibraryActivity.CURRENT_PLATFORM;
+import static com.jeeps.gamecollector.PlatformLibraryActivity.CURRENT_PLATFORM_NAME;
+import static com.jeeps.gamecollector.PlatformLibraryActivity.EDIT_GAME_RESULT;
+import static com.jeeps.gamecollector.PlatformLibraryActivity.NEW_GAME;
+import static com.jeeps.gamecollector.PlatformLibraryActivity.SELECTED_GAME;
+import static com.jeeps.gamecollector.PlatformLibraryActivity.SELECTED_GAME_POSITION;
 
 public class GameDetailsActivity extends AppCompatActivity {
 
@@ -68,23 +69,40 @@ public class GameDetailsActivity extends AppCompatActivity {
 
         //Get intent contents
         Intent intent = getIntent();
-        platformId = intent.getStringExtra(PlatformLibraryActivity.CURRENT_PLATFORM);
-        platformName = intent.getStringExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME);
-        selectedGame = (Game) intent.getSerializableExtra(PlatformLibraryActivity.SELECTED_GAME);
-        selectedGamePosition = intent.getIntExtra(PlatformLibraryActivity.SELECTED_GAME_POSITION, -1);
+        platformId = intent.getStringExtra(CURRENT_PLATFORM);
+        platformName = intent.getStringExtra(CURRENT_PLATFORM_NAME);
+        selectedGame = (Game) intent.getSerializableExtra(SELECTED_GAME);
+        selectedGamePosition = intent.getIntExtra(SELECTED_GAME_POSITION, -1);
 
         populateViews();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == EDIT_GAME_RESULT) {
+            Game game = (Game) data.getSerializableExtra(NEW_GAME);
+            int position = data.getIntExtra(SELECTED_GAME_POSITION, -1);
+
+            Intent result = new Intent();
+            result.putExtra(PlatformLibraryActivity.NEW_GAME, game);
+            result.putExtra(PlatformLibraryActivity.SELECTED_GAME_POSITION, position);
+            setResult(resultCode, result);
+            finish();
+        }
     }
 
     private void populateViews() {
         Picasso.get().load(selectedGame.getImageUri()).into(gameCoverView);
         String title = !selectedGame.getShortName().isEmpty() ? selectedGame.getShortName() : selectedGame.getName();
         gameTitleText.setText(title);
-        gamePublisherText.setText(selectedGame.getPublisher());
+        if (selectedGame.getPublisher().isEmpty())
+            gamePublisherText.setVisibility(View.GONE);
+        else
+            gamePublisherText.setText(selectedGame.getPublisher());
         gamePlatformText.setText(selectedGame.getPlatform());
 
-        fabButton.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
+        fabButton.setOnClickListener(view -> editGame());
 
         getCoverColors();
     }
@@ -114,5 +132,16 @@ public class GameDetailsActivity extends AppCompatActivity {
         colorAnimation.start();
 
         getWindow().setStatusBarColor(colorTo);
+    }
+
+    private void editGame() {
+        //Start add game activity to edit selected
+        Intent intent = new Intent(this, AddGameActivity.class);
+        intent.putExtra(CURRENT_PLATFORM, platformId);
+        intent.putExtra(CURRENT_PLATFORM_NAME, platformName);
+        intent.putExtra(SELECTED_GAME, selectedGame);
+        intent.putExtra(SELECTED_GAME_POSITION, selectedGamePosition);
+
+        startActivityForResult(intent, EDIT_GAME_RESULT);
     }
 }
