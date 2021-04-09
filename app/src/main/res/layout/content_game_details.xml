@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+    <ImageView
+        android:id="@+id/game_cover"
+        android:transitionName="cover"
+        android:layout_width="150dp"
+        android:layout_height="200dp"
+        android:layout_margin="10dp"
+        android:background="#cccccc"
+        android:scaleType="fitCenter"
+        android:src="@drawable/edit_picture"
+        android:elevation="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:layout_margin="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/game_cover"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:orientation="vertical"
+            android:layout_alignParentTop="true">
+
+            <TextView
+                android:id="@+id/game_title"
+                android:transitionName="gameTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                tools:text="Game title"
+                android:textSize="19sp"
+                android:textColor="@color/textColorPrimary" />
+
+            <TextView
+                android:id="@+id/game_publisher"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Game publisher"
+                android:textSize="15sp"
+                android:textColor="@color/textSecondaryColor" />
+
+            <TextView
+                android:id="@+id/game_platform"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="5dp"
+                tools:text="Platform"
+                android:textSize="17sp"
+                android:textColor="@color/textSecondaryColor"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="#555e5e5e"
+                android:layout_marginBottom="5dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_alignParentBottom="true">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Completed"
+                android:textSize="20sp"
+                android:textColor="@color/textSecondaryColor"/>
+
+            <com.varunest.sparkbutton.SparkButton
+                android:id="@+id/complete_switch"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                app:sparkbutton_activeImage="@drawable/completed_active"
+                app:sparkbutton_iconSize="30dp"
+                app:sparkbutton_inActiveImage="@drawable/completed_inactive"
+                app:sparkbutton_primaryColor="@color/success"
+                app:sparkbutton_secondaryColor="@color/inactive" />
+
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

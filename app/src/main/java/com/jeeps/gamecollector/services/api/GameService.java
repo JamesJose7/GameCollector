@@ -1,6 +1,7 @@
 package com.jeeps.gamecollector.services.api;
 
 import com.jeeps.gamecollector.model.Game;
+import com.jeeps.gamecollector.model.ToggleCompletionResponse;
 
 import java.util.List;
 
@@ -39,4 +40,8 @@ public interface GameService {
     Call<ResponseBody> uploadGameCover(@Header("Authorization") String authorization,
                                        @Path("gameId") String gameId,
                                        @Part MultipartBody.Part body);
+
+    @POST("/api/games/toggleCompletion/{gameId}")
+    Call<ToggleCompletionResponse> toggleGameCompletion(@Header("Authorization") String authorization,
+                                                        @Path("gameId") String gameId);
 }

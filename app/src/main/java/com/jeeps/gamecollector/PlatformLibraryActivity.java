@@ -1,18 +1,23 @@
 package com.jeeps.gamecollector;
 
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.transition.Explode;
 import android.util.Log;
+import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -84,6 +89,10 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Setup exit transition
+        getWindow().requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS);
+        getWindow().setExitTransition(new Explode());
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_platform_library);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -108,7 +117,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         platformName = intent.getStringExtra(CURRENT_PLATFORM_NAME);
 
         //Display cover
-        Picasso.with(context).load(PlatformCovers.getPlatformCover(platformName)).into(backdrop);
+        Picasso.get().load(PlatformCovers.getPlatformCover(platformName)).into(backdrop);
 
         initializeGamesAdapter();
 
@@ -287,15 +296,21 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     }
 
     @Override
-    public void editGame(int position) {
+    public void editGame(int position, View imageView, TextView gameTitle) {
         Game game = games.get(position);
         //Start add game activity to edit selected
-        Intent intent = new Intent(context, AddGameActivity.class);
+        Intent intent = new Intent(context, GameDetailsActivity.class);
         intent.putExtra(CURRENT_PLATFORM, platformId);
         intent.putExtra(CURRENT_PLATFORM_NAME, platformName);
         intent.putExtra(SELECTED_GAME, game);
         intent.putExtra(SELECTED_GAME_POSITION, position);
-        startActivityForResult(intent, EDIT_GAME_RESULT);
+
+        ActivityOptions activityOptions = ActivityOptions
+                .makeSceneTransitionAnimation(this,
+                        Pair.create(imageView, "cover"),
+                        Pair.create(gameTitle, "gameTitle"));
+        startActivityForResult(intent, EDIT_GAME_RESULT,
+                activityOptions.toBundle());
     }
 
     /**

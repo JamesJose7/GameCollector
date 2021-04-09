@@ -75,11 +75,11 @@ public class PlatformsListAdapter extends RecyclerView.Adapter<PlatformsListAdap
 
             if (platform.getImageUri() != null)
                 if (!platform.getImageUri().isEmpty())
-                    Picasso.with(mContext).load(platform.getImageUri()).into(holder.platformImage);
+                    Picasso.get().load(platform.getImageUri()).into(holder.platformImage);
                 else
-                    Picasso.with(mContext).load(R.drawable.game_controller).into(holder.platformImage);
+                    Picasso.get().load(R.drawable.game_controller).into(holder.platformImage);
             else
-                Picasso.with(mContext).load(R.drawable.game_controller).into(holder.platformImage);
+                Picasso.get().load(R.drawable.game_controller).into(holder.platformImage);
 
             holder.platformName.setText(platform.getName());
 

@@ -30,7 +30,7 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
 
     public interface GameCardAdapterListener {
         void deleteSelectedGame(int position);
-        void editGame(int position);
+        void editGame(int position, View imageView, TextView titleView);
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -76,7 +76,7 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
         holder.coverProgressBar.setVisibility(View.VISIBLE);
         //load image cover
         if (!game.getImageUri().isEmpty()) {
-            Picasso.with(mContext).load(game.getImageUri()).into(holder.cover, new Callback() {
+            Picasso.get().load(game.getImageUri()).into(holder.cover, new Callback() {
                 @Override
                 public void onSuccess() {
                     //Hide progress bar when image is finished loading
@@ -84,7 +84,7 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
                 }
 
                 @Override
-                public void onError() {
+                public void onError(Exception e) {
                     //Hide progress bar when image is finished loading
                     holder.coverProgressBar.setVisibility(View.INVISIBLE);
                     //Display temp error message
@@ -117,7 +117,7 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
             return true;
         });
 
-        holder.cover.setOnClickListener(view -> listener.editGame(position));
+        holder.cover.setOnClickListener(view -> listener.editGame(position, holder.cover, holder.title));
     }
 
     @Override
