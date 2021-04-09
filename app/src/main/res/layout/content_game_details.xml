@@ -85,7 +85,7 @@
                 android:textColor="@color/textSecondaryColor"/>
 
             <com.varunest.sparkbutton.SparkButton
-                android:id="@+id/spark_button"
+                android:id="@+id/complete_switch"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 app:sparkbutton_activeImage="@drawable/completed_active"
