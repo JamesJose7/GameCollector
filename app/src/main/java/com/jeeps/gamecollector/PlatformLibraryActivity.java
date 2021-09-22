@@ -1,7 +1,6 @@
 package com.jeeps.gamecollector;
 
 import android.app.ActivityOptions;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -53,7 +52,7 @@ import com.jeeps.gamecollector.views.GridSpacingItemDecoration;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -91,6 +90,8 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     private SharedPreferences sharedPreferences;
     private String gameToBeDeleted;
     private FirebaseFirestore db;
+
+    private Comparator<Game> currentComparator = new GameByNameComparator();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,7 +194,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                         games.add(game);
                     }
                     // Sort A-z
-                    games.sort(new GameByNameComparator());
+                    sortGamesWithCurrentComparator();
                     gamesOriginalList = new ArrayList<>(games);
                     // Update adapter
                     updateGamesAdapter();
@@ -364,30 +365,36 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         switch (id) {
             case R.id.action_filter_alph:
                 //Sort A-z
-                games.sort(new GameByNameComparator());
+                currentComparator = new GameByNameComparator();
+                sortGamesWithCurrentComparator();
                 updateGamesAdapter();
                 return true;
             case R.id.action_filter_alph_desc:
                 //Sort A-z desc
-                games.sort(new GameByNameComparator(true));
+                currentComparator = new GameByNameComparator(true);
+                sortGamesWithCurrentComparator();
                 updateGamesAdapter();
                 return true;
             case R.id.action_filter_physical:
                 //Sort physical
-                games.sort(new GameByPhysicalComparator(true));
+                currentComparator = new GameByPhysicalComparator(true);
+                sortGamesWithCurrentComparator();
                 updateGamesAdapter();
                 return true;
             case R.id.action_filter_alph_physical_desc:
-                games.sort(new GameByPhysicalComparator());
+                currentComparator = new GameByPhysicalComparator();
+                sortGamesWithCurrentComparator();
                 updateGamesAdapter();
                 return true;
             case R.id.action_filter_timesc:
                 //Sort physical
-                games.sort(new GameByTimesPlayedComparator());
+                currentComparator = new GameByTimesPlayedComparator();
+                sortGamesWithCurrentComparator();
                 updateGamesAdapter();
                 return true;
             case R.id.action_filter_alph_timesc_desc:
-                games.sort(new GameByTimesPlayedComparator(true));
+                currentComparator = new GameByTimesPlayedComparator(true);
+                sortGamesWithCurrentComparator();
                 updateGamesAdapter();
                 return true;
         }
@@ -406,6 +413,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
 
     private void handleSearch(String query) {
         games = gamesOriginalList.stream()
+                .sorted(currentComparator)
                 .filter(game -> isGameNameSimilar(game, query))
                 .collect(Collectors.toList());
         updateGamesAdapter();
@@ -421,5 +429,9 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     private void updateGamesAdapter() {
         gamesAdapter.setGames(games);
         gamesAdapter.notifyDataSetChanged();
+    }
+
+    private void sortGamesWithCurrentComparator() {
+        games.sort(currentComparator);
     }
 }
