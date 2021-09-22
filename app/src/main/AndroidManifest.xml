@@ -16,7 +16,7 @@
         <activity
             android:name=".GameDetailsActivity"
             android:label="@string/title_activity_game_details"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".AddPlatformActivity"
             android:label="@string/title_activity_add_platform"

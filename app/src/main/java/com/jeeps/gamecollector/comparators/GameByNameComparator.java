@@ -23,7 +23,7 @@ public class GameByNameComparator implements Comparator<Game> {
     @Override
     public int compare(Game game1, Game game2) {
         if (!desc)
-            return game1.getName().compareTo(game2.getName());
-        return (game1.getName().compareTo(game2.getName())) * -1;
+            return game1.getName().compareToIgnoreCase(game2.getName());
+        return (game1.getName().compareToIgnoreCase(game2.getName())) * -1;
     }
 }
