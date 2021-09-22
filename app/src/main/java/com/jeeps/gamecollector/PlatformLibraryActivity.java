@@ -12,6 +12,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -50,8 +52,9 @@ import com.jeeps.gamecollector.views.GridSpacingItemDecoration;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -81,11 +84,14 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     private String platformId;
     private String platformName;
     private GameCardAdapter gamesAdapter;
+    private List<Game> gamesOriginalList;
     private List<Game> games;
     private CurrentUser currentUser;
     private SharedPreferences sharedPreferences;
     private String gameToBeDeleted;
     private FirebaseFirestore db;
+
+    private Comparator<Game> currentComparator = new GameByNameComparator();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,9 +194,10 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                         games.add(game);
                     }
                     // Sort A-z
-                    Collections.sort(games, new GameByNameComparator());
+                    sortGamesWithCurrentComparator();
+                    gamesOriginalList = new ArrayList<>(games);
                     // Update adapter
-                    gamesAdapter.notifyDataSetChanged();
+                    updateGamesAdapter();
                 });
     }
 
@@ -324,7 +331,25 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_platform_library, menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_platform_library, menu);
+
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.search).getActionView();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                handleSearch(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                handleSearch(newText);
+                return false;
+            }
+        });
         return true;
     }
 
@@ -340,31 +365,37 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         switch (id) {
             case R.id.action_filter_alph:
                 //Sort A-z
-                Collections.sort(games, new GameByNameComparator());
-                gamesAdapter.notifyDataSetChanged();
+                currentComparator = new GameByNameComparator();
+                sortGamesWithCurrentComparator();
+                updateGamesAdapter();
                 return true;
             case R.id.action_filter_alph_desc:
                 //Sort A-z desc
-                Collections.sort(games, new GameByNameComparator(true));
-                gamesAdapter.notifyDataSetChanged();
+                currentComparator = new GameByNameComparator(true);
+                sortGamesWithCurrentComparator();
+                updateGamesAdapter();
                 return true;
             case R.id.action_filter_physical:
                 //Sort physical
-                Collections.sort(games, new GameByPhysicalComparator(true));
-                gamesAdapter.notifyDataSetChanged();
+                currentComparator = new GameByPhysicalComparator(true);
+                sortGamesWithCurrentComparator();
+                updateGamesAdapter();
                 return true;
             case R.id.action_filter_alph_physical_desc:
-                Collections.sort(games, new GameByPhysicalComparator());
-                gamesAdapter.notifyDataSetChanged();
+                currentComparator = new GameByPhysicalComparator();
+                sortGamesWithCurrentComparator();
+                updateGamesAdapter();
                 return true;
             case R.id.action_filter_timesc:
                 //Sort physical
-                Collections.sort(games, new GameByTimesPlayedComparator());
-                gamesAdapter.notifyDataSetChanged();
+                currentComparator = new GameByTimesPlayedComparator();
+                sortGamesWithCurrentComparator();
+                updateGamesAdapter();
                 return true;
             case R.id.action_filter_alph_timesc_desc:
-                Collections.sort(games, new GameByTimesPlayedComparator(true));
-                gamesAdapter.notifyDataSetChanged();
+                currentComparator = new GameByTimesPlayedComparator(true);
+                sortGamesWithCurrentComparator();
+                updateGamesAdapter();
                 return true;
         }
 
@@ -378,5 +409,29 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         // Delete a game if it was pending deletion
         if (gameToBeDeleted != null)
             deleteGame();
+    }
+
+    private void handleSearch(String query) {
+        games = gamesOriginalList.stream()
+                .sorted(currentComparator)
+                .filter(game -> isGameNameSimilar(game, query))
+                .collect(Collectors.toList());
+        updateGamesAdapter();
+    }
+
+    private boolean isGameNameSimilar(Game game, String query) {
+        String name = game.getName().toLowerCase();
+        String shortName = game.getShortName().toLowerCase();
+        String queryNormalized = query.toLowerCase();
+        return name.contains(queryNormalized) || shortName.contains(queryNormalized);
+    }
+
+    private void updateGamesAdapter() {
+        gamesAdapter.setGames(games);
+        gamesAdapter.notifyDataSetChanged();
+    }
+
+    private void sortGamesWithCurrentComparator() {
+        games.sort(currentComparator);
     }
 }

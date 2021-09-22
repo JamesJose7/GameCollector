@@ -17,6 +17,7 @@ import com.jeeps.gamecollector.model.Game;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,31 +29,9 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
     private List<Game> mGames;
     private GameCardAdapterListener listener;
 
-    public interface GameCardAdapterListener {
-        void deleteSelectedGame(int position);
-        void editGame(int position, View imageView, TextView titleView);
-    }
-
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-        public ImageView cover;
-        public ImageView isDigital;
-        public TextView title;
-        public ImageView completed;
-        public ProgressBar coverProgressBar;
-
-        public MyViewHolder(View view) {
-            super(view);
-            cover = view.findViewById(R.id.card_game_cover);
-            title = view.findViewById(R.id.card_game_title);
-            isDigital = view.findViewById(R.id.card_is_digital);
-            completed = view.findViewById(R.id.card_game_completed);
-            coverProgressBar = view.findViewById(R.id.cover_progressbar);
-        }
-    }
-
     public GameCardAdapter(Context context, List<Game> games, GameCardAdapterListener listener) {
         mContext = context;
-        mGames = games;
+        mGames = new ArrayList<>(games);
         this.listener = listener;
     }
 
@@ -123,5 +102,32 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
     @Override
     public int getItemCount() {
         return mGames.size();
+    }
+
+    public void setGames(List<Game> games) {
+        mGames.clear();
+        mGames.addAll(games);
+    }
+
+    public interface GameCardAdapterListener {
+        void deleteSelectedGame(int position);
+        void editGame(int position, View imageView, TextView titleView);
+    }
+
+    public class MyViewHolder extends RecyclerView.ViewHolder {
+        public ImageView cover;
+        public ImageView isDigital;
+        public TextView title;
+        public ImageView completed;
+        public ProgressBar coverProgressBar;
+
+        public MyViewHolder(View view) {
+            super(view);
+            cover = view.findViewById(R.id.card_game_cover);
+            title = view.findViewById(R.id.card_game_title);
+            isDigital = view.findViewById(R.id.card_is_digital);
+            completed = view.findViewById(R.id.card_game_completed);
+            coverProgressBar = view.findViewById(R.id.cover_progressbar);
+        }
     }
 }
