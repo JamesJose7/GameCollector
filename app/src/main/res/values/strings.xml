@@ -25,4 +25,8 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="hours_template">%1s Hours</string>
+    <string name="main_story_label">Main Story</string>
+    <string name="main_extra_label">Main + Extra</string>
+    <string name="completionist_label">Completionist</string>
 </resources>

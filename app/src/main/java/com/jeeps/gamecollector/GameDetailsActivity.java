@@ -27,12 +27,16 @@ import com.google.android.material.snackbar.Snackbar;
 import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Game;
 import com.jeeps.gamecollector.model.ToggleCompletionResponse;
+import com.jeeps.gamecollector.model.hltb.GameplayHoursStats;
 import com.jeeps.gamecollector.services.api.ApiClient;
 import com.jeeps.gamecollector.services.api.GameService;
+import com.jeeps.gamecollector.services.api.StatsService;
 import com.jeeps.gamecollector.utils.UserUtils;
 import com.squareup.picasso.Picasso;
 import com.varunest.sparkbutton.SparkButton;
 import com.varunest.sparkbutton.SparkEventListener;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URL;
@@ -49,6 +53,7 @@ import static com.jeeps.gamecollector.PlatformLibraryActivity.EDIT_GAME_RESULT;
 import static com.jeeps.gamecollector.PlatformLibraryActivity.NEW_GAME;
 import static com.jeeps.gamecollector.PlatformLibraryActivity.SELECTED_GAME;
 import static com.jeeps.gamecollector.PlatformLibraryActivity.SELECTED_GAME_POSITION;
+import static com.jeeps.gamecollector.utils.FormatUtils.formatDecimal;
 
 public class GameDetailsActivity extends AppCompatActivity {
 
@@ -66,6 +71,13 @@ public class GameDetailsActivity extends AppCompatActivity {
     FloatingActionButton fabButton;
     @BindView(R.id.complete_switch)
     SparkButton completeSwitch;
+
+    @BindView(R.id.story_hours)
+    TextView mainStoryHoursTv;
+    @BindView(R.id.main_extra_hours)
+    TextView mainExtraHoursTv;
+    @BindView(R.id.completionist_hours)
+    TextView completionistHoursTv;
 
     private Toolbar toolbar;
     private String platformId;
@@ -137,6 +149,7 @@ public class GameDetailsActivity extends AppCompatActivity {
         fabButton.setOnClickListener(view -> editGame());
 
         getCoverColors();
+        getGameplayHours(selectedGame.getName());
     }
 
     private void setupCompleteSwitch() {
@@ -216,5 +229,35 @@ public class GameDetailsActivity extends AppCompatActivity {
         intent.putExtra(SELECTED_GAME_POSITION, selectedGamePosition);
 
         startActivityForResult(intent, EDIT_GAME_RESULT);
+    }
+
+    private void getGameplayHours(String gameName) {
+        StatsService statsService = ApiClient.createService(StatsService.class);
+        statsService.getGameHours(gameName)
+                .enqueue(new Callback<GameplayHoursStats>() {
+                    @Override
+                    public void onResponse(@NotNull Call<GameplayHoursStats> call,
+                                           @NotNull Response<GameplayHoursStats> response) {
+                        GameplayHoursStats stats = response.body();
+                        if (stats != null) {
+                            mainStoryHoursTv.setText(getString(
+                                    R.string.hours_template,
+                                    formatDecimal(stats.getGameplayMain())));
+                            mainExtraHoursTv.setText(getString(
+                                    R.string.hours_template,
+                                    formatDecimal(stats.getGameplayMainExtra())));
+                            completionistHoursTv.setText(getString(
+                                    R.string.hours_template,
+                                    formatDecimal(stats.getGameplayCompletionist())));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Call<GameplayHoursStats> call,
+                                          @NotNull Throwable t) {
+                        t.printStackTrace();
+                        // Hide gameplay hours card
+                    }
+                });
     }
 }
