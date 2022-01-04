@@ -53,6 +53,7 @@ import static com.jeeps.gamecollector.PlatformLibraryActivity.EDIT_GAME_RESULT;
 import static com.jeeps.gamecollector.PlatformLibraryActivity.NEW_GAME;
 import static com.jeeps.gamecollector.PlatformLibraryActivity.SELECTED_GAME;
 import static com.jeeps.gamecollector.PlatformLibraryActivity.SELECTED_GAME_POSITION;
+import static com.jeeps.gamecollector.utils.ColorsUtils.getColorByHoursRange;
 import static com.jeeps.gamecollector.utils.FormatUtils.formatDecimal;
 
 public class GameDetailsActivity extends AppCompatActivity {
@@ -240,15 +241,7 @@ public class GameDetailsActivity extends AppCompatActivity {
                                            @NotNull Response<GameplayHoursStats> response) {
                         GameplayHoursStats stats = response.body();
                         if (stats != null) {
-                            mainStoryHoursTv.setText(getString(
-                                    R.string.hours_template,
-                                    formatDecimal(stats.getGameplayMain())));
-                            mainExtraHoursTv.setText(getString(
-                                    R.string.hours_template,
-                                    formatDecimal(stats.getGameplayMainExtra())));
-                            completionistHoursTv.setText(getString(
-                                    R.string.hours_template,
-                                    formatDecimal(stats.getGameplayCompletionist())));
+                            formatGameplayHours(stats);
                         }
                     }
 
@@ -259,5 +252,19 @@ public class GameDetailsActivity extends AppCompatActivity {
                         // Hide gameplay hours card
                     }
                 });
+    }
+
+    private void formatGameplayHours(GameplayHoursStats stats) {
+        mainStoryHoursTv.setText(getString(R.string.hours_template, formatDecimal(stats.getGameplayMain())));
+        mainStoryHoursTv.setTextColor(getColorByHoursRange(
+                GameDetailsActivity.this, stats.getGameplayMain()));
+
+        mainExtraHoursTv.setText(getString(R.string.hours_template, formatDecimal(stats.getGameplayMainExtra())));
+        mainExtraHoursTv.setTextColor(getColorByHoursRange(
+                GameDetailsActivity.this, stats.getGameplayMainExtra()));
+
+        completionistHoursTv.setText(getString(R.string.hours_template, formatDecimal(stats.getGameplayCompletionist())));
+        completionistHoursTv.setTextColor(getColorByHoursRange(
+                GameDetailsActivity.this, stats.getGameplayCompletionist()));
     }
 }

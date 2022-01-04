@@ -12,4 +12,11 @@
     <!-- Others -->
     <color name="success">#8BC34A</color>
     <color name="inactive">#BDBDBD</color>
+
+    <!-- Hours range palette -->
+    <color name="hours_range_20">#508104</color>
+    <color name="hours_range_40">#9e8e01</color>
+    <color name="hours_range_60">#f3b800</color>
+    <color name="hours_range_80">#db8200</color>
+    <color name="hours_range_100">#b64201</color>
 </resources>
