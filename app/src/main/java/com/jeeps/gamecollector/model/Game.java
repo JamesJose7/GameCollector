@@ -23,6 +23,8 @@ public class Game implements Serializable {
     private String publisher;
     private int timesCompleted;
 
+    private GameHoursStats gameHoursStats;
+
     public Game(String imageUri, boolean isPhysical, String name, String shortName,
                 String platformId, String platform, String publisherId, String publisher) {
         this.imageUri = imageUri;
@@ -136,5 +138,13 @@ public class Game implements Serializable {
 
     public void setTimesCompleted(int timesCompleted) {
         this.timesCompleted = timesCompleted;
+    }
+
+    public GameHoursStats getGameHoursStats() {
+        return gameHoursStats;
+    }
+
+    public void setGameHoursStats(GameHoursStats gameHoursStats) {
+        this.gameHoursStats = gameHoursStats;
     }
 }

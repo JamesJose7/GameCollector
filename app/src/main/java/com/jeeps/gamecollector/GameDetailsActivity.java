@@ -24,8 +24,10 @@ import androidx.palette.graphics.Palette;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Game;
+import com.jeeps.gamecollector.model.GameHoursStats;
 import com.jeeps.gamecollector.model.ToggleCompletionResponse;
 import com.jeeps.gamecollector.model.hltb.GameplayHoursStats;
 import com.jeeps.gamecollector.services.api.ApiClient;
@@ -87,6 +89,8 @@ public class GameDetailsActivity extends AppCompatActivity {
     private int selectedGamePosition;
     private CurrentUser currentUser;
 
+    private FirebaseFirestore db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Setup exit transition
@@ -99,6 +103,9 @@ public class GameDetailsActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
+
+        // Get Firestore instance
+        db = FirebaseFirestore.getInstance();
 
         // Get local data
         SharedPreferences sharedPreferences = getSharedPreferences(
@@ -150,6 +157,11 @@ public class GameDetailsActivity extends AppCompatActivity {
         fabButton.setOnClickListener(view -> editGame());
 
         getCoverColors();
+
+        if (selectedGame.getGameHoursStats() != null) {
+            formatGameplayHours(new GameplayHoursStats(selectedGame.getGameHoursStats()));
+        }
+
         getGameplayHours(selectedGame.getName());
     }
 
@@ -241,7 +253,11 @@ public class GameDetailsActivity extends AppCompatActivity {
                                            @NotNull Response<GameplayHoursStats> response) {
                         GameplayHoursStats stats = response.body();
                         if (stats != null) {
-                            formatGameplayHours(stats);
+                            if (selectedGame.getGameHoursStats() == null ||
+                                isStoredHoursDifferentFromIgbd(selectedGame.getGameHoursStats(), stats)) {
+                                formatGameplayHours(stats);
+                                updateGameHours(stats);
+                            }
                         }
                     }
 
@@ -251,6 +267,16 @@ public class GameDetailsActivity extends AppCompatActivity {
                         t.printStackTrace();
                         // Hide gameplay hours card
                     }
+                });
+    }
+
+    private void updateGameHours(GameplayHoursStats stats) {
+        db.collection("games")
+                .document(selectedGame.getId())
+                .update("gameHoursStats", new GameHoursStats(stats))
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Failed when updating gameplay hours", Toast.LENGTH_LONG).show();
                 });
     }
 
@@ -266,5 +292,11 @@ public class GameDetailsActivity extends AppCompatActivity {
         completionistHoursTv.setText(getString(R.string.hours_template, formatDecimal(stats.getGameplayCompletionist())));
         completionistHoursTv.setTextColor(getColorByHoursRange(
                 GameDetailsActivity.this, stats.getGameplayCompletionist()));
+    }
+
+    private boolean isStoredHoursDifferentFromIgbd(GameHoursStats storedHours, GameplayHoursStats igdbHours) {
+        return storedHours.getGameplayCompletionist() != igdbHours.getGameplayCompletionist() ||
+                storedHours.getGameplayMain() != igdbHours.getGameplayMain() ||
+                storedHours.getGameplayMainExtra() != igdbHours.getGameplayMainExtra();
     }
 }

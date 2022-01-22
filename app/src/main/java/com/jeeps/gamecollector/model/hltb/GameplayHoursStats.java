@@ -1,5 +1,7 @@
 package com.jeeps.gamecollector.model.hltb;
 
+import com.jeeps.gamecollector.model.GameHoursStats;
+
 import java.util.List;
 
 public class GameplayHoursStats {
@@ -15,6 +17,12 @@ public class GameplayHoursStats {
     private double similarity;
     private String searchTerm;
     private List<Object> playableOn;
+
+    public GameplayHoursStats(GameHoursStats gameHoursStats) {
+        gameplayMain = gameHoursStats.getGameplayMain();
+        gameplayMainExtra = gameHoursStats.getGameplayMainExtra();
+        gameplayCompletionist = gameHoursStats.getGameplayCompletionist();
+    }
 
     public GameplayHoursStats() {
     }
