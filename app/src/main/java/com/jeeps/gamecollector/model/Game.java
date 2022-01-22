@@ -1,5 +1,6 @@
 package com.jeeps.gamecollector.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -24,6 +25,9 @@ public class Game implements Serializable {
     private int timesCompleted;
 
     private GameHoursStats gameHoursStats;
+
+    @Expose(serialize = false, deserialize = false)
+    private String currentSortStat;
 
     public Game(String imageUri, boolean isPhysical, String name, String shortName,
                 String platformId, String platform, String publisherId, String publisher) {
@@ -146,5 +150,13 @@ public class Game implements Serializable {
 
     public void setGameHoursStats(GameHoursStats gameHoursStats) {
         this.gameHoursStats = gameHoursStats;
+    }
+
+    public String getCurrentSortStat() {
+        return currentSortStat;
+    }
+
+    public void setCurrentSortStat(String currentSortStat) {
+        this.currentSortStat = currentSortStat;
     }
 }

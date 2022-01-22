@@ -39,11 +39,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.jeeps.gamecollector.adapters.GameCardAdapter;
+import com.jeeps.gamecollector.comparators.GameByHoursCompletionistComparator;
+import com.jeeps.gamecollector.comparators.GameByHoursMainExtraComparator;
+import com.jeeps.gamecollector.comparators.GameByHoursStoryComparator;
 import com.jeeps.gamecollector.comparators.GameByNameComparator;
 import com.jeeps.gamecollector.comparators.GameByPhysicalComparator;
 import com.jeeps.gamecollector.comparators.GameByTimesPlayedComparator;
 import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Game;
+import com.jeeps.gamecollector.model.SortStat;
 import com.jeeps.gamecollector.services.api.ApiClient;
 import com.jeeps.gamecollector.services.api.GameService;
 import com.jeeps.gamecollector.utils.PlatformCovers;
@@ -362,6 +366,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
 
         //noinspection SimplifiableIfStatement
 
+        gamesAdapter.setSortStat(SortStat.NONE);
         switch (id) {
             case R.id.action_filter_alph:
                 //Sort A-z
@@ -394,6 +399,42 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                 return true;
             case R.id.action_filter_alph_timesc_desc:
                 currentComparator = new GameByTimesPlayedComparator(true);
+                sortGamesWithCurrentComparator();
+                updateGamesAdapter();
+                return true;
+            case R.id.action_filter_hoursmain:
+                currentComparator = new GameByHoursStoryComparator();
+                gamesAdapter.setSortStat(SortStat.HOURS_MAIN);
+                sortGamesWithCurrentComparator();
+                updateGamesAdapter();
+                return true;
+            case R.id.action_filter_hoursmain_desc:
+                currentComparator = new GameByHoursStoryComparator(true);
+                gamesAdapter.setSortStat(SortStat.HOURS_MAIN);
+                sortGamesWithCurrentComparator();
+                updateGamesAdapter();
+                return true;
+            case R.id.action_filter_hoursme:
+                currentComparator = new GameByHoursMainExtraComparator();
+                gamesAdapter.setSortStat(SortStat.HOURS_MAIN_EXTRA);
+                sortGamesWithCurrentComparator();
+                updateGamesAdapter();
+                return true;
+            case R.id.action_filter_hoursme_desc:
+                currentComparator = new GameByHoursMainExtraComparator(true);
+                gamesAdapter.setSortStat(SortStat.HOURS_MAIN_EXTRA);
+                sortGamesWithCurrentComparator();
+                updateGamesAdapter();
+                return true;
+            case R.id.action_filter_hourscompletionist:
+                currentComparator = new GameByHoursCompletionistComparator();
+                gamesAdapter.setSortStat(SortStat.HOURS_COMPLETIONIST);
+                sortGamesWithCurrentComparator();
+                updateGamesAdapter();
+                return true;
+            case R.id.action_filter_hourscompletionist_desc:
+                currentComparator = new GameByHoursCompletionistComparator(true);
+                gamesAdapter.setSortStat(SortStat.HOURS_COMPLETIONIST);
                 sortGamesWithCurrentComparator();
                 updateGamesAdapter();
                 return true;

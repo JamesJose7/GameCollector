@@ -59,6 +59,48 @@
                 android:title="Times completed"
                 app:showAsAction="never"/>
 
+            <item
+                android:id="@+id/action_filter_hoursmain"
+                android:icon="@drawable/ic_up"
+                android:orderInCategory="106"
+                android:title="Hours (Main)"
+                app:showAsAction="never"/>
+
+            <item
+                android:id="@+id/action_filter_hoursmain_desc"
+                android:icon="@drawable/ic_down"
+                android:orderInCategory="107"
+                android:title="Hours (Main)"
+                app:showAsAction="never"/>
+
+            <item
+                android:id="@+id/action_filter_hoursme"
+                android:icon="@drawable/ic_up"
+                android:orderInCategory="108"
+                android:title="Hours (Main + Extra)"
+                app:showAsAction="never"/>
+
+            <item
+                android:id="@+id/action_filter_hoursme_desc"
+                android:icon="@drawable/ic_down"
+                android:orderInCategory="109"
+                android:title="Hours (Main + Extra)"
+                app:showAsAction="never"/>
+
+            <item
+                android:id="@+id/action_filter_hourscompletionist"
+                android:icon="@drawable/ic_up"
+                android:orderInCategory="110"
+                android:title="Hours (Completionist)"
+                app:showAsAction="never"/>
+
+            <item
+                android:id="@+id/action_filter_hourscompletionist_desc"
+                android:icon="@drawable/ic_down"
+                android:orderInCategory="111"
+                android:title="Hours (Completionist)"
+                app:showAsAction="never"/>
+
         </menu>
 
     </item>

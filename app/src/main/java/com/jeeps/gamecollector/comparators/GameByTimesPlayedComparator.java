@@ -23,8 +23,8 @@ public class GameByTimesPlayedComparator implements Comparator<Game> {
     @Override
     public int compare(Game game1, Game game2) {
         if (!desc)
-            return ((Integer) game1.getTimesCompleted()).compareTo(game2.getTimesCompleted());
-        return ((Integer) game1.getTimesCompleted()).compareTo(game2.getTimesCompleted()) * -1;
+            return Integer.compare(game1.getTimesCompleted(), game2.getTimesCompleted());
+        return Integer.compare(game1.getTimesCompleted(), game2.getTimesCompleted()) * -1;
     }
 }
 
