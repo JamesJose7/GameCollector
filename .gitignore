@@ -69,6 +69,7 @@ captures/
 .idea/compiler.xml
 .idea/jarRepositories.xml
 .idea/modules
+.idea/misc.xml
 *.ipr
 
 # Keystore files
