@@ -7,8 +7,8 @@ android {
         applicationId "com.jeeps.gamecollector"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 16
-        versionName "2.7.3"
+        versionCode 17
+        versionName "2.7.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
