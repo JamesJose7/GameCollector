@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -186,13 +187,16 @@ public class GameDetailsActivity extends AppCompatActivity {
                 selectedGame.getId());
         toggleGameCompletion.enqueue(new Callback<ToggleCompletionResponse>() {
             @Override
-            public void onResponse(Call<ToggleCompletionResponse> call, Response<ToggleCompletionResponse> response) {
+            public void onResponse(@NonNull Call<ToggleCompletionResponse> call, @NonNull Response<ToggleCompletionResponse> response) {
                 if (response.isSuccessful()) {
                     ToggleCompletionResponse completionResponse = response.body();
-                    String message = completionResponse.isCompleted() ?
-                            "Marked as complete" :
-                            "Marked as incomplete";
-                    Snackbar.make(fabButton, message, Snackbar.LENGTH_SHORT).show();
+                    if (completionResponse != null) {
+                        String message = completionResponse.isCompleted() ?
+                                "Marked as complete" :
+                                "Marked as incomplete";
+                        Snackbar.make(fabButton, message, Snackbar.LENGTH_SHORT).show();
+                        selectedGame.setTimesCompleted(completionResponse.isCompleted() ? 1 : 0);
+                    }
                 } else {
                     Log.e(TAG, "Toggle game completion request failed");
                     Toast.makeText(GameDetailsActivity.this, "There was an error when updating the game, please try again", Toast.LENGTH_SHORT).show();

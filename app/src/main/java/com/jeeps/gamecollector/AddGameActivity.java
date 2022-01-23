@@ -176,6 +176,7 @@ public class AddGameActivity extends AppCompatActivity {
             mRadioGroup.check(mRadioDigital.getId());
         //Set times commpleted
         mNumberPicker.setValue(game.getTimesCompleted());
+        timesCompleted = game.getTimesCompleted();
         //Set publisher
         publisherEdit.setText(game.getPublisher());
     }
