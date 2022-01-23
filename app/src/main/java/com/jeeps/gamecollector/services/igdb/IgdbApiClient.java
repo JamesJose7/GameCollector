@@ -2,6 +2,7 @@ package com.jeeps.gamecollector.services.igdb;
 
 import android.util.Log;
 
+import com.jeeps.gamecollector.BuildConfig;
 import com.jeeps.gamecollector.services.api.ApiClient;
 import com.jeeps.gamecollector.services.api.UserService;
 
@@ -16,7 +17,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class IgdbApiClient {
     private static final String BASE_URL = "https://api.igdb.com/";
-    private static final String CLIENT_ID = "<client-id>";
+    private static final String CLIENT_ID = BuildConfig.IGDB_CLIENT_ID;
     private static String token = "";
 
     private static Retrofit.Builder builder =
