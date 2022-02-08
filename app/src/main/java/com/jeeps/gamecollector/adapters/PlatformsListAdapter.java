@@ -42,15 +42,18 @@ public class PlatformsListAdapter extends RecyclerView.Adapter<PlatformsListAdap
         this.platforms = platforms;
     }
 
-    public class PlatformsViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.platform_card) CardView platformCard;
-        @BindView(R.id.platform_card_image) ImageView platformImage;
-        @BindView(R.id.platform_card_border) View platformBorder;
-        @BindView(R.id.platform_card_name) TextView platformName;
+    public static class PlatformsViewHolder extends RecyclerView.ViewHolder {
+        CardView platformCard;
+        ImageView platformImage;
+        View platformBorder;
+        TextView platformName;
 
         public PlatformsViewHolder(@NonNull View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            platformCard = itemView.findViewById(R.id.platform_card);
+            platformImage = itemView.findViewById(R.id.platform_card_image);
+            platformBorder = itemView.findViewById(R.id.platform_card_border);
+            platformName = itemView.findViewById(R.id.platform_card_name);
         }
     }
 
