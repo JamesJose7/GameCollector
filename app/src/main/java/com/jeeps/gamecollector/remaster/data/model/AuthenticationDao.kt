@@ -23,7 +23,7 @@ class AuthenticationDao @Inject constructor(
 
     private val dispatcher = Dispatchers.IO
 
-    fun getCurrentUser(): FirebaseUser? {
+    fun getCurrentFirebaseUser(): FirebaseUser? {
         return firebaseAuth.currentUser
     }
 
@@ -65,6 +65,14 @@ class AuthenticationDao @Inject constructor(
         PreferencesWrapper.save(CURRENT_USER_TOKEN, token)
     }
 
+    fun saveUserLocally(user: User) {
+        PreferencesWrapper.save(CURRENT_USER, user)
+    }
+
+    fun getUser(): User? {
+        return PreferencesWrapper.read(CURRENT_USER, User::class.java)
+    }
+
     suspend fun getUserDetails(token: String): NetworkResponse<UserDetails, ErrorResponse> {
         return withContext(dispatcher) {
             apiUser.getUser("Bearer $token")
@@ -72,6 +80,7 @@ class AuthenticationDao @Inject constructor(
     }
 
     companion object {
+        private const val CURRENT_USER = "CURRENT_USER"
         private const val CURRENT_USER_TOKEN = "CURRENT_USER_TOKEN"
         private const val CURRENT_USER_USERNAME = "CURRENT_USER_USERNAME"
         private const val CURRENT_USER_UID = "CURRENT_USER_UID"

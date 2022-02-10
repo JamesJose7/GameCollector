@@ -14,7 +14,7 @@ class AuthenticationRepository @Inject constructor(
 ) {
 
     suspend fun isUserLoggedIn() : Boolean {
-        val currentUser = authenticationDao.getCurrentUser()
+        val currentUser = authenticationDao.getCurrentFirebaseUser()
         val token = authenticationDao.getUserToken(currentUser)
         // Refresh stored token
         authenticationDao.saveUserToken(token)
@@ -22,7 +22,7 @@ class AuthenticationRepository @Inject constructor(
     }
 
     suspend fun saveNewUser(authResponse: IdpResponse) {
-        val user = authenticationDao.getCurrentUser()
+        val user = authenticationDao.getCurrentFirebaseUser()
         val token = authenticationDao.getUserToken(user)
 
         // Save user details for new users
@@ -48,10 +48,12 @@ class AuthenticationRepository @Inject constructor(
             }
             is NetworkResponse.Success -> {
                 val userDetails = response.body.credentials
-                authenticationDao.saveUserDetailsLocally(
-                    userDetails.username, userDetails.userId, token
-                )
+                authenticationDao.saveUserLocally(userDetails)
             }
         }
+    }
+
+    fun getUser(): User? {
+        return authenticationDao.getUser()
     }
 }

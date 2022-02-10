@@ -9,5 +9,5 @@ class PlatformsRepository @Inject constructor(
     private val platformsCollectionDao: PlatformsCollectionDao
 ) {
 
-    fun getPlatforms() = platformsCollectionDao.getPlatforms("joseeguigurenp")
+    suspend fun getPlatforms(username: String) = platformsCollectionDao.getPlatforms(username)
 }

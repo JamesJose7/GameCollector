@@ -1,5 +1,6 @@
 package com.jeeps.gamecollector.remaster.ui.gamePlatorms
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -13,6 +14,7 @@ import com.jeeps.gamecollector.adapters.PlatformsListAdapter
 import com.jeeps.gamecollector.databinding.ActivityMainLibraryBinding
 import com.jeeps.gamecollector.model.Platform
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
+import com.jeeps.gamecollector.remaster.ui.login.LoginActivity
 import com.jeeps.gamecollector.remaster.utils.extensions.value
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,6 +33,8 @@ class GamePlatformsActivity : BaseActivity() {
         setContentView(view)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.title = "Platforms"
+
+        checkIfUserIsLoggedIn()
 
         bindLoading()
         bindError()
@@ -84,8 +88,22 @@ class GamePlatformsActivity : BaseActivity() {
         platformsList.adapter = platformsListAdapter
     }
 
+    private fun checkIfUserIsLoggedIn() {
+        viewModel.isUserLoggedIn.observe(this) { isLoggedIn ->
+            if (!isLoggedIn.value()) {
+                promptUserLogin()
+            }
+        }
+    }
+
+    private fun promptUserLogin() {
+        val intent = Intent(this, LoginActivity::class.java).apply {
+            flags = (Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        startActivity(intent)
+    }
+
     companion object {
-        const val RC_SIGN_IN = 420
         const val ADD_PLATFORM_RESULT = 13
         const val EDIT_PLATFORM_RESULT = 97
     }

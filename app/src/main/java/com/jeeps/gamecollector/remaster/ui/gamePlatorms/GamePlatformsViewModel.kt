@@ -6,19 +6,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jeeps.gamecollector.model.Platform
 import com.jeeps.gamecollector.remaster.data.State
+import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.PlatformsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.Comparator
 
 @ExperimentalCoroutinesApi
 @HiltViewModel
 class GamePlatformsViewModel @Inject constructor(
-    private val platformsRepository: PlatformsRepository
+    private val platformsRepository: PlatformsRepository,
+    private val authenticationRepository: AuthenticationRepository
 ) : ViewModel() {
 
     private val _isLoading = MutableLiveData<Boolean>()
@@ -35,9 +35,17 @@ class GamePlatformsViewModel @Inject constructor(
     val errorMessage: LiveData<String>
         get() = _errorMessage
 
+    private val _isUserLoggedIn = MutableLiveData<Boolean>()
+    val isUserLoggedIn: LiveData<Boolean>
+        get() = _isUserLoggedIn.also {
+            checkUserLoginStatus()
+        }
+
     private fun loadPlatforms() {
-        viewModelScope.launch(Dispatchers.IO) {
-            platformsRepository.getPlatforms().collect {
+        val user = authenticationRepository.getUser() ?: return
+
+        viewModelScope.launch {
+            platformsRepository.getPlatforms(user.username).collect {
                 when (it) {
                     is State.Loading -> {
                         _isLoading.postValue(true)
@@ -53,9 +61,18 @@ class GamePlatformsViewModel @Inject constructor(
                     }
                     is State.Failed -> {
                         _isLoading.postValue(false)
+                        _errorMessage.postValue(it.message)
+
                     }
                 }
             }
+        }
+    }
+
+    private fun checkUserLoginStatus() {
+        viewModelScope.launch {
+            val isUserLoggedIn = authenticationRepository.isUserLoggedIn()
+            _isUserLoggedIn.postValue(isUserLoggedIn)
         }
     }
 }

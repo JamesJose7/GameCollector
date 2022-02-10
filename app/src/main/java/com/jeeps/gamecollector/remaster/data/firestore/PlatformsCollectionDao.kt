@@ -16,7 +16,7 @@ class PlatformsCollectionDao @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore
 ) {
 
-    fun getPlatforms(username: String) : Flow<State<List<Platform>>> = callbackFlow {
+    suspend fun getPlatforms(username: String) : Flow<State<List<Platform>>> = callbackFlow {
         trySend(State.Loading())
 
         val userPlatforms = firebaseFirestore.collection("platforms")
@@ -26,7 +26,7 @@ class PlatformsCollectionDao @Inject constructor(
         val subscription = userPlatforms
             .addSnapshotListener { snapshot, e ->
                 e?.let {
-                    trySend(State.Failed(it.message.toString()))
+                    trySend(State.Failed(it.message.toString(), e))
                     cancel(it.message.toString())
                 }
                 val platforms = mutableListOf<Platform>()
