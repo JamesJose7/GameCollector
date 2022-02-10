@@ -6,6 +6,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".remaster.ui.login.LoginActivity"
-    android:background="@mipmap/bg_login">
+    android:background="@mipmap/bg_login"
+    android:backgroundTint="#88000000"
+    android:backgroundTintMode="src_atop">
+
+    <ProgressBar
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:indeterminateTint="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
