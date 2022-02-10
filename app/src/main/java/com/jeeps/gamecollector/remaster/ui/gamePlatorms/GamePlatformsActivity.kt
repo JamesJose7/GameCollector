@@ -4,11 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.firebase.ui.auth.AuthUI
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.adapters.PlatformsListAdapter
 import com.jeeps.gamecollector.databinding.ActivityMainLibraryBinding
@@ -44,7 +46,18 @@ class GamePlatformsActivity : BaseActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main_library, menu)
-        return true;
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_stats -> {
+                // TODO: Launch stats activity
+            }
+            R.id.action_logout -> logout()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     private fun bindLoading() {
@@ -101,6 +114,17 @@ class GamePlatformsActivity : BaseActivity() {
             flags = (Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         startActivity(intent)
+    }
+
+    private fun logout() {
+        AuthUI.getInstance()
+            .signOut(this)
+            .addOnCompleteListener {
+                promptUserLogin()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Something went wront", Toast.LENGTH_LONG).show()
+            }
     }
 
     companion object {
