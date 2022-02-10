@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.jeeps.gamecollector.model.Platform
 import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
@@ -20,6 +21,10 @@ class GamePlatformsViewModel @Inject constructor(
     private val platformsRepository: PlatformsRepository,
     private val authenticationRepository: AuthenticationRepository
 ) : ViewModel() {
+
+    private val ignoredExceptions = listOf(
+        FirebaseFirestoreException.Code.PERMISSION_DENIED
+    )
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean>
@@ -61,11 +66,20 @@ class GamePlatformsViewModel @Inject constructor(
                     }
                     is State.Failed -> {
                         _isLoading.postValue(false)
-                        _errorMessage.postValue(it.message)
-
+                        handleError(it.e)
                     }
                 }
             }
+        }
+    }
+
+    private fun handleError(e: Throwable?) {
+        if (e is FirebaseFirestoreException) {
+            if (e.code !in ignoredExceptions) {
+                _errorMessage.postValue(e.message)
+            }
+        } else {
+            _errorMessage.postValue(e?.message)
         }
     }
 
