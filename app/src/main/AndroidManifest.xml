@@ -16,7 +16,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".remaster.ui.login.LoginActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".remaster.ui.gamePlatorms.GamePlatformsActivity"
             android:exported="true"
