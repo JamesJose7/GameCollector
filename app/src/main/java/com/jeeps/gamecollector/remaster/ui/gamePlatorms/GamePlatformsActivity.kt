@@ -17,6 +17,7 @@ import com.jeeps.gamecollector.databinding.ActivityMainLibraryBinding
 import com.jeeps.gamecollector.model.Platform
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.login.LoginActivity
+import com.jeeps.gamecollector.remaster.ui.userStats.UserStatsActivity
 import com.jeeps.gamecollector.remaster.utils.extensions.value
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,7 +53,8 @@ class GamePlatformsActivity : BaseActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_stats -> {
-                // TODO: Launch stats activity
+                val intent = Intent(this, UserStatsActivity::class.java)
+                startActivity(intent)
             }
             R.id.action_logout -> logout()
         }

@@ -61,18 +61,25 @@ public class PlatformStatsAdapter extends RecyclerView.Adapter<PlatformStatsAdap
     }
 
     protected class PlatformViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.platform_name) TextView platformName;
-        @BindView(R.id.platform_completion_chart) DonutChartView platformChart;
-        @BindView(R.id.platform_completion_percentage) TextView platformCompletionPercentage;
-        @BindView(R.id.platform_total) TextView platformTotal;
-        @BindView(R.id.platform_completed) TextView platformCompleted;
-        @BindView(R.id.platform_total_physical) TextView platformTotalPhysical;
-        @BindView(R.id.platform_total_digital) TextView platformTotalDigital;
-        @BindView(R.id.platform_last_game_completed) TextView platformLastGameCompleted;
+        TextView platformName;
+        DonutChartView platformChart;
+        TextView platformCompletionPercentage;
+        TextView platformTotal;
+        TextView platformCompleted;
+        TextView platformTotalPhysical;
+        TextView platformTotalDigital;
+        TextView platformLastGameCompleted;
 
         public PlatformViewHolder(@NonNull View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            platformName = itemView.findViewById(R.id.platform_name);
+            platformChart = itemView.findViewById(R.id.platform_completion_chart);
+            platformCompletionPercentage = itemView.findViewById(R.id.platform_completion_percentage);
+            platformTotal = itemView.findViewById(R.id.platform_total);
+            platformCompleted = itemView.findViewById(R.id.platform_completed);
+            platformTotalPhysical = itemView.findViewById(R.id.platform_total_physical);
+            platformTotalDigital = itemView.findViewById(R.id.platform_total_digital);
+            platformLastGameCompleted = itemView.findViewById(R.id.platform_last_game_completed);
         }
     }
 

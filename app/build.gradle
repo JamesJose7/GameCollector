@@ -70,7 +70,7 @@ dependencies {
     implementation 'org.json:json:20190722'
     implementation 'id.zelory:compressor:2.1.0'
     implementation 'com.github.ybq:Android-SpinKit:1.4.0'
-    implementation 'com.diogobernardino:williamchart:3.3.0'
+    implementation 'com.diogobernardino:williamchart:3.10.1'
     implementation 'com.google.firebase:firebase-firestore:24.0.1'
     implementation 'com.github.varunest:sparkbutton:1.0.6'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2"
