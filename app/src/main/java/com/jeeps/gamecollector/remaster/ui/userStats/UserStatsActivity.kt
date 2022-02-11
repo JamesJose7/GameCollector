@@ -15,6 +15,7 @@ import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.utils.extensions.completionPercentage
 import com.jeeps.gamecollector.remaster.utils.extensions.totalGames
 import com.jeeps.gamecollector.remaster.utils.extensions.value
+import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -22,17 +23,18 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class UserStatsActivity : BaseActivity() {
 
-    private lateinit var binding: ActivityStatsBinding
+    private val binding by viewBinding(ActivityStatsBinding::inflate).also {
+        // Workaround from view not initializing properly when view binding
+        if (it.isInitialized()) {
+            it.value.content.overallCompletionChart.show(listOf())
+        }
+    }
     private lateinit var content: ContentStatsBinding
 
     private val viewModel: UserStatsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityStatsBinding.inflate(layoutInflater).also {
-            // Workaround from view not initializing properly when view binding
-            it.content.overallCompletionChart.show(listOf())
-        }
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.title = "Statistics"
