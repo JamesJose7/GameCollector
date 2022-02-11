@@ -19,21 +19,21 @@ import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.login.LoginActivity
 import com.jeeps.gamecollector.remaster.ui.userStats.UserStatsActivity
 import com.jeeps.gamecollector.remaster.utils.extensions.value
+import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class GamePlatformsActivity : BaseActivity() {
-    private lateinit var binding: ActivityMainLibraryBinding
+
+    private val binding by viewBinding(ActivityMainLibraryBinding::inflate)
 
     private val viewModel: GamePlatformsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainLibraryBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.title = "Platforms"
 
