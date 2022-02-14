@@ -1,6 +1,7 @@
 package com.jeeps.gamecollector.remaster.utils.extensions
 
 import android.net.Uri
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
@@ -9,6 +10,7 @@ import androidx.viewbinding.ViewBinding
 import com.google.android.material.snackbar.Snackbar
 import com.jeeps.gamecollector.utils.FileUtils
 import java.io.File
+import kotlin.math.roundToInt
 
 inline fun <T : ViewBinding> AppCompatActivity.viewBinding(
     crossinline bindingInflater: (LayoutInflater) -> T) =
@@ -37,4 +39,10 @@ fun AppCompatActivity.compressImage(
     fileUri: Uri
 ): File? {
     return FileUtils.compressImage(this, newFileName, fileUri)
+}
+
+fun AppCompatActivity.dpToPx(dp: Float): Int {
+    return TypedValue
+        .applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.displayMetrics)
+        .roundToInt()
 }

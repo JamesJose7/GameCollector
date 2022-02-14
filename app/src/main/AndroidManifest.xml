@@ -15,7 +15,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".remaster.ui.gamePlatorms.AddPlatformActivity"
+            android:name=".remaster.ui.games.GamesFromPlatformActivity"
+            android:exported="false"
+            android:label="@string/title_activity_platform_library"
+            android:parentActivityName=".remaster.ui.gamePlatforms.GamePlatformsActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.jeeps.gamecollector.remaster.ui.gamePlatforms.GamePlatformsActivity" />
+        </activity>
+        <activity
+            android:name=".remaster.ui.gamePlatforms.AddPlatformActivity"
             android:exported="false"
             android:label="@string/title_activity_add_platform"
             android:parentActivityName=".remaster.ui.gamePlatforms.GamePlatformsActivity"

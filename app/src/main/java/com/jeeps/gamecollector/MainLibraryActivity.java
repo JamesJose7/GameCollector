@@ -39,6 +39,7 @@ import com.jeeps.gamecollector.utils.UserUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -96,7 +97,7 @@ public class MainLibraryActivity extends AppCompatActivity {
 
         fab.setOnClickListener(view -> {
             // Create platform activity
-            Intent intent = new Intent(this, AddPlatformActivity.class);
+            Intent intent = new Intent(this, AddPlatformActivityOld.class);
             startActivityForResult(intent, ADD_PLATFORM_RESULT);
         });
     }
@@ -219,13 +220,13 @@ public class MainLibraryActivity extends AppCompatActivity {
         } else if (requestCode == ADD_PLATFORM_RESULT) {
             if (resultCode == RESULT_OK) {
                 // Add platform
-                Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivity.PLATFORM);
+                Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivityOld.PLATFORM);
                 Snackbar.make(fab, "Successfully added platform", Snackbar.LENGTH_SHORT).show();
             }
         } else if (requestCode == EDIT_PLATFORM_RESULT) {
             if (resultCode == RESULT_OK) {
-                Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivity.PLATFORM);
-                int platformPosition = data.getIntExtra(AddPlatformActivity.EDITED_PLATFORM_POSITION, -1);
+                Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivityOld.PLATFORM);
+                int platformPosition = data.getIntExtra(AddPlatformActivityOld.EDITED_PLATFORM_POSITION, -1);
             }
         }
     }
@@ -293,7 +294,7 @@ public class MainLibraryActivity extends AppCompatActivity {
                         platforms.add(platform);
                     }
                     // Sort by name
-                    platforms.sort((p1, p2) -> p1.getName().toLowerCase().compareTo(p2.getName().toLowerCase()));
+                    platforms.sort(Comparator.comparing(p -> p.getName().toLowerCase()));
                     // Update adapter
                     platformsAdapter.notifyDataSetChanged();
                 });

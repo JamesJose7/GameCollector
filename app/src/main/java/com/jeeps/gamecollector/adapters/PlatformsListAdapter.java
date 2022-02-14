@@ -19,6 +19,7 @@ import com.jeeps.gamecollector.PlatformLibraryActivity;
 import com.jeeps.gamecollector.R;
 import com.jeeps.gamecollector.model.Platform;
 import com.jeeps.gamecollector.remaster.ui.gamePlatforms.AddPlatformActivity;
+import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -86,7 +87,7 @@ public class PlatformsListAdapter extends RecyclerView.Adapter<PlatformsListAdap
             // Click listener to open a platform activity
             holder.platformCard.setOnClickListener(view -> {
                 //start games activity with platform id
-                Intent intent = new Intent(mContext, PlatformLibraryActivity.class);
+                Intent intent = new Intent(mContext, GamesFromPlatformActivity.class);
                 intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.getId());
                 intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME, platform.getName());
                 mContext.startActivity(intent);
