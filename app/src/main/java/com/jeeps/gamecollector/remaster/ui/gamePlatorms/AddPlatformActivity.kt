@@ -53,7 +53,14 @@ class AddPlatformActivity : BaseActivity() {
         bindFormElements()
         bindLoading()
 
+        handleErrorMessages()
         handleServiceEvents()
+    }
+
+    private fun handleErrorMessages() {
+        viewModel.errorMessage.observe(this) {
+            showToast(it)
+        }
     }
 
     private fun bindFab() {

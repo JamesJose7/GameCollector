@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.firebase.ui.auth.ErrorCodes
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
+import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
+import com.jeeps.gamecollector.remaster.ui.base.ErrorType
 import com.jeeps.gamecollector.remaster.utils.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,13 +21,7 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 class LoginViewModel @Inject constructor(
     private val authenticationRepository: AuthenticationRepository
-) : ViewModel() {
-
-    private val TAG = javaClass.simpleName
-
-    private val _errorMessage = MutableLiveData<String>()
-    val errorMessage: LiveData<String>
-        get() = _errorMessage
+) : BaseViewModel() {
 
     private val _isLoginSuccessful = MutableLiveData<Event<Boolean>>()
     val isLoginSuccessful: LiveData<Event<Boolean>>
@@ -40,11 +36,8 @@ class LoginViewModel @Inject constructor(
                         authenticationRepository.saveNewUser(user)
                         _isLoginSuccessful.postValue(Event(true))
                     } catch (e: Exception) {
-                        e.printStackTrace()
-                        e.message?.let { message ->
-                            Log.e(TAG, message)
-                        }
-                        _errorMessage.postValue("An unknown error has occurred")
+                        // TODO: Handle more specific exceptions
+                        handleError(ErrorType.UNKNOWN_ERROR, e)
                         _isLoginSuccessful.postValue(Event(false))
                     }
                 }
@@ -53,13 +46,12 @@ class LoginViewModel @Inject constructor(
             // Handle login failure
             when (response?.error?.errorCode ?: ErrorCodes.UNKNOWN_ERROR) {
                 ErrorCodes.NO_NETWORK -> {
-                    _errorMessage.postValue("No network connection available")
+                    handleError(ErrorType.NETWORK_ERROR, response?.error)
                 }
                 else -> {
-                    _errorMessage.postValue("An unknown error has occurred")
+                    handleError(ErrorType.UNKNOWN_ERROR, response?.error)
                 }
             }
-            response?.error?.message?.let { Log.e(TAG, it) }
             _isLoginSuccessful.postValue(Event(false))
         }
     }

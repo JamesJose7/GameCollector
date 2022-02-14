@@ -8,6 +8,7 @@ import com.jeeps.gamecollector.model.UserStats
 import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.UserStatsRepository
+import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -19,11 +20,7 @@ import javax.inject.Inject
 class UserStatsViewModel @Inject constructor(
     private val userStatsRepository: UserStatsRepository,
     private val authenticationRepository: AuthenticationRepository
-) : ViewModel() {
-
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean>
-        get() = _isLoading
+) : BaseViewModel() {
 
     private val _userStats = MutableLiveData<UserStats>()
     val userStats: LiveData<UserStats>
@@ -37,15 +34,15 @@ class UserStatsViewModel @Inject constructor(
         viewModelScope.launch {
             userStatsRepository.getUserStats(user.username).collect {
                 when (it) {
-                    is State.Loading -> _isLoading.postValue(true)
+                    is State.Loading -> startLoading()
                     is State.Success -> {
-                        _isLoading.postValue(false)
+                        stopLoading()
                         it.data?.let { result ->
                             _userStats.postValue(result)
                         }
                     }
                     is State.Failed -> {
-                        _isLoading.postValue(false)
+                        stopLoading()
                     }
                 }
             }

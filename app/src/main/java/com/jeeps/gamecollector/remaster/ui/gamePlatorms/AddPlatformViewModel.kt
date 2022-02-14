@@ -3,12 +3,13 @@ package com.jeeps.gamecollector.remaster.ui.gamePlatorms
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.model.Platform
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.PlatformsRepository
+import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
+import com.jeeps.gamecollector.remaster.ui.base.ErrorType
 import com.jeeps.gamecollector.remaster.utils.Event
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,15 +26,11 @@ import javax.inject.Inject
 class AddPlatformViewModel @Inject constructor(
     private val platformsRepository: PlatformsRepository,
     private val authenticationRepository: AuthenticationRepository
-) : ViewModel() {
+) : BaseViewModel() {
 
     var isEdit: Boolean = false
     var isImageEdited: Boolean = false
     var currentImageUri: Uri? = null
-
-    private val _isLoading = MutableLiveData(false)
-    val isLoading: LiveData<Boolean>
-        get() = _isLoading
 
     private val _platform = MutableLiveData(Platform())
     val platform: LiveData<Platform>
@@ -72,7 +69,7 @@ class AddPlatformViewModel @Inject constructor(
     }
 
     fun savePlatform() {
-        _isLoading.postValue(true)
+        startLoading()
         viewModelScope.launch {
             if (isEdit) editPlatform()
             else saveNewPlatform()
@@ -89,13 +86,16 @@ class AddPlatformViewModel @Inject constructor(
                     _isPlatformSaved.postValue(Event(true))
                 }
                 is NetworkResponse.ServerError -> {
-                    _isLoading.postValue(false)
+                    handleError(ErrorType.SERVER_ERROR, response.error)
+                    stopLoading()
                 }
                 is NetworkResponse.NetworkError -> {
-                    _isLoading.postValue(false)
+                    handleError(ErrorType.NETWORK_ERROR, response.error)
+                    stopLoading()
                 }
                 is NetworkResponse.UnknownError -> {
-                    _isLoading.postValue(false)
+                    handleError(ErrorType.UNKNOWN_ERROR, response.error)
+                    stopLoading()
                 }
             }
         }
@@ -104,13 +104,22 @@ class AddPlatformViewModel @Inject constructor(
     private suspend fun editPlatform() {
         val token = authenticationRepository.getUserToken()
         _platform.value?.let {
-            when (platformsRepository.editPlatform(token, it)) {
+            when (val response = platformsRepository.editPlatform(token, it)) {
                 is NetworkResponse.Success -> {
                     _isPlatformSaved.postValue(Event(true))
                 }
-                is NetworkResponse.ServerError -> _isLoading.postValue(false)
-                is NetworkResponse.NetworkError -> _isLoading.postValue(false)
-                is NetworkResponse.UnknownError -> _isLoading.postValue(false)
+                is NetworkResponse.ServerError -> {
+                    handleError(ErrorType.SERVER_ERROR, response.error)
+                    stopLoading()
+                }
+                is NetworkResponse.NetworkError -> {
+                    handleError(ErrorType.NETWORK_ERROR, response.error)
+                    stopLoading()
+                }
+                is NetworkResponse.UnknownError -> {
+                    handleError(ErrorType.UNKNOWN_ERROR, response.error)
+                    stopLoading()
+                }
             }
         }
     }
@@ -123,25 +132,25 @@ class AddPlatformViewModel @Inject constructor(
                     .asRequestBody("image/png".toMediaTypeOrNull())
                 val body: MultipartBody.Part =
                     MultipartBody.Part.createFormData("image", file.name, requestFile)
-                when (platformsRepository.uploadPlatformCover(
+                when (val response = platformsRepository.uploadPlatformCover(
                     token, _platform.value?.id ?: "", body)) {
                     is NetworkResponse.Success -> {
                         if (file.exists()) file.delete()
                     }
                     is NetworkResponse.ServerError -> {
-                        _isLoading.postValue(false)
+                        handleError(ErrorType.SERVER_ERROR, response.error)
                     }
                     is NetworkResponse.NetworkError -> {
-                        _isLoading.postValue(false)
+                        handleError(ErrorType.NETWORK_ERROR, response.error)
                     }
                     is NetworkResponse.UnknownError -> {
-                        _isLoading.postValue(false)
+                        handleError(ErrorType.UNKNOWN_ERROR, response.error)
                     }
                 }
             }
 
             _isImageUploaded.postValue(Event(true))
-            _isLoading.postValue(false)
+            stopLoading()
         }
     }
 }

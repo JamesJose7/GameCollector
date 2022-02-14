@@ -2,13 +2,14 @@ package com.jeeps.gamecollector.remaster.ui.gamePlatorms
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.jeeps.gamecollector.model.Platform
 import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.PlatformsRepository
+import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
+import com.jeeps.gamecollector.remaster.ui.base.ErrorType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -20,25 +21,17 @@ import javax.inject.Inject
 class GamePlatformsViewModel @Inject constructor(
     private val platformsRepository: PlatformsRepository,
     private val authenticationRepository: AuthenticationRepository
-) : ViewModel() {
+) : BaseViewModel() {
 
     private val ignoredExceptions = listOf(
         FirebaseFirestoreException.Code.PERMISSION_DENIED
     )
-
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean>
-        get() = _isLoading
 
     private val _platforms = MutableLiveData<List<Platform>>()
     val platforms: LiveData<List<Platform>>
         get() = _platforms.also {
             loadPlatforms()
         }
-
-    private val _errorMessage = MutableLiveData<String>()
-    val errorMessage: LiveData<String>
-        get() = _errorMessage
 
     private val _isUserLoggedIn = MutableLiveData<Boolean>()
     val isUserLoggedIn: LiveData<Boolean>
@@ -53,10 +46,10 @@ class GamePlatformsViewModel @Inject constructor(
             platformsRepository.getPlatforms(user.username).collect {
                 when (it) {
                     is State.Loading -> {
-                        _isLoading.postValue(true)
+                        startLoading()
                     }
                     is State.Success -> {
-                        _isLoading.postValue(false)
+                        stopLoading()
                         it.data.let { result ->
                             val sortedPlatforms = result.sortedWith(Comparator.comparing { p: Platform ->
                                 p.name.lowercase()
@@ -65,7 +58,7 @@ class GamePlatformsViewModel @Inject constructor(
                         }
                     }
                     is State.Failed -> {
-                        _isLoading.postValue(false)
+                        stopLoading()
                         handleError(it.e)
                     }
                 }
@@ -76,10 +69,10 @@ class GamePlatformsViewModel @Inject constructor(
     private fun handleError(e: Throwable?) {
         if (e is FirebaseFirestoreException) {
             if (e.code !in ignoredExceptions) {
-                _errorMessage.postValue(e.message)
+                handleError(ErrorType.SERVER_ERROR, e)
             }
         } else {
-            _errorMessage.postValue(e?.message)
+            handleError(ErrorType.UNKNOWN_ERROR, e)
         }
     }
 
