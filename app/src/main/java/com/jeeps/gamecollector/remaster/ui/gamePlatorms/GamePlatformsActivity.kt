@@ -7,6 +7,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,6 +20,8 @@ import com.jeeps.gamecollector.model.Platform
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.login.LoginActivity
 import com.jeeps.gamecollector.remaster.ui.userStats.UserStatsActivity
+import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
+import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.value
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,6 +34,11 @@ class GamePlatformsActivity : BaseActivity() {
     private val binding by viewBinding(ActivityMainLibraryBinding::inflate)
 
     private val viewModel: GamePlatformsViewModel by viewModels()
+
+    private val addPlatformResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        it?.let { handleAddPlatformResult(it) }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,8 +84,7 @@ class GamePlatformsActivity : BaseActivity() {
     private fun bindError() {
         viewModel.errorMessage.observe(this) { error ->
             Log.e(TAG, error)
-            Toast.makeText(this, "An error has occurred, please try again", Toast.LENGTH_SHORT)
-                .show()
+            showToast("An error has occurred, please try again")
         }
     }
 
@@ -90,7 +98,8 @@ class GamePlatformsActivity : BaseActivity() {
 
     private fun bindFab() {
         binding.fab.setOnClickListener {
-            // TODO: Implement new activity
+            intent = Intent(this, AddPlatformActivity::class.java)
+            addPlatformResultLauncher.launch(intent)
         }
     }
 
@@ -125,13 +134,14 @@ class GamePlatformsActivity : BaseActivity() {
                 promptUserLogin()
             }
             .addOnFailureListener {
-                Toast.makeText(this, "Something went wront", Toast.LENGTH_LONG).show()
+                showToast("Something went wrong", Toast.LENGTH_LONG)
             }
     }
 
-    companion object {
-        const val ADD_PLATFORM_RESULT = 13
-        const val EDIT_PLATFORM_RESULT = 97
+    private fun handleAddPlatformResult(result: ActivityResult) {
+        if (result.resultCode == RESULT_OK) {
+            showSnackBar(binding.root, "Successfully added platform")
+        }
     }
 
 }

@@ -2,7 +2,7 @@ package com.jeeps.gamecollector.utils;
 
 import com.jeeps.gamecollector.R;
 
-public enum Colors {
+public enum PlatformColors {
     NORMIE_WHITE("#ffffff", R.id.color_switch_normiewhite),
     SWITCH_RED("#E60012", R.id.color_switchred),
     XBOX_GREEN("#107C10", R.id.color_xboxgreen),
@@ -11,7 +11,7 @@ public enum Colors {
     private String color;
     private int colorId;
 
-    Colors(String color, int colorId) {
+    PlatformColors(String color, int colorId) {
         this.color = color;
         this.colorId = colorId;
     }

@@ -26,7 +26,7 @@ import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.model.Platform;
 import com.jeeps.gamecollector.services.api.ApiClient;
 import com.jeeps.gamecollector.services.api.PlatformService;
-import com.jeeps.gamecollector.utils.Colors;
+import com.jeeps.gamecollector.utils.PlatformColors;
 import com.jeeps.gamecollector.utils.FileUtils;
 import com.jeeps.gamecollector.utils.UserUtils;
 import com.squareup.picasso.Picasso;
@@ -81,7 +81,7 @@ public class AddPlatformActivity extends AppCompatActivity {
         context = this;
 
         platform = new Platform();
-        platform.setColor(Colors.NORMIE_WHITE.getColor());
+        platform.setColor(PlatformColors.NORMIE_WHITE.getColor());
 
         fab.setOnClickListener(view -> {
             toggleProgressbar(true);
@@ -117,7 +117,7 @@ public class AddPlatformActivity extends AppCompatActivity {
         // Platform name
         platformNameInput.setText(editedPlatform.getName());
         // Get appropriate color
-        Arrays.stream(Colors.values())
+        Arrays.stream(PlatformColors.values())
                 .filter(color -> color.getColor().equals(editedPlatform.getColor()))
                 .findFirst()
                 .ifPresent(color -> colorRadioGroup.check(color.getColorId()));
@@ -169,16 +169,16 @@ public class AddPlatformActivity extends AppCompatActivity {
         boolean checked = ((RadioButton) view).isChecked();
         switch (view.getId()) {
             case R.id.color_switch_normiewhite:
-                if (checked) platform.setColor(Colors.NORMIE_WHITE.getColor());
+                if (checked) platform.setColor(PlatformColors.NORMIE_WHITE.getColor());
                 break;
             case R.id.color_switchred:
-                if (checked) platform.setColor(Colors.SWITCH_RED.getColor());
+                if (checked) platform.setColor(PlatformColors.SWITCH_RED.getColor());
                 break;
             case R.id.color_xboxgreen:
-                if (checked) platform.setColor(Colors.XBOX_GREEN.getColor());
+                if (checked) platform.setColor(PlatformColors.XBOX_GREEN.getColor());
                 break;
             case R.id.color_playstationblue:
-                if (checked) platform.setColor(Colors.PLAYSTATION_BLUE.getColor());
+                if (checked) platform.setColor(PlatformColors.PLAYSTATION_BLUE.getColor());
                 break;
         }
     }

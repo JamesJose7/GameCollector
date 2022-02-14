@@ -56,4 +56,8 @@ class AuthenticationRepository @Inject constructor(
     fun getUser(): User? {
         return authenticationDao.getUser()
     }
+
+    suspend fun getUserToken(): String {
+        return authenticationDao.getUserToken(authenticationDao.getCurrentFirebaseUser())
+    }
 }
