@@ -153,4 +153,9 @@ class AddPlatformViewModel @Inject constructor(
             stopLoading()
         }
     }
+
+    fun skipImageUpload() {
+        stopLoading()
+        _isImageUploaded.postValue(Event(true))
+    }
 }

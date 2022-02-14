@@ -147,6 +147,8 @@ class AddPlatformActivity : BaseActivity() {
                     val compressedImage =
                         viewModel.currentImageUri?.let { compressImage("temp.png", it) }
                     viewModel.uploadImageCover(compressedImage)
+                } else {
+                    viewModel.skipImageUpload()
                 }
             }
         }
