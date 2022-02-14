@@ -1,5 +1,6 @@
 package com.jeeps.gamecollector.remaster.di.network
 
+import com.jeeps.gamecollector.remaster.data.api.ApiIgdb
 import com.jeeps.gamecollector.remaster.data.api.ApiPlatform
 import com.jeeps.gamecollector.remaster.data.api.ApiUser
 import dagger.Module
@@ -23,4 +24,9 @@ object ApisModule {
     @Provides
     fun providePlatformApiService(@Named("BaseApi") retrofit: Retrofit): ApiPlatform =
         retrofit.create(ApiPlatform::class.java)
+
+    @Singleton
+    @Provides
+    fun provideIgdbApiService(@Named("IgdbApi") retrofit: Retrofit): ApiIgdb =
+        retrofit.create(ApiIgdb::class.java)
 }
