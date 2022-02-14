@@ -14,17 +14,14 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.jeeps.gamecollector.AddPlatformActivity;
 import com.jeeps.gamecollector.MainLibraryActivity;
 import com.jeeps.gamecollector.PlatformLibraryActivity;
 import com.jeeps.gamecollector.R;
 import com.jeeps.gamecollector.model.Platform;
+import com.jeeps.gamecollector.remaster.ui.gamePlatorms.AddPlatformActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by jeeps on 12/23/2017.

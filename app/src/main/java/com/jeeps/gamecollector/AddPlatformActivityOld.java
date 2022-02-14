@@ -46,12 +46,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AddPlatformActivity extends AppCompatActivity {
+public class AddPlatformActivityOld extends AppCompatActivity {
 
     public static final String PLATFORM = "PLATFORM";
     public static final String EDITED_PLATFORM = "EDITED PLATFORM";
     public static final String EDITED_PLATFORM_POSITION = "EDITED PLATFORM POSITION";
-    private static final String TAG = AddPlatformActivity.class.getSimpleName();
+    private static final String TAG = AddPlatformActivityOld.class.getSimpleName();
 
     @BindView(R.id.add_platform_layout) ConstraintLayout rootLayout;
     @BindView(R.id.platform_cover) ImageView platformCover;
