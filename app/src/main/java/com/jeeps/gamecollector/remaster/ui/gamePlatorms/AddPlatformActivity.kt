@@ -14,6 +14,7 @@ import com.jeeps.gamecollector.databinding.ContentAddPlatformBinding
 import com.jeeps.gamecollector.model.Platform
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.utils.extensions.compressImage
+import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import com.jeeps.gamecollector.utils.PlatformColors
@@ -61,11 +62,17 @@ class AddPlatformActivity : BaseActivity() {
         viewModel.errorMessage.observe(this) {
             showToast(it)
         }
+
+        viewModel.fieldErrorMessage.observe(this) {
+            showSnackBar(binding.root, it)
+        }
     }
 
     private fun bindFab() {
         binding.fab.setOnClickListener {
-            viewModel.savePlatform()
+            if (viewModel.validateFields()) {
+                viewModel.savePlatform()
+            }
         }
     }
 

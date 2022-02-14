@@ -44,6 +44,10 @@ class AddPlatformViewModel @Inject constructor(
     val isImageUploaded: LiveData<Event<Boolean>>
         get() = _isImageUploaded
 
+    private val _fieldErrorMessage = MutableLiveData<String>()
+    val fieldErrorMessage: LiveData<String>
+        get() = _fieldErrorMessage
+
     fun setPlatform(platform: Platform) {
         _platform.value = platform
 
@@ -157,5 +161,23 @@ class AddPlatformViewModel @Inject constructor(
     fun skipImageUpload() {
         stopLoading()
         _isImageUploaded.postValue(Event(true))
+    }
+
+    fun validateFields(): Boolean {
+        return when {
+            currentImageUri == null && !isEdit -> {
+                _fieldErrorMessage.value = "Please select an image"
+                false
+            }
+            platform.value?.name.isNullOrEmpty() -> {
+                _fieldErrorMessage.value = "Please input a name"
+                false
+            }
+            platform.value?.color.isNullOrEmpty() -> {
+                _fieldErrorMessage.value = "Please select a color"
+                false
+            }
+            else -> true
+        }
     }
 }
