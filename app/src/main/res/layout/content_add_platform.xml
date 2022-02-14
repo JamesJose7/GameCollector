@@ -22,10 +22,9 @@
             android:id="@+id/platform_cover"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:alpha="0.5"
             android:background="#cccccc"
             android:scaleType="fitCenter"
-            android:src="@drawable/edit_picture"
+            android:src="@drawable/ic_add_image"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

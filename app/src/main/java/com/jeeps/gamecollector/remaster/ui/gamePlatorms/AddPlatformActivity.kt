@@ -78,7 +78,6 @@ class AddPlatformActivity : BaseActivity() {
                         .into(content.platformCover)
                 }
             }
-            content.platformCover.alpha = 1f
             content.platformCover.setBackgroundColor(Color.parseColor("#99cccccc"))
             content.platformNameEdit.setText(platform.name)
             // TODO: Is there a better way to do this?
@@ -123,7 +122,6 @@ class AddPlatformActivity : BaseActivity() {
     private fun handleImageSelected(uri: Uri?) {
         if (uri != null) {
             Picasso.get().load(uri).into(content.platformCover)
-            content.platformCover.alpha = 1f
             content.platformCover.setBackgroundColor(Color.parseColor("#99cccccc"))
             viewModel.imageHasBeenEdited()
             viewModel.currentImageUri = uri
