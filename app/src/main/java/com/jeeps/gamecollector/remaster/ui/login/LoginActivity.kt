@@ -9,7 +9,7 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
-import com.jeeps.gamecollector.remaster.ui.gamePlatorms.GamePlatformsActivity
+import com.jeeps.gamecollector.remaster.ui.gamePlatforms.GamePlatformsActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 

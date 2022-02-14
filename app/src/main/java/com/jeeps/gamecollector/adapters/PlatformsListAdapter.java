@@ -18,7 +18,7 @@ import com.jeeps.gamecollector.MainLibraryActivity;
 import com.jeeps.gamecollector.PlatformLibraryActivity;
 import com.jeeps.gamecollector.R;
 import com.jeeps.gamecollector.model.Platform;
-import com.jeeps.gamecollector.remaster.ui.gamePlatorms.AddPlatformActivity;
+import com.jeeps.gamecollector.remaster.ui.gamePlatforms.AddPlatformActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;

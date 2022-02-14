@@ -1,4 +1,4 @@
-package com.jeeps.gamecollector.remaster.ui.gamePlatorms
+package com.jeeps.gamecollector.remaster.ui.gamePlatforms
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

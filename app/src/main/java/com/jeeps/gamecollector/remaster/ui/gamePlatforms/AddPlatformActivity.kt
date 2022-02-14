@@ -1,4 +1,4 @@
-package com.jeeps.gamecollector.remaster.ui.gamePlatorms
+package com.jeeps.gamecollector.remaster.ui.gamePlatforms
 
 import android.graphics.Color
 import android.net.Uri

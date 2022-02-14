@@ -18,29 +18,29 @@
             android:name=".remaster.ui.gamePlatorms.AddPlatformActivity"
             android:exported="false"
             android:label="@string/title_activity_add_platform"
-            android:parentActivityName=".remaster.ui.gamePlatorms.GamePlatformsActivity"
+            android:parentActivityName=".remaster.ui.gamePlatforms.GamePlatformsActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jeeps.gamecollector.remaster.ui.gamePlatorms.GamePlatformsActivity" />
+                android:value="com.jeeps.gamecollector.remaster.ui.gamePlatforms.GamePlatformsActivity" />
         </activity>
         <activity
             android:name=".remaster.ui.userStats.UserStatsActivity"
             android:exported="false"
             android:label="@string/title_activity_stats"
-            android:parentActivityName=".remaster.ui.gamePlatorms.GamePlatformsActivity"
+            android:parentActivityName=".remaster.ui.gamePlatforms.GamePlatformsActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jeeps.gamecollector.remaster.ui.gamePlatorms.GamePlatformsActivity" />
+                android:value="com.jeeps.gamecollector.remaster.ui.gamePlatforms.GamePlatformsActivity" />
         </activity>
         <activity
             android:name=".remaster.ui.login.LoginActivity"
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".remaster.ui.gamePlatorms.GamePlatformsActivity"
+            android:name=".remaster.ui.gamePlatforms.GamePlatformsActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
