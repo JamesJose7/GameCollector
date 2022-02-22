@@ -133,6 +133,7 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
     public void setGames(List<Game> games) {
         mGames.clear();
         mGames.addAll(games);
+        notifyDataSetChanged();
     }
 
     public void setSortStat(SortStat sortStat)  {

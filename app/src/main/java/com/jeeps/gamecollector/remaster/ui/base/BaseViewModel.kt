@@ -26,6 +26,7 @@ open class BaseViewModel : ViewModel() {
     }
 
     fun handleError(errorType: ErrorType, e: Throwable? = null) {
+        // TODO: Create additional method that infers error type based on throwable
         e?.message?.let { Log.e(TAG, it) }
         _errorMessage.postValue(errorType.message)
     }

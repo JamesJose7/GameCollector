@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.appbar.AppBarLayout
 import com.jeeps.gamecollector.adapters.GameCardAdapter
+import com.jeeps.gamecollector.comparators.GameByTimesPlayedComparator
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
@@ -19,7 +20,9 @@ import com.jeeps.gamecollector.utils.PlatformCovers
 import com.jeeps.gamecollector.views.GridSpacingItemDecoration
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class GamesFromPlatformActivity : BaseActivity(),
     GameCardAdapter.GameCardAdapterListener {
@@ -41,11 +44,15 @@ class GamesFromPlatformActivity : BaseActivity(),
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         content = binding.content
 
-        getIntentData()
         displayPlatformCover()
 
         initCollapsingToolbar()
         initializeGamesAdapter()
+
+        bindFab()
+        getIntentData()
+
+        bindUserGames()
     }
 
     private fun getIntentData() {
@@ -97,6 +104,27 @@ class GamesFromPlatformActivity : BaseActivity(),
 
         gamesAdapter = GameCardAdapter(this, mutableListOf(), this)
         gamesRecyclerView.adapter = gamesAdapter
+    }
+
+    private fun bindFab() {
+        // TODO: Bind fab to add game
+        binding.fab.setOnClickListener {
+
+        }
+    }
+
+    private fun bindUserGames() {
+        viewModel.isLoading.observe(this) {
+            it?.let { isLoading ->
+                content.gamesProgressbar.visibility = if (isLoading) View.VISIBLE else View.INVISIBLE
+            }
+        }
+
+        viewModel.games.observe(this) { games ->
+            games?.let {
+                gamesAdapter.setGames(it)
+            }
+        }
     }
 
     override fun deleteSelectedGame(position: Int) {
