@@ -62,7 +62,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".GameDetailsActivity"
+            android:name=".remaster.ui.games.details.GameDetailsActivity"
+            android:label="@string/title_activity_game_details"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".GameDetailsActivityOld"
             android:label="@string/title_activity_game_details"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

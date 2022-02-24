@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".GameDetailsActivity"
+    tools:context=".remaster.ui.games.details.GameDetailsActivity"
     android:id="@+id/root_layout"
     android:animateLayoutChanges="true">
 
@@ -22,7 +22,9 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/content_game_details" />
+    <include
+        android:id="@+id/content"
+        layout="@layout/content_game_details" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

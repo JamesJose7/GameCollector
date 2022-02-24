@@ -59,9 +59,9 @@ import static com.jeeps.gamecollector.PlatformLibraryActivity.SELECTED_GAME_POSI
 import static com.jeeps.gamecollector.utils.ColorsUtils.getColorByHoursRange;
 import static com.jeeps.gamecollector.utils.FormatUtils.formatDecimal;
 
-public class GameDetailsActivity extends AppCompatActivity {
+public class GameDetailsActivityOld extends AppCompatActivity {
 
-    private static final String TAG = GameDetailsActivity.class.getSimpleName();
+    private static final String TAG = GameDetailsActivityOld.class.getSimpleName();
 
     @BindView(R.id.game_cover)
     ImageView gameCoverView;
@@ -199,14 +199,14 @@ public class GameDetailsActivity extends AppCompatActivity {
                     }
                 } else {
                     Log.e(TAG, "Toggle game completion request failed");
-                    Toast.makeText(GameDetailsActivity.this, "There was an error when updating the game, please try again", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(GameDetailsActivityOld.this, "There was an error when updating the game, please try again", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ToggleCompletionResponse> call, Throwable t) {
                 Log.e(TAG, "Toggle game completion request failed");
-                Toast.makeText(GameDetailsActivity.this, "There was an error when updating the game, please try again", Toast.LENGTH_SHORT).show();
+                Toast.makeText(GameDetailsActivityOld.this, "There was an error when updating the game, please try again", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -287,15 +287,15 @@ public class GameDetailsActivity extends AppCompatActivity {
     private void formatGameplayHours(GameplayHoursStats stats) {
         mainStoryHoursTv.setText(getString(R.string.hours_template, formatDecimal(stats.getGameplayMain())));
         mainStoryHoursTv.setTextColor(getColorByHoursRange(
-                GameDetailsActivity.this, stats.getGameplayMain()));
+                GameDetailsActivityOld.this, stats.getGameplayMain()));
 
         mainExtraHoursTv.setText(getString(R.string.hours_template, formatDecimal(stats.getGameplayMainExtra())));
         mainExtraHoursTv.setTextColor(getColorByHoursRange(
-                GameDetailsActivity.this, stats.getGameplayMainExtra()));
+                GameDetailsActivityOld.this, stats.getGameplayMainExtra()));
 
         completionistHoursTv.setText(getString(R.string.hours_template, formatDecimal(stats.getGameplayCompletionist())));
         completionistHoursTv.setTextColor(getColorByHoursRange(
-                GameDetailsActivity.this, stats.getGameplayCompletionist()));
+                GameDetailsActivityOld.this, stats.getGameplayCompletionist()));
     }
 
     private boolean isStoredHoursDifferentFromIgbd(GameHoursStats storedHours, GameplayHoursStats igdbHours) {

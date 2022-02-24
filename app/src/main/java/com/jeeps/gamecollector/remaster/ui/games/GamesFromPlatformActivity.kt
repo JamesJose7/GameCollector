@@ -1,8 +1,11 @@
 package com.jeeps.gamecollector.remaster.ui.games
 
+import android.app.ActivityOptions
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.transition.Explode
+import android.util.Pair
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -23,6 +26,7 @@ import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
 import com.jeeps.gamecollector.model.SortStat
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
+import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
 import com.jeeps.gamecollector.remaster.utils.extensions.createSnackBar
 import com.jeeps.gamecollector.remaster.utils.extensions.dpToPx
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
@@ -280,12 +284,26 @@ class GamesFromPlatformActivity : BaseActivity(),
             .show()
     }
 
-    override fun editGame(position: Int, imageView: View?, titleView: TextView?) {
-        TODO("Not yet implemented")
+    override fun editGame(position: Int, imageView: View, gameTitle: TextView) {
+        val selectedGame = viewModel.getGameAt(position)
+        val intent = Intent(this, GameDetailsActivity::class.java).apply {
+            putExtra(CURRENT_PLATFORM, viewModel.platformId)
+            putExtra(CURRENT_PLATFORM_NAME, viewModel.platformName)
+            putExtra(SELECTED_GAME, selectedGame)
+            putExtra(SELECTED_GAME_POSITION, position)
+        }
+        val activityOptions = ActivityOptions
+            .makeSceneTransitionAnimation(
+                this,
+                Pair.create(imageView, "cover"),
+                Pair.create(gameTitle, "gameTitle"))
+        startActivity(intent, activityOptions.toBundle())
     }
 
     companion object {
         const val CURRENT_PLATFORM = "CURRENT_PLATFORM"
         const val CURRENT_PLATFORM_NAME = "CURRENT_PLATFORM_NAME"
+        const val SELECTED_GAME = "SELECTED_GAME"
+        const val SELECTED_GAME_POSITION = "SELECTED_GAME_POSITION"
     }
 }

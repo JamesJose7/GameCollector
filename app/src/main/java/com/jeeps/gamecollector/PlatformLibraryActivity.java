@@ -310,7 +310,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     public void editGame(int position, View imageView, TextView gameTitle) {
         Game game = games.get(position);
         //Start add game activity to edit selected
-        Intent intent = new Intent(context, GameDetailsActivity.class);
+        Intent intent = new Intent(context, GameDetailsActivityOld.class);
         intent.putExtra(CURRENT_PLATFORM, platformId);
         intent.putExtra(CURRENT_PLATFORM_NAME, platformName);
         intent.putExtra(SELECTED_GAME, game);
