@@ -35,6 +35,8 @@ class GamesFromPlatformViewModel @Inject constructor(
 
     private var currentOrder: Comparator<Game> = GameByNameComparator()
 
+    var gamePendingDeletion: Game? = null
+
     private var dbGames = MutableLiveData<List<Game>>()
 
     private val _games = MediatorLiveData<List<Game>>()
@@ -89,10 +91,11 @@ class GamesFromPlatformViewModel @Inject constructor(
         return games.value?.get(position)
     }
 
-    fun deleteGame(position: Int) {
+    fun deleteGame(game: Game) {
+        gamePendingDeletion = null
         viewModelScope.launch {
             val token = authenticationRepository.getUserToken()
-            games.value?.get(position)?.id?.let { gameId ->
+            game.id?.let { gameId ->
                 when (val response = gamesRepository.deleteGame(token, gameId)) {
                     is NetworkResponse.Success -> {
                         postServerMessage("Game deleted successfully")
@@ -109,7 +112,12 @@ class GamesFromPlatformViewModel @Inject constructor(
                 }
             }
         }
+    }
 
+    fun deleteGamePendingDeletion() {
+        gamePendingDeletion?.let { game ->
+            deleteGame(game)
+        }
     }
 
     fun handleSearch(query: String) {

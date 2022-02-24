@@ -60,6 +60,11 @@ class GamesFromPlatformActivity : BaseActivity(),
         bindUserGames()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.deleteGamePendingDeletion()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_platform_library, menu)
 
@@ -165,13 +170,14 @@ class GamesFromPlatformActivity : BaseActivity(),
             when (which) {
                 DialogInterface.BUTTON_POSITIVE -> {
                     val selectedGame = viewModel.getGameAt(position)
+                    viewModel.gamePendingDeletion = selectedGame
                     // Remove game from adapter
                     gamesAdapter.removeGameAtPosition(position)
                     // Notify user
                     val undoCallback = object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                         override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                             // Delete game permanently
-                            viewModel.deleteGame(position)
+                            selectedGame?.let { viewModel.deleteGame(it) }
                         }
                     }
                     val undoSnackBar = createSnackBar(
