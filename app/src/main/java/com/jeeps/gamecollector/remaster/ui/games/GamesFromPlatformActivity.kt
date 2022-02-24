@@ -4,6 +4,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.transition.Explode
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.Window
 import android.widget.TextView
@@ -17,10 +18,15 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.adapters.GameCardAdapter
+import com.jeeps.gamecollector.comparators.*
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
+import com.jeeps.gamecollector.model.SortStat
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
-import com.jeeps.gamecollector.remaster.utils.extensions.*
+import com.jeeps.gamecollector.remaster.utils.extensions.createSnackBar
+import com.jeeps.gamecollector.remaster.utils.extensions.dpToPx
+import com.jeeps.gamecollector.remaster.utils.extensions.showToast
+import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import com.jeeps.gamecollector.utils.PlatformCovers
 import com.jeeps.gamecollector.views.GridSpacingItemDecoration
 import com.squareup.picasso.Picasso
@@ -81,6 +87,68 @@ class GamesFromPlatformActivity : BaseActivity(),
             }
         })
         return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        gamesAdapter.setSortStat(SortStat.NONE)
+
+        return when (item.itemId) {
+            R.id.action_filter_alph -> {
+                viewModel.rearrangeGames(GameByNameComparator())
+                true
+            }
+            R.id.action_filter_alph_desc -> {
+                viewModel.rearrangeGames(GameByNameComparator(true))
+                true
+            }
+            R.id.action_filter_physical -> {
+                viewModel.rearrangeGames(GameByPhysicalComparator(true))
+                true
+            }
+            R.id.action_filter_alph_physical_desc -> {
+                viewModel.rearrangeGames(GameByPhysicalComparator())
+                true
+            }
+            R.id.action_filter_timesc -> {
+                viewModel.rearrangeGames(GameByTimesPlayedComparator())
+                true
+            }
+            R.id.action_filter_alph_timesc_desc -> {
+                viewModel.rearrangeGames(GameByTimesPlayedComparator(true))
+                true
+            }
+            R.id.action_filter_hoursmain -> {
+                viewModel.rearrangeGames(GameByHoursStoryComparator())
+                gamesAdapter.setSortStat(SortStat.HOURS_MAIN)
+                true
+            }
+            R.id.action_filter_hoursmain_desc -> {
+                viewModel.rearrangeGames(GameByHoursStoryComparator(true))
+                gamesAdapter.setSortStat(SortStat.HOURS_MAIN)
+                true
+            }
+            R.id.action_filter_hoursme -> {
+                viewModel.rearrangeGames(GameByHoursMainExtraComparator())
+                gamesAdapter.setSortStat(SortStat.HOURS_MAIN_EXTRA)
+                true
+            }
+            R.id.action_filter_hoursme_desc -> {
+                viewModel.rearrangeGames(GameByHoursMainExtraComparator(true))
+                gamesAdapter.setSortStat(SortStat.HOURS_MAIN_EXTRA)
+                true
+            }
+            R.id.action_filter_hourscompletionist -> {
+                viewModel.rearrangeGames(GameByHoursCompletionistComparator())
+                gamesAdapter.setSortStat(SortStat.HOURS_COMPLETIONIST)
+                true
+            }
+            R.id.action_filter_hourscompletionist_desc -> {
+                viewModel.rearrangeGames(GameByHoursCompletionistComparator(true))
+                gamesAdapter.setSortStat(SortStat.HOURS_COMPLETIONIST)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun getIntentData() {
