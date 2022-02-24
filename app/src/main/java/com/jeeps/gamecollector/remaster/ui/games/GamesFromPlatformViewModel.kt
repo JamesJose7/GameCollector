@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.comparators.GameByNameComparator
 import com.jeeps.gamecollector.model.Game
+import com.jeeps.gamecollector.model.SortStat
 import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
@@ -34,6 +35,10 @@ class GamesFromPlatformViewModel @Inject constructor(
     var platformName: String = ""
 
     private var currentOrder: Comparator<Game> = GameByNameComparator()
+
+    private val _currentSortStat = MutableLiveData(SortStat.NONE)
+    val currentSortStat: LiveData<SortStat>
+        get() = _currentSortStat
 
     var gamePendingDeletion: Game? = null
 
@@ -81,6 +86,10 @@ class GamesFromPlatformViewModel @Inject constructor(
         currentOrder: Comparator<Game>
     ): List<Game> {
         return unsortedGames.sortedWith(currentOrder)
+    }
+
+    fun setCurrentSortState(sortStat: SortStat) {
+        _currentSortStat.value = sortStat
     }
 
     fun rearrangeGames(comparator: Comparator<Game>) = dbGames.value?.let {

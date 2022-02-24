@@ -90,61 +90,65 @@ class GamesFromPlatformActivity : BaseActivity(),
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        gamesAdapter.setSortStat(SortStat.NONE)
-
         return when (item.itemId) {
             R.id.action_filter_alph -> {
+                viewModel.setCurrentSortState(SortStat.NONE)
                 viewModel.rearrangeGames(GameByNameComparator())
                 true
             }
             R.id.action_filter_alph_desc -> {
+                viewModel.setCurrentSortState(SortStat.NONE)
                 viewModel.rearrangeGames(GameByNameComparator(true))
                 true
             }
             R.id.action_filter_physical -> {
+                viewModel.setCurrentSortState(SortStat.NONE)
                 viewModel.rearrangeGames(GameByPhysicalComparator(true))
                 true
             }
             R.id.action_filter_alph_physical_desc -> {
+                viewModel.setCurrentSortState(SortStat.NONE)
                 viewModel.rearrangeGames(GameByPhysicalComparator())
                 true
             }
             R.id.action_filter_timesc -> {
+                viewModel.setCurrentSortState(SortStat.NONE)
                 viewModel.rearrangeGames(GameByTimesPlayedComparator())
                 true
             }
             R.id.action_filter_alph_timesc_desc -> {
+                viewModel.setCurrentSortState(SortStat.NONE)
                 viewModel.rearrangeGames(GameByTimesPlayedComparator(true))
                 true
             }
             R.id.action_filter_hoursmain -> {
+                viewModel.setCurrentSortState(SortStat.HOURS_MAIN)
                 viewModel.rearrangeGames(GameByHoursStoryComparator())
-                gamesAdapter.setSortStat(SortStat.HOURS_MAIN)
                 true
             }
             R.id.action_filter_hoursmain_desc -> {
+                viewModel.setCurrentSortState(SortStat.HOURS_MAIN)
                 viewModel.rearrangeGames(GameByHoursStoryComparator(true))
-                gamesAdapter.setSortStat(SortStat.HOURS_MAIN)
                 true
             }
             R.id.action_filter_hoursme -> {
+                viewModel.setCurrentSortState(SortStat.HOURS_MAIN_EXTRA)
                 viewModel.rearrangeGames(GameByHoursMainExtraComparator())
-                gamesAdapter.setSortStat(SortStat.HOURS_MAIN_EXTRA)
                 true
             }
             R.id.action_filter_hoursme_desc -> {
+                viewModel.setCurrentSortState(SortStat.HOURS_MAIN_EXTRA)
                 viewModel.rearrangeGames(GameByHoursMainExtraComparator(true))
-                gamesAdapter.setSortStat(SortStat.HOURS_MAIN_EXTRA)
                 true
             }
             R.id.action_filter_hourscompletionist -> {
+                viewModel.setCurrentSortState(SortStat.HOURS_COMPLETIONIST)
                 viewModel.rearrangeGames(GameByHoursCompletionistComparator())
-                gamesAdapter.setSortStat(SortStat.HOURS_COMPLETIONIST)
                 true
             }
             R.id.action_filter_hourscompletionist_desc -> {
+                viewModel.setCurrentSortState(SortStat.HOURS_COMPLETIONIST)
                 viewModel.rearrangeGames(GameByHoursCompletionistComparator(true))
-                gamesAdapter.setSortStat(SortStat.HOURS_COMPLETIONIST)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -220,6 +224,10 @@ class GamesFromPlatformActivity : BaseActivity(),
             games?.let {
                 gamesAdapter.setGames(it)
             }
+        }
+
+        viewModel.currentSortStat.observe(this) {
+            it?.let { gamesAdapter.setSortStat(it) }
         }
 
         viewModel.errorMessage.observe(this) {
