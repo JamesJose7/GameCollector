@@ -18,6 +18,13 @@ inline fun <T : ViewBinding> AppCompatActivity.viewBinding(
         bindingInflater.invoke(layoutInflater)
     }
 
+fun AppCompatActivity.createSnackBar(
+    rootView: View,
+    message: String,
+    length: Int = Snackbar.LENGTH_SHORT
+): Snackbar {
+    return Snackbar.make(rootView, message, length)
+}
 
 fun AppCompatActivity.showSnackBar(
     rootView: View,

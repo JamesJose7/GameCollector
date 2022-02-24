@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.comparators.GameByNameComparator
 import com.jeeps.gamecollector.model.Game
 import com.jeeps.gamecollector.remaster.data.State
@@ -83,4 +84,31 @@ class GamesFromPlatformViewModel @Inject constructor(
     fun rearrangeGames(comparator: Comparator<Game>) = dbGames.value?.let {
         _games.value = sortGames(it, comparator)
     }.also { currentOrder = comparator }
+
+    fun getGameAt(position: Int): Game? {
+        return games.value?.get(position)
+    }
+
+    fun deleteGame(position: Int) {
+        viewModelScope.launch {
+            val token = authenticationRepository.getUserToken()
+            games.value?.get(position)?.id?.let { gameId ->
+                when (val response = gamesRepository.deleteGame(token, gameId)) {
+                    is NetworkResponse.Success -> {
+                        postServerMessage("Game deleted successfully")
+                    }
+                    is NetworkResponse.ServerError -> {
+                        handleError(ErrorType.SERVER_ERROR, response.error)
+                    }
+                    is NetworkResponse.NetworkError -> {
+                        handleError(ErrorType.NETWORK_ERROR, response.error)
+                    }
+                    is NetworkResponse.UnknownError -> {
+                        handleError(ErrorType.UNKNOWN_ERROR, response.error)
+                    }
+                }
+            }
+        }
+
+    }
 }

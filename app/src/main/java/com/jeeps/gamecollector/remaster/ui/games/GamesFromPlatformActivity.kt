@@ -1,21 +1,23 @@
 package com.jeeps.gamecollector.remaster.ui.games
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.transition.Explode
 import android.view.View
 import android.view.Window
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 import com.jeeps.gamecollector.adapters.GameCardAdapter
-import com.jeeps.gamecollector.comparators.GameByTimesPlayedComparator
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
-import com.jeeps.gamecollector.remaster.utils.extensions.dpToPx
-import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
+import com.jeeps.gamecollector.remaster.utils.extensions.*
 import com.jeeps.gamecollector.utils.PlatformCovers
 import com.jeeps.gamecollector.views.GridSpacingItemDecoration
 import com.squareup.picasso.Picasso
@@ -125,10 +127,54 @@ class GamesFromPlatformActivity : BaseActivity(),
                 gamesAdapter.setGames(it)
             }
         }
+
+        viewModel.errorMessage.observe(this) {
+            it?.let { showToast(it) }
+        }
+
+        viewModel.serverMessage.observe(this) { messageEvent ->
+            messageEvent.getContentIfNotHandled()?.let {
+                showToast(it)
+            }
+        }
     }
 
     override fun deleteSelectedGame(position: Int) {
-        TODO("Not yet implemented")
+        val dialogClickListener = DialogInterface.OnClickListener { _, which ->
+            when (which) {
+                DialogInterface.BUTTON_POSITIVE -> {
+                    val selectedGame = viewModel.getGameAt(position)
+                    // Remove game from adapter
+                    gamesAdapter.removeGameAtPosition(position)
+                    // Notify user
+                    val undoCallback = object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                            // Delete game permanently
+                            viewModel.deleteGame(position)
+                        }
+                    }
+                    val undoSnackBar = createSnackBar(
+                        binding.root,
+                        "Deleted: ${selectedGame?.name}",
+                        Snackbar.LENGTH_LONG
+                    ).addCallback(undoCallback)
+
+                    undoSnackBar.setAction("UNDO") {
+                        undoSnackBar.removeCallback(undoCallback)
+                        // Restore game
+                        gamesAdapter.addGameAtPosition(position, selectedGame)
+                    }
+
+                    undoSnackBar.show()
+                }
+            }
+        }
+
+        AlertDialog.Builder(this)
+            .setMessage("Delete game?")
+            .setPositiveButton("Yes", dialogClickListener)
+            .setNegativeButton("No", dialogClickListener)
+            .show()
     }
 
     override fun editGame(position: Int, imageView: View?, titleView: TextView?) {

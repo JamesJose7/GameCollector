@@ -1,5 +1,8 @@
 package com.jeeps.gamecollector.adapters;
 
+import static com.jeeps.gamecollector.utils.ColorsUtils.getColorByHoursRange;
+import static com.jeeps.gamecollector.utils.FormatUtils.formatDecimal;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -21,9 +24,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.jeeps.gamecollector.utils.ColorsUtils.getColorByHoursRange;
-import static com.jeeps.gamecollector.utils.FormatUtils.formatDecimal;
 
 /**
  * Created by jeeps on 12/25/2017.
@@ -147,6 +147,16 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
                         formatDecimal(gameplayMainExtra)));
         sortStatTv.setTextColor(getColorByHoursRange(
                 sortStatTv.getContext(), gameplayMainExtra));
+    }
+
+    public void removeGameAtPosition(int position) {
+        mGames.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    public void addGameAtPosition(int position, Game selectedGame) {
+        mGames.add(position, selectedGame);
+        notifyItemInserted(position);
     }
 
     public interface GameCardAdapterListener {
