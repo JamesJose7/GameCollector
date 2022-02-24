@@ -3,16 +3,19 @@ package com.jeeps.gamecollector.remaster.ui.games
 import android.content.DialogInterface
 import android.os.Bundle
 import android.transition.Explode
+import android.view.Menu
 import android.view.View
 import android.view.Window
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.adapters.GameCardAdapter
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
@@ -55,6 +58,24 @@ class GamesFromPlatformActivity : BaseActivity(),
         getIntentData()
 
         bindUserGames()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_platform_library, menu)
+
+        val searchView: SearchView = menu?.findItem(R.id.search)?.actionView as SearchView
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let { viewModel.handleSearch(it) }
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                newText?.let { viewModel.handleSearch(it) }
+                return false
+            }
+        })
+        return true
     }
 
     private fun getIntentData() {

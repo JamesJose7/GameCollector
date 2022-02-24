@@ -111,4 +111,22 @@ class GamesFromPlatformViewModel @Inject constructor(
         }
 
     }
+
+    fun handleSearch(query: String) {
+        dbGames.value
+            ?.sortedWith(currentOrder)
+            ?.filter { game -> isGameNameSimilar(game, query) }
+            .also { games ->
+                games?.let {
+                    _games.value = it
+                }
+            }
+    }
+
+    private fun isGameNameSimilar(game: Game, query: String): Boolean {
+        val name = game.name.lowercase()
+        val shortName = game.shortName.lowercase()
+        val queryNormalized = query.lowercase()
+        return name.contains(queryNormalized) || shortName.contains(queryNormalized)
+    }
 }
