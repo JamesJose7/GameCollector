@@ -16,4 +16,7 @@ class GamesRepository @Inject constructor(
 
     suspend fun deleteGame(token: String, gameId: String) =
         gamesDao.deleteGame(token, gameId)
+
+    suspend fun toggleGameCompletion(token: String, gameId: String) =
+        gamesDao.toggleGameCompletion(token, gameId)
 }

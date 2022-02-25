@@ -1,6 +1,7 @@
 package com.jeeps.gamecollector.remaster.data.api
 
 import com.haroldadmin.cnradapter.NetworkResponse
+import com.jeeps.gamecollector.model.ToggleCompletionResponse
 import com.jeeps.gamecollector.remaster.data.model.ErrorResponse
 import okhttp3.ResponseBody
 import retrofit2.http.Header
@@ -14,4 +15,10 @@ interface ApiGame {
         @Header("Authorization") authorization: String,
         @Path("gameId") gameId: String
     ): NetworkResponse<ResponseBody, ErrorResponse>
+
+    @POST("/api/games/toggleCompletion/{gameId}")
+    suspend fun toggleGameCompletion(
+        @Header("Authorization") authorization: String,
+        @Path("gameId") gameId: String
+    ): NetworkResponse<ToggleCompletionResponse, ErrorResponse>
 }
