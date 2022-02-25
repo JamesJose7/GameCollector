@@ -82,10 +82,12 @@ class GameDetailsActivity : BaseActivity() {
                 setupCompleteSwitch()
 
                 getCoverColors()
+            }
+        }
 
-                game.gameHoursStats?.let { stats ->
-                    formatGamePlayHours(GameplayHoursStats(stats))
-                }
+        viewModel.gameHoursStats.observe(this) {
+            it?.let { stats ->
+                formatGamePlayHours(stats)
             }
         }
     }
