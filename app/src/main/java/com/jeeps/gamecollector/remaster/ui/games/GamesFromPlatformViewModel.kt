@@ -35,6 +35,7 @@ class GamesFromPlatformViewModel @Inject constructor(
     var platformName: String = ""
 
     private var currentOrder: Comparator<Game> = GameByNameComparator()
+    private var currentQuery: String = ""
 
     private val _currentSortStat = MutableLiveData(SortStat.NONE)
     val currentSortStat: LiveData<SortStat>
@@ -50,8 +51,10 @@ class GamesFromPlatformViewModel @Inject constructor(
 
     init {
         _games.addSource(dbGames) { result ->
-            result?.let {
-                _games.value = sortGames(it, currentOrder)
+            result?.let { game ->
+                _games.value = sortGames(game, currentOrder)
+                val query = currentQuery.takeIf { it.isNotEmpty() }
+                query?.let { handleSearch(query) }
             }
         }
     }
@@ -94,7 +97,10 @@ class GamesFromPlatformViewModel @Inject constructor(
 
     fun rearrangeGames(comparator: Comparator<Game>) = dbGames.value?.let {
         _games.value = sortGames(it, comparator)
-    }.also { currentOrder = comparator }
+    }.also {
+        currentOrder = comparator
+        if (currentQuery.isNotEmpty()) handleSearch(currentQuery)
+    }
 
     fun getGameAt(position: Int): Game? {
         return games.value?.get(position)
@@ -130,6 +136,7 @@ class GamesFromPlatformViewModel @Inject constructor(
     }
 
     fun handleSearch(query: String) {
+        currentQuery = query
         dbGames.value
             ?.sortedWith(currentOrder)
             ?.filter { game -> isGameNameSimilar(game, query) }
