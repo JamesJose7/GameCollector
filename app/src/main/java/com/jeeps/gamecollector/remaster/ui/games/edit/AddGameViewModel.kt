@@ -55,4 +55,18 @@ class AddGameViewModel @Inject constructor(
         currentImageUri = uri
         _selectedGame.value?.imageUri = uri?.toString() ?: ""
     }
+
+    fun initializeDefaultGame() {
+        val game = Game(
+            "",
+        true,
+        "",
+        "",
+        platformId ?: "",
+        platformName ?: "",
+        "",
+        ""
+        )
+        setSelectedGame(game)
+    }
 }

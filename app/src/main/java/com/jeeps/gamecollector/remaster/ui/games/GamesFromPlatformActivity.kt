@@ -27,6 +27,7 @@ import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
 import com.jeeps.gamecollector.model.SortStat
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
+import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
 import com.jeeps.gamecollector.remaster.utils.extensions.createSnackBar
 import com.jeeps.gamecollector.remaster.utils.extensions.dpToPx
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
@@ -211,9 +212,12 @@ class GamesFromPlatformActivity : BaseActivity(),
     }
 
     private fun bindFab() {
-        // TODO: Bind fab to add game
         binding.fab.setOnClickListener {
-
+            val intent = Intent(this, AddGameActivity::class.java).apply {
+                putExtra(CURRENT_PLATFORM, viewModel.platformId)
+                putExtra(CURRENT_PLATFORM_NAME, viewModel.platformName)
+            }
+            startActivity(intent)
         }
     }
 

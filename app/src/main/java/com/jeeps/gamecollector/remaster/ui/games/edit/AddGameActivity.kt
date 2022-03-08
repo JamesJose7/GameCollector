@@ -55,7 +55,7 @@ class AddGameActivity : BaseActivity() {
     private fun getIntentData() {
         viewModel.platformId = intent.getStringExtra(CURRENT_PLATFORM)
         viewModel.platformName = intent.getStringExtra(CURRENT_PLATFORM_NAME)
-        viewModel.setSelectedGame(intent.getSerializableExtra(SELECTED_GAME) as Game)
+        (intent.getSerializableExtra(SELECTED_GAME) as? Game)?.let { viewModel.setSelectedGame(it) }
         viewModel.selectedGamePosition = intent.getIntExtra(SELECTED_GAME_POSITION, -1)
     }
 
@@ -95,6 +95,8 @@ class AddGameActivity : BaseActivity() {
             supportActionBar?.title = "Edit Game"
             binding.fab.setImageResource(R.drawable.edit)
             mapSelectedGameFields()
+        } else {
+            viewModel.initializeDefaultGame()
         }
     }
 
