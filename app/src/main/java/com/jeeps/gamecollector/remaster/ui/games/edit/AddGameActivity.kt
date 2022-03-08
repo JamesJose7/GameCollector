@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.RadioButton
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 import androidx.core.widget.doOnTextChanged
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityAddGameBinding
@@ -86,7 +87,7 @@ class AddGameActivity : BaseActivity() {
     private fun removeImageCover() {
         viewModel.coverDeleted = true
         viewModel.setGameImageUri(null)
-        Picasso.get().load(R.drawable.ic_add_image).into(content.gameCover)
+        content.gameCover.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_add_image))
         content.gameCover.setBackgroundColor(Color.parseColor("#cccccc"))
     }
 
