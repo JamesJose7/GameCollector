@@ -2,12 +2,15 @@ package com.jeeps.gamecollector.remaster.ui.games.details
 
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
+import android.content.Intent
 import android.os.Bundle
 import android.transition.Explode
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.ImageView
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import com.jeeps.gamecollector.R
@@ -20,6 +23,7 @@ import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Compa
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM_NAME
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.SELECTED_GAME
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.SELECTED_GAME_POSITION
+import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
 import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
@@ -38,6 +42,11 @@ class GameDetailsActivity : BaseActivity() {
     private lateinit var content: ContentGameDetailsBinding
 
     private val viewModel: GameDetailsViewModel by viewModels()
+
+    private val editGameResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            it?.let { handleEditGameResult(it) }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Setup exit transition
@@ -111,7 +120,21 @@ class GameDetailsActivity : BaseActivity() {
     }
 
     private fun editGame() {
-        TODO("Not yet implemented")
+        val intent = Intent(this, AddGameActivity::class.java).apply {
+            putExtra(CURRENT_PLATFORM, viewModel.platformId)
+            putExtra(CURRENT_PLATFORM_NAME, viewModel.platformName)
+            putExtra(SELECTED_GAME, viewModel.selectedGame.value)
+            putExtra(SELECTED_GAME_POSITION, viewModel.selectedGamePosition)
+        }
+        editGameResultLauncher.launch(intent)
+    }
+
+    private fun handleEditGameResult(result: ActivityResult) {
+        if (result.resultCode == RESULT_OK) {
+            // TODO: Do I still need the previous implementation?
+            setResult(result.resultCode)
+            finish()
+        }
     }
 
     private fun setupCompleteSwitch() {

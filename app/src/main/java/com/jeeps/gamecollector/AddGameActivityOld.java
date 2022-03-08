@@ -53,7 +53,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AddGameActivity extends AppCompatActivity {
+public class AddGameActivityOld extends AppCompatActivity {
 
     private static final String TAG = "ADD_GAME_ACTIVITY";
 

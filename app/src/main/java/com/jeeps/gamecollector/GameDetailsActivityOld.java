@@ -239,7 +239,7 @@ public class GameDetailsActivityOld extends AppCompatActivity {
 
     private void editGame() {
         //Start add game activity to edit selected
-        Intent intent = new Intent(this, AddGameActivity.class);
+        Intent intent = new Intent(this, AddGameActivityOld.class);
         intent.putExtra(CURRENT_PLATFORM, platformId);
         intent.putExtra(CURRENT_PLATFORM_NAME, platformName);
         intent.putExtra(SELECTED_GAME, selectedGame);

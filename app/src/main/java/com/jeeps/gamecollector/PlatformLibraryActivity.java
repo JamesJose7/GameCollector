@@ -133,7 +133,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
 
         // Add game
         fab.setOnClickListener(view -> {
-            Intent startAddGameActivityIntent = new Intent(context, AddGameActivity.class);
+            Intent startAddGameActivityIntent = new Intent(context, AddGameActivityOld.class);
             startAddGameActivityIntent.putExtra(CURRENT_PLATFORM, platformId);
             startAddGameActivityIntent.putExtra(CURRENT_PLATFORM_NAME, platformName);
             startActivityForResult(startAddGameActivityIntent, ADD_GAME_RESULT);
