@@ -14,10 +14,9 @@
         android:id="@+id/game_cover"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:alpha="0.5"
         android:background="#cccccc"
         android:scaleType="fitCenter"
-        android:src="@drawable/edit_picture"
+        android:src="@drawable/ic_add_image"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -167,14 +166,16 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="50"
-                            android:text="Physical" />
+                            android:text="Physical"
+                            android:onClick="onGameFormatClicked" />
 
                         <RadioButton
                             android:id="@+id/radio_digital"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="50"
-                            android:text="Digital" />
+                            android:text="Digital"
+                            android:onClick="onGameFormatClicked" />
 
                     </RadioGroup>
 
@@ -203,7 +204,7 @@
                         android:orientation="horizontal">
 
                         <NumberPicker
-                            android:id="@+id/card_game_completed_selector"
+                            android:id="@+id/times_completed_selector"
                             android:layout_width="match_parent"
                             android:layout_height="80dp"
                             android:orientation="vertical" />

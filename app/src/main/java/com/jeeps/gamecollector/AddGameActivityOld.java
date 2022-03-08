@@ -65,7 +65,7 @@ public class AddGameActivityOld extends AppCompatActivity {
     @BindView(R.id.radio_group) RadioGroup mRadioGroup;
     @BindView(R.id.radio_digital) RadioButton mRadioDigital;
     @BindView(R.id.radio_physical) RadioButton radioPhysical;
-    @BindView(R.id.card_game_completed_selector) NumberPicker mNumberPicker;
+    @BindView(R.id.times_completed_selector) NumberPicker mNumberPicker;
     @BindView(R.id.fab) FloatingActionButton fab;
     @BindView(R.id.add_game_progressbar) ProgressBar progressBar;
 
