@@ -18,6 +18,9 @@ import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Compa
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM_NAME
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.SELECTED_GAME
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.SELECTED_GAME_POSITION
+import com.jeeps.gamecollector.remaster.utils.extensions.compressImage
+import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
+import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,9 +51,12 @@ class AddGameActivity : BaseActivity() {
         populateFormDefaults()
 
         checkIfGameIsBeingEdited()
+        bindAlerts()
         bindLoading()
         bindFab()
         bindFormFields()
+
+        bindImageUploadEvent()
     }
 
     private fun getIntentData() {
@@ -133,7 +139,7 @@ class AddGameActivity : BaseActivity() {
 
     private fun bindFab() {
         binding.fab.setOnClickListener {
-            saveGame()
+            viewModel.saveGame()
         }
     }
 
@@ -150,6 +156,18 @@ class AddGameActivity : BaseActivity() {
         } else {
             binding.addGameProgressbar.visibility = View.INVISIBLE
             binding.fab.visibility = View.VISIBLE
+        }
+    }
+
+    private fun bindAlerts() {
+        viewModel.errorMessage.observe(this) {
+            it?.let { showToast(it) }
+        }
+
+        viewModel.serverMessage.observe(this) { messageEvent ->
+            messageEvent?.getContentIfNotHandled()?.let {
+                showSnackBar(binding.root, it)
+            }
         }
     }
 
@@ -186,7 +204,15 @@ class AddGameActivity : BaseActivity() {
         }
     }
 
-    private fun saveGame() {
-        // TODO: Add save game feature
+    private fun bindImageUploadEvent() {
+        viewModel.isImageReadyToUpload.observe(this) { event ->
+            event?.getContentIfNotHandled()?.let { isReadyToUpload ->
+                if (isReadyToUpload) {
+                    viewModel.uploadCoverImage(
+                        viewModel.currentImageUri?.let { compressImage("temp.png", it) }
+                    )
+                }
+            }
+        }
     }
 }

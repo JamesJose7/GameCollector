@@ -3,14 +3,28 @@ package com.jeeps.gamecollector.remaster.ui.games.edit
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.model.Game
+import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
+import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
+import com.jeeps.gamecollector.remaster.ui.base.ErrorType
+import com.jeeps.gamecollector.remaster.utils.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 import javax.inject.Inject
 
+@ExperimentalCoroutinesApi
 @HiltViewModel
 class AddGameViewModel @Inject constructor(
-
+    private val authenticationRepository: AuthenticationRepository,
+    private val gamesRepository: GamesRepository
 ) : BaseViewModel() {
 
     private var timesCompleted: Int = 0
@@ -19,12 +33,18 @@ class AddGameViewModel @Inject constructor(
     val selectedGame: LiveData<Game>
         get() = _selectedGame
 
+    private val _isImageReadyToUpload = MutableLiveData<Event<Boolean>>()
+    val isImageReadyToUpload: LiveData<Event<Boolean>>
+        get() = _isImageReadyToUpload
+
     var selectedGamePosition: Int = -1
     var platformName: String? = null
     var platformId: String? = null
 
     var currentImageUri: Uri? = null
     var coverDeleted: Boolean = false
+
+    private var pendingMessage: String = ""
 
     fun setSelectedGame(game: Game) {
         _selectedGame.value = game
@@ -68,5 +88,108 @@ class AddGameViewModel @Inject constructor(
         ""
         )
         setSelectedGame(game)
+    }
+
+    fun saveGame() {
+        selectedGame.value?.let { game ->
+            if (game.id.isNullOrEmpty()) {
+                saveNewGame(game)
+            } else {
+                editGame(game)
+            }
+        }
+    }
+
+    private fun saveNewGame(game: Game) {
+        viewModelScope.launch {
+            startLoading()
+            val token = authenticationRepository.getUserToken()
+            when (val response = gamesRepository.saveNewGame(token, game)) {
+                is NetworkResponse.Success -> {
+                    if (currentImageUri != null) {
+                        setSelectedGame(response.body)
+                        pendingMessage = "Game created successfully"
+                        _isImageReadyToUpload.value = Event(true)
+                    } else {
+                        postServerMessage("Game created successfully")
+                        stopLoading()
+                    }
+                }
+                is NetworkResponse.ServerError -> {
+                    handleError(ErrorType.SERVER_ERROR, response.error)
+                    stopLoading()
+                }
+                is NetworkResponse.NetworkError -> {
+                    handleError(ErrorType.NETWORK_ERROR, response.error)
+                    stopLoading()
+                }
+                is NetworkResponse.UnknownError -> {
+                    handleError(ErrorType.UNKNOWN_ERROR, response.error)
+                    stopLoading()
+                }
+            }
+        }
+    }
+
+    private fun editGame(game: Game) {
+        viewModelScope.launch {
+            startLoading()
+            val token = authenticationRepository.getUserToken()
+            when (val response = gamesRepository.editGame(token, game.id ?: "", game)) {
+                is NetworkResponse.Success -> {
+                    if (currentImageUri != null) {
+                        pendingMessage = "Game edited successfully"
+                        _isImageReadyToUpload.value = Event(true)
+                    } else {
+                        postServerMessage("Game edited successfully")
+                        stopLoading()
+                    }
+                }
+                is NetworkResponse.ServerError -> {
+                    handleError(ErrorType.SERVER_ERROR, response.error)
+                    stopLoading()
+                }
+                is NetworkResponse.NetworkError -> {
+                    handleError(ErrorType.NETWORK_ERROR, response.error)
+                    stopLoading()
+                }
+                is NetworkResponse.UnknownError -> {
+                    handleError(ErrorType.UNKNOWN_ERROR, response.error)
+                    stopLoading()
+                }
+            }
+        }
+    }
+
+    fun uploadCoverImage(imageFile: File?) {
+        viewModelScope.launch {
+            startLoading()
+            imageFile?.let { image ->
+                val token = authenticationRepository.getUserToken()
+                val requestFile = image
+                    .asRequestBody("image/png".toMediaTypeOrNull())
+                val body: MultipartBody.Part =
+                    MultipartBody.Part.createFormData("image", image.name, requestFile)
+                when (val response = gamesRepository
+                    .uploadGameCover(token, selectedGame.value?.id ?: "", body)) {
+                    is NetworkResponse.Success -> {
+                        postServerMessage(pendingMessage)
+                    }
+                    is NetworkResponse.ServerError -> {
+                        handleError(ErrorType.SERVER_ERROR, response.error)
+                    }
+                    is NetworkResponse.NetworkError -> {
+                        handleError(ErrorType.NETWORK_ERROR, response.error)
+                    }
+                    is NetworkResponse.UnknownError -> {
+                        handleError(ErrorType.UNKNOWN_ERROR, response.error)
+                    }
+                }
+                if (image.exists()) {
+                    image.delete()
+                }
+            }
+            stopLoading()
+        }
     }
 }
