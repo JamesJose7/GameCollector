@@ -1,7 +1,7 @@
 package com.jeeps.gamecollector.remaster.data.api
 
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.model.Platform
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
 import com.jeeps.gamecollector.remaster.data.model.ErrorResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody

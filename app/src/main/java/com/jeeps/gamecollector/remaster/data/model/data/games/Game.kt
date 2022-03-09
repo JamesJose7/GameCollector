@@ -1,4 +1,4 @@
-package com.jeeps.gamecollector.remaster.data.model.data
+package com.jeeps.gamecollector.remaster.data.model.data.games
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName

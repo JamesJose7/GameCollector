@@ -11,7 +11,7 @@ import androidx.core.widget.doOnTextChanged
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityAddPlatformBinding
 import com.jeeps.gamecollector.databinding.ContentAddPlatformBinding
-import com.jeeps.gamecollector.model.Platform
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.utils.extensions.compressImage
 import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
@@ -78,7 +78,7 @@ class AddPlatformActivity : BaseActivity() {
 
     private fun bindPlatform() {
         viewModel.platform.observe(this) { platform ->
-            platform.imageUri?.let { uri ->
+            platform.imageUri.let { uri ->
                 if (uri.isNotEmpty()) {
                     Picasso.get()
                         .load(uri)

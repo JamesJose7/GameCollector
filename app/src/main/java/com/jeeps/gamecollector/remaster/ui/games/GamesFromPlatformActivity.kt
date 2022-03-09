@@ -26,7 +26,7 @@ import com.jeeps.gamecollector.adapters.GameCardAdapter
 import com.jeeps.gamecollector.comparators.*
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
-import com.jeeps.gamecollector.model.SortStat
+import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
 import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity

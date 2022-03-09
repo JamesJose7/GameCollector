@@ -12,13 +12,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.db.williamchart.view.DonutChartView;
 import com.jeeps.gamecollector.R;
-import com.jeeps.gamecollector.model.PlatformStats;
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.PlatformStats;
 
 import java.util.Collections;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class PlatformStatsAdapter extends RecyclerView.Adapter<PlatformStatsAdapter.PlatformViewHolder> {
     private Context context;

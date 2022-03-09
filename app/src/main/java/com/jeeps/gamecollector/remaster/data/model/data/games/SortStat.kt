@@ -1,6 +1,6 @@
-package com.jeeps.gamecollector.model;
+package com.jeeps.gamecollector.remaster.data.model.data.games
 
-public enum SortStat {
+enum class SortStat {
     HOURS_MAIN,
     HOURS_MAIN_EXTRA,
     HOURS_COMPLETIONIST,

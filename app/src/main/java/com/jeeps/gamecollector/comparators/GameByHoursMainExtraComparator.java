@@ -1,12 +1,12 @@
 package com.jeeps.gamecollector.comparators;
 
-import com.jeeps.gamecollector.remaster.data.model.data.Game;
-import com.jeeps.gamecollector.remaster.data.model.data.GameHoursStats;
+import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
+import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats;
 
 import java.util.Comparator;
 
 public class GameByHoursMainExtraComparator implements Comparator<Game> {
-    private boolean desc;
+    private final boolean desc;
 
     public GameByHoursMainExtraComparator(boolean desc) {
         this.desc = desc;
@@ -18,11 +18,11 @@ public class GameByHoursMainExtraComparator implements Comparator<Game> {
 
     @Override
     public int compare(Game game1, Game game2) {
-        GameHoursStats gameHoursStats1 = game1.getGameHoursStats() != null ?
-                game1.getGameHoursStats() : new GameHoursStats();
+        game1.getGameHoursStats();
+        GameHoursStats gameHoursStats1 = game1.getGameHoursStats();
 
-        GameHoursStats gameHoursStats2 = game2.getGameHoursStats() != null ?
-                game2.getGameHoursStats() : new GameHoursStats();
+        game2.getGameHoursStats();
+        GameHoursStats gameHoursStats2 = game2.getGameHoursStats();
         if (!desc)
             return Double.compare(
                     gameHoursStats1.getGameplayMainExtra(),

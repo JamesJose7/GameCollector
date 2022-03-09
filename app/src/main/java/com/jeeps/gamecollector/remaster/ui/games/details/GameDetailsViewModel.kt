@@ -8,8 +8,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.remaster.data.model.data.Game
-import com.jeeps.gamecollector.remaster.data.model.data.GameHoursStats
+import com.jeeps.gamecollector.remaster.data.model.data.games.Game
+import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats
 import com.jeeps.gamecollector.model.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository

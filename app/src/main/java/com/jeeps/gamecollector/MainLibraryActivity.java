@@ -29,7 +29,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.jeeps.gamecollector.adapters.PlatformsListAdapter;
 import com.jeeps.gamecollector.model.CurrentUser;
-import com.jeeps.gamecollector.model.Platform;
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
 import com.jeeps.gamecollector.model.User;
 import com.jeeps.gamecollector.model.UserDetails;
 import com.jeeps.gamecollector.services.api.ApiClient;

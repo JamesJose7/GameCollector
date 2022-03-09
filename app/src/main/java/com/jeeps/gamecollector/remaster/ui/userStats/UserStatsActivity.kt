@@ -9,7 +9,7 @@ import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.adapters.PlatformStatsAdapter
 import com.jeeps.gamecollector.databinding.ActivityStatsBinding
 import com.jeeps.gamecollector.databinding.ContentStatsBinding
-import com.jeeps.gamecollector.model.PlatformStats
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.PlatformStats
 import com.jeeps.gamecollector.model.UserStats
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.utils.extensions.completionPercentage

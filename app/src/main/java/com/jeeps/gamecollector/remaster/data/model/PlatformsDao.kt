@@ -1,7 +1,7 @@
 package com.jeeps.gamecollector.remaster.data.model
 
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.model.Platform
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
 import com.jeeps.gamecollector.remaster.data.api.ApiPlatform
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

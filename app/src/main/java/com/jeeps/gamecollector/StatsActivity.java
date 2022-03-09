@@ -26,7 +26,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.jeeps.gamecollector.adapters.PlatformStatsAdapter;
 import com.jeeps.gamecollector.model.CurrentUser;
-import com.jeeps.gamecollector.model.PlatformStats;
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.PlatformStats;
 import com.jeeps.gamecollector.model.UserStats;
 import com.jeeps.gamecollector.utils.UserUtils;
 

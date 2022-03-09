@@ -1,6 +1,6 @@
 package com.jeeps.gamecollector.comparators;
 
-import com.jeeps.gamecollector.remaster.data.model.data.Game;
+import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
 
 import java.util.Comparator;
 

@@ -1,7 +1,7 @@
 package com.jeeps.gamecollector.remaster.data.repository
 
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.model.Platform
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
 import com.jeeps.gamecollector.remaster.data.firestore.PlatformsCollectionDao
 import com.jeeps.gamecollector.remaster.data.model.ErrorResponse
 import com.jeeps.gamecollector.remaster.data.model.PlatformsDao

@@ -16,7 +16,7 @@ import com.firebase.ui.auth.AuthUI
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.adapters.PlatformsListAdapter
 import com.jeeps.gamecollector.databinding.ActivityMainLibraryBinding
-import com.jeeps.gamecollector.model.Platform
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.login.LoginActivity
 import com.jeeps.gamecollector.remaster.ui.userStats.UserStatsActivity

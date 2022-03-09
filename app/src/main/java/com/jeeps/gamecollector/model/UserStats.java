@@ -2,6 +2,7 @@ package com.jeeps.gamecollector.model;
 
 import com.google.firebase.firestore.PropertyName;
 import com.google.gson.annotations.SerializedName;
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.PlatformStats;
 
 import java.util.List;
 

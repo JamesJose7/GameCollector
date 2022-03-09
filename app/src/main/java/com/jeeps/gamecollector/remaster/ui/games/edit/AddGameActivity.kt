@@ -13,7 +13,7 @@ import androidx.core.widget.doOnTextChanged
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityAddGameBinding
 import com.jeeps.gamecollector.databinding.ContentAddGameBinding
-import com.jeeps.gamecollector.remaster.data.model.data.Game
+import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.ADD_GAME_RESULT_MESSAGE
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM
