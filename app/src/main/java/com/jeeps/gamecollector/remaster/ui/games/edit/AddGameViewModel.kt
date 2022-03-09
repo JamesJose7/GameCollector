@@ -203,7 +203,7 @@ class AddGameViewModel @Inject constructor(
             val selectedGame = if (igdbGames == null || igdbGames.isEmpty()) {
                 null
             } else {
-                // Exclude DLC
+                // Exclude DLC and sort based on most similar name based on the user input
                 val sortedGames = igdbGames
                     .sortedByDescending { igGame -> igGame.name.similarity(_selectedGame.value?.name ?: "") }
 
