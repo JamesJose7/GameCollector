@@ -2,7 +2,6 @@ package com.jeeps.gamecollector.remaster.ui.userStats
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jeeps.gamecollector.model.UserStats
 import com.jeeps.gamecollector.remaster.data.State

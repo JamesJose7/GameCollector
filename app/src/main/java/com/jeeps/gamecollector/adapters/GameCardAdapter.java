@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.ybq.android.spinkit.style.DoubleBounce;
 import com.jeeps.gamecollector.R;
-import com.jeeps.gamecollector.model.Game;
+import com.jeeps.gamecollector.remaster.data.model.data.Game;
 import com.jeeps.gamecollector.model.SortStat;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;

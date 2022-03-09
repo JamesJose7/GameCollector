@@ -1,6 +1,6 @@
 package com.jeeps.gamecollector.services.api;
 
-import com.jeeps.gamecollector.model.Game;
+import com.jeeps.gamecollector.remaster.data.model.data.Game;
 import com.jeeps.gamecollector.model.ToggleCompletionResponse;
 
 import java.util.List;

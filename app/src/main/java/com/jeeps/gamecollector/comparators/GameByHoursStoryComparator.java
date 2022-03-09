@@ -1,7 +1,7 @@
 package com.jeeps.gamecollector.comparators;
 
-import com.jeeps.gamecollector.model.Game;
-import com.jeeps.gamecollector.model.GameHoursStats;
+import com.jeeps.gamecollector.remaster.data.model.data.Game;
+import com.jeeps.gamecollector.remaster.data.model.data.GameHoursStats;
 
 import java.util.Comparator;
 

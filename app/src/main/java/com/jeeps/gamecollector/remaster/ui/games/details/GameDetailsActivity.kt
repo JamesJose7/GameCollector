@@ -16,7 +16,7 @@ import androidx.core.content.ContextCompat
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityGameDetailsBinding
 import com.jeeps.gamecollector.databinding.ContentGameDetailsBinding
-import com.jeeps.gamecollector.model.Game
+import com.jeeps.gamecollector.remaster.data.model.data.Game
 import com.jeeps.gamecollector.model.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.ADD_GAME_RESULT_MESSAGE
@@ -77,6 +77,7 @@ class GameDetailsActivity : BaseActivity() {
     private fun bindViews() {
         viewModel.selectedGame.observe(this) {
             it?.let { game ->
+                game.currentSortStat = ""
                 if (game.imageUri.isNotEmpty())
                     Picasso.get().load(game.imageUri).into(content.gameCover)
                 val title = game.shortName.ifEmpty { game.name }

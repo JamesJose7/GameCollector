@@ -24,7 +24,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DatabaseReference;
 import com.jeeps.gamecollector.model.CurrentUser;
-import com.jeeps.gamecollector.model.Game;
+import com.jeeps.gamecollector.remaster.data.model.data.Game;
 import com.jeeps.gamecollector.model.Publisher;
 import com.jeeps.gamecollector.model.igdb.GameCoverIG;
 import com.jeeps.gamecollector.model.igdb.GameIG;

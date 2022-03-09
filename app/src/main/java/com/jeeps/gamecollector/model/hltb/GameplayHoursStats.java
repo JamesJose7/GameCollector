@@ -1,6 +1,6 @@
 package com.jeeps.gamecollector.model.hltb;
 
-import com.jeeps.gamecollector.model.GameHoursStats;
+import com.jeeps.gamecollector.remaster.data.model.data.GameHoursStats;
 
 import java.util.List;
 

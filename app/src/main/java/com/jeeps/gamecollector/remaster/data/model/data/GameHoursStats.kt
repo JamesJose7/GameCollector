@@ -1,50 +1,35 @@
-package com.jeeps.gamecollector.model;
+package com.jeeps.gamecollector.remaster.data.model.data
 
-import com.jeeps.gamecollector.model.hltb.GameplayHoursStats;
+import com.jeeps.gamecollector.model.hltb.GameplayHoursStats
+import java.io.Serializable
+//
+//class GameHoursStats : Serializable {
+//    var gameplayMain = 0.0
+//    var gameplayMainExtra = 0.0
+//    var gameplayCompletionist = 0.0
+//
+//    constructor(gameplayMain: Double, gameplayMainExtra: Double, gameplayCompletionist: Double) {
+//        this.gameplayMain = gameplayMain
+//        this.gameplayMainExtra = gameplayMainExtra
+//        this.gameplayCompletionist = gameplayCompletionist
+//    }
+//
+//    constructor(gameplayHoursStats: GameplayHoursStats) {
+//        gameplayMain = gameplayHoursStats.gameplayMain
+//        gameplayMainExtra = gameplayHoursStats.gameplayMainExtra
+//        gameplayCompletionist = gameplayHoursStats.gameplayCompletionist
+//    }
+//
+//    constructor() {}
+//}
 
-import java.io.Serializable;
-
-public class GameHoursStats implements Serializable {
-    private double gameplayMain;
-    private double gameplayMainExtra;
-    private double gameplayCompletionist;
-
-    public GameHoursStats(double gameplayMain, double gameplayMainExtra, double gameplayCompletionist) {
-        this.gameplayMain = gameplayMain;
-        this.gameplayMainExtra = gameplayMainExtra;
-        this.gameplayCompletionist = gameplayCompletionist;
-    }
-
-    public GameHoursStats(GameplayHoursStats gameplayHoursStats) {
-        this.gameplayMain = gameplayHoursStats.getGameplayMain();
-        this.gameplayMainExtra = gameplayHoursStats.getGameplayMainExtra();
-        this.gameplayCompletionist = gameplayHoursStats.getGameplayCompletionist();
-    }
-
-    public GameHoursStats() {
-    }
-
-    public double getGameplayMain() {
-        return gameplayMain;
-    }
-
-    public void setGameplayMain(double gameplayMain) {
-        this.gameplayMain = gameplayMain;
-    }
-
-    public double getGameplayMainExtra() {
-        return gameplayMainExtra;
-    }
-
-    public void setGameplayMainExtra(double gameplayMainExtra) {
-        this.gameplayMainExtra = gameplayMainExtra;
-    }
-
-    public double getGameplayCompletionist() {
-        return gameplayCompletionist;
-    }
-
-    public void setGameplayCompletionist(double gameplayCompletionist) {
-        this.gameplayCompletionist = gameplayCompletionist;
-    }
+data class GameHoursStats(
+    var gameplayMain: Double = 0.0,
+    var gameplayMainExtra: Double = 0.0,
+    var gameplayCompletionist: Double = 0.0
+) : Serializable {
+    constructor(gameplayHoursStats: GameplayHoursStats) : this(
+        gameplayHoursStats.gameplayMain,
+        gameplayHoursStats.gameplayMainExtra,
+        gameplayHoursStats.gameplayCompletionist)
 }

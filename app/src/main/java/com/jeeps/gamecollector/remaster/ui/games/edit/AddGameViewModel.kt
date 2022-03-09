@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.model.Game
+import com.jeeps.gamecollector.remaster.data.model.data.Game
 import com.jeeps.gamecollector.model.igdb.GameIG
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
@@ -61,7 +61,7 @@ class AddGameViewModel @Inject constructor(
     }
 
     fun setGameFormat(isPhysical: Boolean) {
-        _selectedGame.value?.setPhysical(isPhysical)
+        _selectedGame.value?.isPhysical = isPhysical
     }
 
     fun setGameName(name: String) {
@@ -84,20 +84,20 @@ class AddGameViewModel @Inject constructor(
     fun initializeDefaultGame() {
         val game = Game(
             "",
-        true,
-        "",
-        "",
-        platformId ?: "",
-        platformName ?: "",
-        "",
-        ""
+            true,
+            "",
+            "",
+            platformId ?: "",
+            platformName ?: "",
+            "",
+            ""
         )
         setSelectedGame(game)
     }
 
     fun saveGame() {
         selectedGame.value?.let { game ->
-            val isEdit = !game.id.isNullOrEmpty()
+            val isEdit = game.id.isNotEmpty()
             when {
                 !isEdit && currentImageUri == null -> {
                     saveGameAfterGettingCover(game, isEdit)
@@ -150,7 +150,7 @@ class AddGameViewModel @Inject constructor(
         viewModelScope.launch {
             startLoading()
             val token = authenticationRepository.getUserToken()
-            when (val response = gamesRepository.editGame(token, game.id ?: "", game)) {
+            when (val response = gamesRepository.editGame(token, game.id, game)) {
                 is NetworkResponse.Success -> {
                     if (currentImageUri != null) {
                         pendingMessage = "Game edited successfully"

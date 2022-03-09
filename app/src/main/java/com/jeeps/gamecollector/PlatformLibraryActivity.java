@@ -46,7 +46,7 @@ import com.jeeps.gamecollector.comparators.GameByNameComparator;
 import com.jeeps.gamecollector.comparators.GameByPhysicalComparator;
 import com.jeeps.gamecollector.comparators.GameByTimesPlayedComparator;
 import com.jeeps.gamecollector.model.CurrentUser;
-import com.jeeps.gamecollector.model.Game;
+import com.jeeps.gamecollector.remaster.data.model.data.Game;
 import com.jeeps.gamecollector.model.SortStat;
 import com.jeeps.gamecollector.services.api.ApiClient;
 import com.jeeps.gamecollector.services.api.GameService;

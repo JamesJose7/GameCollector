@@ -8,8 +8,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.model.Game
-import com.jeeps.gamecollector.model.GameHoursStats
+import com.jeeps.gamecollector.remaster.data.model.data.Game
+import com.jeeps.gamecollector.remaster.data.model.data.GameHoursStats
 import com.jeeps.gamecollector.model.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
@@ -51,9 +51,7 @@ class GameDetailsViewModel @Inject constructor(
 
     fun setSelectedGame(game: Game) {
         _selectedGame.value = game
-        game.gameHoursStats?.let {
-            _gameHoursStats.value = GameplayHoursStats(it)
-        }
+        _gameHoursStats.value = GameplayHoursStats(game.gameHoursStats)
         getGameHours()
     }
 
@@ -113,8 +111,7 @@ class GameDetailsViewModel @Inject constructor(
                 when (val response = statsRepository.getGameHours(game.name)) {
                     is NetworkResponse.Success -> {
                         val stats = response.body
-                        if (game.gameHoursStats == null ||
-                            isStoredHoursDifferentFromIgbd(game.gameHoursStats, stats)) {
+                        if (isStoredHoursDifferentFromIgbd(game.gameHoursStats, stats)) {
                             _gameHoursStats.value = stats
                             updateGameHours(stats, game.id)
                         }

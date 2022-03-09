@@ -2,8 +2,8 @@ package com.jeeps.gamecollector.remaster.data.firestore
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.jeeps.gamecollector.model.Game
-import com.jeeps.gamecollector.model.GameHoursStats
+import com.jeeps.gamecollector.remaster.data.model.data.Game
+import com.jeeps.gamecollector.remaster.data.model.data.GameHoursStats
 import com.jeeps.gamecollector.model.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.data.State
 import kotlinx.coroutines.ExperimentalCoroutinesApi

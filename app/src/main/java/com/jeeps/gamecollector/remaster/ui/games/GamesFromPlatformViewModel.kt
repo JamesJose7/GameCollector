@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.comparators.GameByNameComparator
-import com.jeeps.gamecollector.model.Game
+import com.jeeps.gamecollector.remaster.data.model.data.Game
 import com.jeeps.gamecollector.model.SortStat
 import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
@@ -110,20 +110,19 @@ class GamesFromPlatformViewModel @Inject constructor(
         gamePendingDeletion = null
         viewModelScope.launch {
             val token = authenticationRepository.getUserToken()
-            game.id?.let { gameId ->
-                when (val response = gamesRepository.deleteGame(token, gameId)) {
-                    is NetworkResponse.Success -> {
-                        postServerMessage("Game deleted successfully")
-                    }
-                    is NetworkResponse.ServerError -> {
-                        handleError(ErrorType.SERVER_ERROR, response.error)
-                    }
-                    is NetworkResponse.NetworkError -> {
-                        handleError(ErrorType.NETWORK_ERROR, response.error)
-                    }
-                    is NetworkResponse.UnknownError -> {
-                        handleError(ErrorType.UNKNOWN_ERROR, response.error)
-                    }
+
+            when (val response = gamesRepository.deleteGame(token, game.id)) {
+                is NetworkResponse.Success -> {
+                    postServerMessage("Game deleted successfully")
+                }
+                is NetworkResponse.ServerError -> {
+                    handleError(ErrorType.SERVER_ERROR, response.error)
+                }
+                is NetworkResponse.NetworkError -> {
+                    handleError(ErrorType.NETWORK_ERROR, response.error)
+                }
+                is NetworkResponse.UnknownError -> {
+                    handleError(ErrorType.UNKNOWN_ERROR, response.error)
                 }
             }
         }

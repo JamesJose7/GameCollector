@@ -1,10 +1,8 @@
 package com.jeeps.gamecollector.remaster.ui.login
 
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.firebase.ui.auth.ErrorCodes
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
