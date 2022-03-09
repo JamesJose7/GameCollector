@@ -1,5 +1,6 @@
 package com.jeeps.gamecollector.remaster.ui.games.edit
 
+import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -14,12 +15,12 @@ import com.jeeps.gamecollector.databinding.ActivityAddGameBinding
 import com.jeeps.gamecollector.databinding.ContentAddGameBinding
 import com.jeeps.gamecollector.model.Game
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
+import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.ADD_GAME_RESULT_MESSAGE
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM_NAME
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.SELECTED_GAME
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.SELECTED_GAME_POSITION
 import com.jeeps.gamecollector.remaster.utils.extensions.compressImage
-import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import com.squareup.picasso.Picasso
@@ -166,9 +167,17 @@ class AddGameActivity : BaseActivity() {
 
         viewModel.serverMessage.observe(this) { messageEvent ->
             messageEvent?.getContentIfNotHandled()?.let {
-                showSnackBar(binding.root, it)
+                finishActivityWithResult(it)
             }
         }
+    }
+
+    private fun finishActivityWithResult(message: String) {
+        val intent = Intent().apply {
+            putExtra(ADD_GAME_RESULT_MESSAGE, message)
+        }
+        setResult(RESULT_OK, intent)
+        finish()
     }
 
     private fun bindFormFields() {

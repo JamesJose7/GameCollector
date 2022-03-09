@@ -19,6 +19,7 @@ import com.jeeps.gamecollector.databinding.ContentGameDetailsBinding
 import com.jeeps.gamecollector.model.Game
 import com.jeeps.gamecollector.model.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
+import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.ADD_GAME_RESULT_MESSAGE
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM_NAME
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.SELECTED_GAME
@@ -131,8 +132,12 @@ class GameDetailsActivity : BaseActivity() {
 
     private fun handleEditGameResult(result: ActivityResult) {
         if (result.resultCode == RESULT_OK) {
-            // TODO: Do I still need the previous implementation?
-            setResult(result.resultCode)
+            val intent = Intent().apply {
+                result.data?.getStringExtra(ADD_GAME_RESULT_MESSAGE)?.let { message ->
+                    putExtra(ADD_GAME_RESULT_MESSAGE, message)
+                }
+            }
+            setResult(result.resultCode, intent)
             finish()
         }
     }

@@ -1,19 +1,21 @@
 package com.jeeps.gamecollector.remaster.ui.games
 
-import android.app.ActivityOptions
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.transition.Explode
-import android.util.Pair
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.Window
 import android.widget.TextView
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.util.Pair
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.appbar.AppBarLayout
@@ -28,10 +30,7 @@ import com.jeeps.gamecollector.model.SortStat
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
 import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
-import com.jeeps.gamecollector.remaster.utils.extensions.createSnackBar
-import com.jeeps.gamecollector.remaster.utils.extensions.dpToPx
-import com.jeeps.gamecollector.remaster.utils.extensions.showToast
-import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
+import com.jeeps.gamecollector.remaster.utils.extensions.*
 import com.jeeps.gamecollector.utils.PlatformCovers
 import com.jeeps.gamecollector.views.GridSpacingItemDecoration
 import com.squareup.picasso.Picasso
@@ -47,6 +46,11 @@ class GamesFromPlatformActivity : BaseActivity(),
     private lateinit var content: ContentPlatformLibraryBinding
 
     private val viewModel: GamesFromPlatformViewModel by viewModels()
+
+    private val addGameResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            it?.let { handleAddGameResult(it) }
+        }
 
     private lateinit var gamesAdapter: GameCardAdapter
 
@@ -217,7 +221,7 @@ class GamesFromPlatformActivity : BaseActivity(),
                 putExtra(CURRENT_PLATFORM, viewModel.platformId)
                 putExtra(CURRENT_PLATFORM_NAME, viewModel.platformName)
             }
-            startActivity(intent)
+            addGameResultLauncher.launch(intent)
         }
     }
 
@@ -296,12 +300,20 @@ class GamesFromPlatformActivity : BaseActivity(),
             putExtra(SELECTED_GAME, selectedGame)
             putExtra(SELECTED_GAME_POSITION, position)
         }
-        val activityOptions = ActivityOptions
+        val activityOptions = ActivityOptionsCompat
             .makeSceneTransitionAnimation(
                 this,
                 Pair.create(imageView, "cover"),
                 Pair.create(gameTitle, "gameTitle"))
-        startActivity(intent, activityOptions.toBundle())
+        addGameResultLauncher.launch(intent, activityOptions)
+    }
+
+    private fun handleAddGameResult(result: ActivityResult) {
+        if (result.resultCode == RESULT_OK) {
+            result.data?.getStringExtra(ADD_GAME_RESULT_MESSAGE)?.let { message ->
+                showSnackBar(binding.root, message)
+            }
+        }
     }
 
     companion object {
@@ -309,5 +321,6 @@ class GamesFromPlatformActivity : BaseActivity(),
         const val CURRENT_PLATFORM_NAME = "CURRENT_PLATFORM_NAME"
         const val SELECTED_GAME = "SELECTED_GAME"
         const val SELECTED_GAME_POSITION = "SELECTED_GAME_POSITION"
+        const val ADD_GAME_RESULT_MESSAGE = "ADD_GAME_RESULT_MESSAGE"
     }
 }
