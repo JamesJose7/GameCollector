@@ -6,11 +6,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.model.Game
+import com.jeeps.gamecollector.model.igdb.GameIG
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
+import com.jeeps.gamecollector.remaster.data.repository.IgdbRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.base.ErrorType
 import com.jeeps.gamecollector.remaster.utils.Event
+import com.jeeps.gamecollector.remaster.utils.extensions.similarity
+import com.jeeps.gamecollector.utils.IgdbUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -24,7 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AddGameViewModel @Inject constructor(
     private val authenticationRepository: AuthenticationRepository,
-    private val gamesRepository: GamesRepository
+    private val gamesRepository: GamesRepository,
+    private val igdbRepository: IgdbRepository
 ) : BaseViewModel() {
 
     private var timesCompleted: Int = 0
@@ -92,10 +97,20 @@ class AddGameViewModel @Inject constructor(
 
     fun saveGame() {
         selectedGame.value?.let { game ->
-            if (game.id.isNullOrEmpty()) {
-                saveNewGame(game)
-            } else {
-                editGame(game)
+            val isEdit = !game.id.isNullOrEmpty()
+            when {
+                !isEdit && currentImageUri == null -> {
+                    saveGameAfterGettingCover(game, isEdit)
+                }
+                isEdit && coverDeleted -> {
+                    saveGameAfterGettingCover(game, isEdit)
+                }
+                isEdit -> {
+                    editGame(game)
+                }
+                else -> {
+                    saveNewGame(game)
+                }
             }
         }
     }
@@ -159,6 +174,71 @@ class AddGameViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun saveGameAfterGettingCover(game: Game, isEdit: Boolean) {
+        viewModelScope.launch {
+            startLoading()
+            val igdbGames: List<GameIG>? = when (val response = igdbRepository
+                    .searchGames(IgdbUtils.getSearchGamesQuery(game.name))) {
+                is NetworkResponse.Success -> {
+                    response.body
+                }
+                is NetworkResponse.ServerError -> {
+                    handleError(ErrorType.SERVER_ERROR, response.error)
+                    stopLoading()
+                    null
+                }
+                is NetworkResponse.NetworkError -> {
+                    handleError(ErrorType.NETWORK_ERROR, response.error)
+                    stopLoading()
+                    null
+                }
+                is NetworkResponse.UnknownError -> {
+                    handleError(ErrorType.UNKNOWN_ERROR, response.error)
+                    stopLoading()
+                    null
+                }
+            }
+            val selectedGame = if (igdbGames == null || igdbGames.isEmpty()) {
+                null
+            } else {
+                // Exclude DLC
+                val sortedGames = igdbGames
+                    .sortedByDescending { igGame -> igGame.name.similarity(_selectedGame.value?.name ?: "") }
+
+                sortedGames
+                    .firstOrNull { igGame -> igGame.category != 1 }
+            }
+
+            if (selectedGame == null) {
+                continueSavingGame(isEdit, game)
+            } else {
+                // Get image cover
+                when (val response = igdbRepository
+                    .getGameCoverById(IgdbUtils.getCoverImageQuery(selectedGame.cover))) {
+                    is NetworkResponse.Success -> {
+                        val gameCovers = response.body
+                        if (gameCovers.isNotEmpty()) {
+                            gameCovers[0].url?.let { coverUrl ->
+                                _selectedGame.value?.imageUri = coverUrl
+                                currentImageUri = null
+                            }
+                        }
+                        continueSavingGame(isEdit, game)
+                    }
+                    is NetworkResponse.Error -> {
+                        stopLoading()
+                        handleError(ErrorType.UNKNOWN_ERROR, response.error)
+                        continueSavingGame(isEdit, game)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun continueSavingGame(isEdit: Boolean, game: Game) {
+        if (isEdit) editGame(game) else saveNewGame(game)
     }
 
     fun uploadCoverImage(imageFile: File?) {
