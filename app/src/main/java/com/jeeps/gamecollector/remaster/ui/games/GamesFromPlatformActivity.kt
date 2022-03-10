@@ -64,13 +64,12 @@ class GamesFromPlatformActivity : BaseActivity(),
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         content = binding.content
 
-        displayPlatformCover()
-
         initCollapsingToolbar()
         initializeGamesAdapter()
 
         bindFab()
         getIntentData()
+        displayPlatformCover()
 
         bindUserGames()
     }
