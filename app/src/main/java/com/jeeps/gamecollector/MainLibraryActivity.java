@@ -27,7 +27,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.jeeps.gamecollector.adapters.PlatformsListAdapter;
+import com.jeeps.gamecollector.remaster.ui.adapters.PlatformsListAdapter;
 import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
 import com.jeeps.gamecollector.remaster.data.model.data.user.User;
@@ -265,7 +265,7 @@ public class MainLibraryActivity extends AppCompatActivity {
         platformsRecyclerView.setLayoutManager(layoutManager);
         platformsRecyclerView.setItemAnimator(new DefaultItemAnimator());
         // Create adapter
-        platformsAdapter = new PlatformsListAdapter(this, context, platforms);
+        platformsAdapter = new PlatformsListAdapter(this, platforms);
         platformsRecyclerView.setAdapter(platformsAdapter);
         platformsAdapter.notifyDataSetChanged();
     }

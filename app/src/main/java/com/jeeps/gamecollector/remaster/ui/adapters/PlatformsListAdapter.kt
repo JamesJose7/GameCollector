@@ -1,110 +1,81 @@
-package com.jeeps.gamecollector.adapters;
+package com.jeeps.gamecollector.remaster.ui.adapters
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.jeeps.gamecollector.MainLibraryActivity;
-import com.jeeps.gamecollector.PlatformLibraryActivity;
-import com.jeeps.gamecollector.R;
-import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
-import com.jeeps.gamecollector.remaster.ui.gamePlatforms.AddPlatformActivity;
-import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity;
-import com.squareup.picasso.Picasso;
-
-import java.util.List;
+import android.app.Activity
+import android.content.Intent
+import android.graphics.Color
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import com.jeeps.gamecollector.MainLibraryActivity
+import com.jeeps.gamecollector.PlatformLibraryActivity
+import com.jeeps.gamecollector.R
+import com.jeeps.gamecollector.remaster.ui.adapters.PlatformsListAdapter.PlatformsViewHolder
+import com.jeeps.gamecollector.databinding.PlatformCardLayoutBinding
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
+import com.jeeps.gamecollector.remaster.ui.gamePlatforms.AddPlatformActivity
+import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity
+import com.squareup.picasso.Picasso
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Created by jeeps on 12/23/2017.
  */
+@ExperimentalCoroutinesApi
+class PlatformsListAdapter(
+    private val parentActivity: Activity,
+    private val platforms: List<Platform>
+) : RecyclerView.Adapter<PlatformsViewHolder>() {
 
-public class PlatformsListAdapter extends RecyclerView.Adapter<PlatformsListAdapter.PlatformsViewHolder> {
-
-    private Activity parentActivity;
-    private Context mContext;
-    private List<Platform> platforms;
-
-    public PlatformsListAdapter(Activity activity, Context context, List<Platform> platforms) {
-        parentActivity = activity;
-        mContext = context;
-        this.platforms = platforms;
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlatformsViewHolder {
+        val binding = PlatformCardLayoutBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false)
+        return PlatformsViewHolder(binding)
     }
 
-    public static class PlatformsViewHolder extends RecyclerView.ViewHolder {
-        CardView platformCard;
-        ImageView platformImage;
-        View platformBorder;
-        TextView platformName;
+    override fun onBindViewHolder(holder: PlatformsViewHolder, position: Int) {
+        val platform = platforms[position]
+        holder.bind(platform)
 
-        public PlatformsViewHolder(@NonNull View itemView) {
-            super(itemView);
-            platformCard = itemView.findViewById(R.id.platform_card);
-            platformImage = itemView.findViewById(R.id.platform_card_image);
-            platformBorder = itemView.findViewById(R.id.platform_card_border);
-            platformName = itemView.findViewById(R.id.platform_card_name);
+        holder.binding.platformCard.setOnClickListener {
+            val intent = Intent(parentActivity, GamesFromPlatformActivity::class.java).apply {
+                putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.id)
+                putExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME, platform.name)
+            }
+            parentActivity.startActivity(intent)
+        }
+        holder.binding.platformCard.setOnLongClickListener {
+            val intent = Intent(parentActivity, AddPlatformActivity::class.java).apply {
+                putExtra(AddPlatformActivity.EDITED_PLATFORM, platform)
+                putExtra(AddPlatformActivity.EDITED_PLATFORM_POSITION, position)
+            }
+            parentActivity.startActivityForResult(
+                intent,
+                MainLibraryActivity.EDIT_PLATFORM_RESULT
+            )
+            true
         }
     }
 
-    @NonNull
-    @Override
-    public PlatformsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.platform_card_layout, parent, false);
-        return new PlatformsViewHolder(itemView);
+    override fun getItemCount(): Int {
+        return platforms.size
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull PlatformsViewHolder holder, int position) {
-        Platform platform = platforms.get(position);
+    inner class PlatformsViewHolder(val binding: PlatformCardLayoutBinding)
+        : RecyclerView.ViewHolder(binding.root) {
 
-        if (platform != null) {
-            holder.platformBorder.setBackgroundColor(Color.parseColor(platform.getColor()));
-//            if (!platform.getColor().equals(Colors.NORMIE_WHITE.getColor()))
-//                name.setTextColor(Color.parseColor(Colors.NORMIE_WHITE.getColor()));
-//            else
-//                name.setTextColor(Color.parseColor("#000000"));
+        fun bind(platform: Platform) {
+            with(binding) {
+                if (platform.color.isNotEmpty()) {
+                    platformCardBorder.setBackgroundColor(Color.parseColor(platform.color))
+                }
 
-            if (platform.getImageUri() != null)
-                if (!platform.getImageUri().isEmpty())
-                    Picasso.get().load(platform.getImageUri()).into(holder.platformImage);
-                else
-                    Picasso.get().load(R.drawable.game_controller).into(holder.platformImage);
-            else
-                Picasso.get().load(R.drawable.game_controller).into(holder.platformImage);
-
-            holder.platformName.setText(platform.getName());
-
-            // Click listener to open a platform activity
-            holder.platformCard.setOnClickListener(view -> {
-                //start games activity with platform id
-                Intent intent = new Intent(mContext, GamesFromPlatformActivity.class);
-                intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.getId());
-                intent.putExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME, platform.getName());
-                mContext.startActivity(intent);
-            });
-            holder.platformCard.setOnLongClickListener(view -> {
-                // Start add platform activity to edit the selected platform
-                Intent intent = new Intent(mContext, AddPlatformActivity.class);
-                intent.putExtra(AddPlatformActivity.EDITED_PLATFORM, platform);
-                intent.putExtra(AddPlatformActivity.EDITED_PLATFORM_POSITION, position);
-                parentActivity.startActivityForResult(intent, MainLibraryActivity.EDIT_PLATFORM_RESULT);
-                return true;
-            });
+                if (platform.imageUri.isNotEmpty()) {
+                    Picasso.get().load(platform.imageUri).into(platformCardImage)
+                } else {
+                    Picasso.get().load(R.drawable.game_controller).into(platformCardImage)
+                }
+                platformCardName.text = platform.name
+            }
         }
-    }
-
-    @Override
-    public int getItemCount() {
-        return platforms.size();
     }
 }
