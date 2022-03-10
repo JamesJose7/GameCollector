@@ -1,7 +1,7 @@
 package com.jeeps.gamecollector.services.igdb;
 
-import com.jeeps.gamecollector.model.igdb.GameCoverIG;
-import com.jeeps.gamecollector.model.igdb.GameIG;
+import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameCoverIG;
+import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameIG;
 
 import java.util.List;
 

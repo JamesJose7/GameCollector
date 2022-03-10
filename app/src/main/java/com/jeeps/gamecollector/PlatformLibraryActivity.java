@@ -39,21 +39,23 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.jeeps.gamecollector.adapters.GameCardAdapter;
-import com.jeeps.gamecollector.comparators.GameByHoursCompletionistComparator;
-import com.jeeps.gamecollector.comparators.GameByHoursMainExtraComparator;
-import com.jeeps.gamecollector.comparators.GameByHoursStoryComparator;
-import com.jeeps.gamecollector.comparators.GameByNameComparator;
-import com.jeeps.gamecollector.comparators.GameByPhysicalComparator;
-import com.jeeps.gamecollector.comparators.GameByTimesPlayedComparator;
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByHoursCompletionistComparator;
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByHoursMainExtraComparator;
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByHoursStoryComparator;
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByNameComparator;
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByPhysicalComparator;
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByTimesPlayedComparator;
 import com.jeeps.gamecollector.model.CurrentUser;
-import com.jeeps.gamecollector.model.Game;
-import com.jeeps.gamecollector.model.SortStat;
+import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
+import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat;
 import com.jeeps.gamecollector.services.api.ApiClient;
 import com.jeeps.gamecollector.services.api.GameService;
 import com.jeeps.gamecollector.utils.PlatformCovers;
 import com.jeeps.gamecollector.utils.UserUtils;
 import com.jeeps.gamecollector.views.GridSpacingItemDecoration;
 import com.squareup.picasso.Picasso;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -133,7 +135,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
 
         // Add game
         fab.setOnClickListener(view -> {
-            Intent startAddGameActivityIntent = new Intent(context, AddGameActivity.class);
+            Intent startAddGameActivityIntent = new Intent(context, AddGameActivityOld.class);
             startAddGameActivityIntent.putExtra(CURRENT_PLATFORM, platformId);
             startAddGameActivityIntent.putExtra(CURRENT_PLATFORM_NAME, platformName);
             startActivityForResult(startAddGameActivityIntent, ADD_GAME_RESULT);
@@ -150,7 +152,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         gamesRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
         gamesRecyclerView.setItemAnimator(new DefaultItemAnimator());
         // Create adapter
-        gamesAdapter = new GameCardAdapter(context, games, PlatformLibraryActivity.this);
+        gamesAdapter = new GameCardAdapter(games, PlatformLibraryActivity.this);
         gamesRecyclerView.setAdapter(gamesAdapter);
         gamesAdapter.notifyDataSetChanged();
     }
@@ -307,10 +309,10 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     }
 
     @Override
-    public void editGame(int position, View imageView, TextView gameTitle) {
+    public void editGame(int position, @NotNull View imageView, @NotNull TextView gameTitle) {
         Game game = games.get(position);
         //Start add game activity to edit selected
-        Intent intent = new Intent(context, GameDetailsActivity.class);
+        Intent intent = new Intent(context, GameDetailsActivityOld.class);
         intent.putExtra(CURRENT_PLATFORM, platformId);
         intent.putExtra(CURRENT_PLATFORM_NAME, platformName);
         intent.putExtra(SELECTED_GAME, game);

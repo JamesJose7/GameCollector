@@ -27,11 +27,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.jeeps.gamecollector.adapters.PlatformsListAdapter;
+import com.jeeps.gamecollector.remaster.ui.adapters.PlatformsListAdapter;
 import com.jeeps.gamecollector.model.CurrentUser;
-import com.jeeps.gamecollector.model.Platform;
-import com.jeeps.gamecollector.model.User;
-import com.jeeps.gamecollector.model.UserDetails;
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
+import com.jeeps.gamecollector.remaster.data.model.data.user.User;
+import com.jeeps.gamecollector.remaster.data.model.data.user.UserDetails;
 import com.jeeps.gamecollector.services.api.ApiClient;
 import com.jeeps.gamecollector.services.api.UserService;
 import com.jeeps.gamecollector.services.igdb.IgdbApiClient;
@@ -39,6 +39,7 @@ import com.jeeps.gamecollector.utils.UserUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -96,7 +97,7 @@ public class MainLibraryActivity extends AppCompatActivity {
 
         fab.setOnClickListener(view -> {
             // Create platform activity
-            Intent intent = new Intent(this, AddPlatformActivity.class);
+            Intent intent = new Intent(this, AddPlatformActivityOld.class);
             startActivityForResult(intent, ADD_PLATFORM_RESULT);
         });
     }
@@ -219,13 +220,13 @@ public class MainLibraryActivity extends AppCompatActivity {
         } else if (requestCode == ADD_PLATFORM_RESULT) {
             if (resultCode == RESULT_OK) {
                 // Add platform
-                Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivity.PLATFORM);
+                Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivityOld.PLATFORM);
                 Snackbar.make(fab, "Successfully added platform", Snackbar.LENGTH_SHORT).show();
             }
         } else if (requestCode == EDIT_PLATFORM_RESULT) {
             if (resultCode == RESULT_OK) {
-                Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivity.PLATFORM);
-                int platformPosition = data.getIntExtra(AddPlatformActivity.EDITED_PLATFORM_POSITION, -1);
+                Platform platform = (Platform) data.getSerializableExtra(AddPlatformActivityOld.PLATFORM);
+                int platformPosition = data.getIntExtra(AddPlatformActivityOld.EDITED_PLATFORM_POSITION, -1);
             }
         }
     }
@@ -264,7 +265,7 @@ public class MainLibraryActivity extends AppCompatActivity {
         platformsRecyclerView.setLayoutManager(layoutManager);
         platformsRecyclerView.setItemAnimator(new DefaultItemAnimator());
         // Create adapter
-        platformsAdapter = new PlatformsListAdapter(this, context, platforms);
+        platformsAdapter = new PlatformsListAdapter(this, platforms);
         platformsRecyclerView.setAdapter(platformsAdapter);
         platformsAdapter.notifyDataSetChanged();
     }
@@ -293,7 +294,7 @@ public class MainLibraryActivity extends AppCompatActivity {
                         platforms.add(platform);
                     }
                     // Sort by name
-                    platforms.sort((p1, p2) -> p1.getName().toLowerCase().compareTo(p2.getName().toLowerCase()));
+                    platforms.sort(Comparator.comparing(p -> p.getName().toLowerCase()));
                     // Update adapter
                     platformsAdapter.notifyDataSetChanged();
                 });

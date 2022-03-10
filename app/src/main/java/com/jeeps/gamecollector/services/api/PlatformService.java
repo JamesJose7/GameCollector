@@ -1,6 +1,6 @@
 package com.jeeps.gamecollector.services.api;
 
-import com.jeeps.gamecollector.model.Platform;
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
 
 import java.util.List;
 

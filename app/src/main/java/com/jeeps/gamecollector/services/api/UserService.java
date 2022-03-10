@@ -1,7 +1,7 @@
 package com.jeeps.gamecollector.services.api;
 
-import com.jeeps.gamecollector.model.User;
-import com.jeeps.gamecollector.model.UserDetails;
+import com.jeeps.gamecollector.remaster.data.model.data.user.User;
+import com.jeeps.gamecollector.remaster.data.model.data.user.UserDetails;
 import com.jeeps.gamecollector.services.igdb.TwitchAuthToken;
 
 import okhttp3.ResponseBody;
