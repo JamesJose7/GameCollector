@@ -30,6 +30,7 @@ import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
 import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialog
 import com.jeeps.gamecollector.remaster.utils.extensions.*
 import com.jeeps.gamecollector.utils.PlatformCovers
 import com.jeeps.gamecollector.views.GridSpacingItemDecoration
@@ -99,6 +100,11 @@ class GamesFromPlatformActivity : BaseActivity(),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_advanced_filters -> {
+                val advancedFiltersDialog = AdvancedFiltersDialog(this)
+                advancedFiltersDialog.show()
+                true
+            }
             R.id.action_filter_alph -> {
                 viewModel.setCurrentSortState(SortStat.NONE)
                 viewModel.rearrangeGames(GameByNameComparator())
