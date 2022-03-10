@@ -83,7 +83,7 @@ class GameDetailsViewModel @Inject constructor(
             selectedGame.value?.id?.let {  gameId ->
                 when (val response = gamesRepository.toggleGameCompletion(token, gameId)) {
                     is NetworkResponse.Success -> {
-                        val isCompleted = response.body.isCompleted
+                        val isCompleted = response.body.completed
                         val message =
                             if (isCompleted) "Marked as complete"
                             else "Marked as incomplete"
