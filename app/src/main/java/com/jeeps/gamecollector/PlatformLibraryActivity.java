@@ -55,6 +55,8 @@ import com.jeeps.gamecollector.utils.UserUtils;
 import com.jeeps.gamecollector.views.GridSpacingItemDecoration;
 import com.squareup.picasso.Picasso;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -150,7 +152,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         gamesRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
         gamesRecyclerView.setItemAnimator(new DefaultItemAnimator());
         // Create adapter
-        gamesAdapter = new GameCardAdapter(context, games, PlatformLibraryActivity.this);
+        gamesAdapter = new GameCardAdapter(games, PlatformLibraryActivity.this);
         gamesRecyclerView.setAdapter(gamesAdapter);
         gamesAdapter.notifyDataSetChanged();
     }
@@ -307,7 +309,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     }
 
     @Override
-    public void editGame(int position, View imageView, TextView gameTitle) {
+    public void editGame(int position, @NotNull View imageView, @NotNull TextView gameTitle) {
         Game game = games.get(position);
         //Start add game activity to edit selected
         Intent intent = new Intent(context, GameDetailsActivityOld.class);

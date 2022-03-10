@@ -211,7 +211,7 @@ class GamesFromPlatformActivity : BaseActivity(),
             GridSpacingItemDecoration(2, dpToPx(10f), true))
         gamesRecyclerView.itemAnimator = DefaultItemAnimator()
 
-        gamesAdapter = GameCardAdapter(this, mutableListOf(), this)
+        gamesAdapter = GameCardAdapter(mutableListOf(), this)
         gamesRecyclerView.adapter = gamesAdapter
     }
 
@@ -277,7 +277,9 @@ class GamesFromPlatformActivity : BaseActivity(),
                     undoSnackBar.setAction("UNDO") {
                         undoSnackBar.removeCallback(undoCallback)
                         // Restore game
-                        gamesAdapter.addGameAtPosition(position, selectedGame)
+                        if (selectedGame != null) {
+                            gamesAdapter.addGameAtPosition(position, selectedGame)
+                        }
                     }
 
                     undoSnackBar.show()
@@ -292,7 +294,7 @@ class GamesFromPlatformActivity : BaseActivity(),
             .show()
     }
 
-    override fun editGame(position: Int, imageView: View, gameTitle: TextView) {
+    override fun editGame(position: Int, imageView: View, titleView: TextView) {
         val selectedGame = viewModel.getGameAt(position)
         val intent = Intent(this, GameDetailsActivity::class.java).apply {
             putExtra(CURRENT_PLATFORM, viewModel.platformId)
@@ -304,7 +306,7 @@ class GamesFromPlatformActivity : BaseActivity(),
             .makeSceneTransitionAnimation(
                 this,
                 Pair.create(imageView, "cover"),
-                Pair.create(gameTitle, "gameTitle"))
+                Pair.create(titleView, "gameTitle"))
         addGameResultLauncher.launch(intent, activityOptions)
     }
 
