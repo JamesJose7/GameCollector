@@ -13,7 +13,7 @@ import com.jeeps.gamecollector.remaster.ui.adapters.PlatformsListAdapter.Platfor
 import com.jeeps.gamecollector.databinding.PlatformCardLayoutBinding
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
 import com.jeeps.gamecollector.remaster.ui.gamePlatforms.AddPlatformActivity
-import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 

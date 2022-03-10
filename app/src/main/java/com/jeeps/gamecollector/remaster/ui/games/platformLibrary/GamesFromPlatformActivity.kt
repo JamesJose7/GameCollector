@@ -1,4 +1,4 @@
-package com.jeeps.gamecollector.remaster.ui.games
+package com.jeeps.gamecollector.remaster.ui.games.platformLibrary
 
 import android.content.DialogInterface
 import android.content.Intent

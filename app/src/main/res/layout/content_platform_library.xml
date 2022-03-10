@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.jeeps.gamecollector.PlatformLibraryActivity"
+    tools:context=".remaster.ui.games.platformLibrary.GamesFromPlatformActivity"
     tools:showIn="@layout/activity_platform_library">
 
     <androidx.recyclerview.widget.RecyclerView

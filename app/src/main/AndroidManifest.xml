@@ -26,7 +26,7 @@
             android:value="com.jeeps.gamecollector.PlatformLibraryActivity" />
         </activity>
         <activity
-            android:name=".remaster.ui.games.GamesFromPlatformActivity"
+            android:name=".remaster.ui.games.platformLibrary.GamesFromPlatformActivity"
             android:exported="false"
             android:label="@string/title_activity_platform_library"
             android:parentActivityName=".remaster.ui.gamePlatforms.GamePlatformsActivity"

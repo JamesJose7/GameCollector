@@ -1,4 +1,4 @@
-package com.jeeps.gamecollector.remaster.ui.games
+package com.jeeps.gamecollector.remaster.ui.games.platformLibrary
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
