@@ -4,7 +4,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats
-import com.jeeps.gamecollector.model.hltb.GameplayHoursStats
+import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.data.State
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel

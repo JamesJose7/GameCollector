@@ -30,7 +30,7 @@ import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
 import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats;
 import com.jeeps.gamecollector.model.ToggleCompletionResponse;
-import com.jeeps.gamecollector.model.hltb.GameplayHoursStats;
+import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats;
 import com.jeeps.gamecollector.services.api.ApiClient;
 import com.jeeps.gamecollector.services.api.GameService;
 import com.jeeps.gamecollector.services.api.StatsService;

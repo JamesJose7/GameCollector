@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
-import com.jeeps.gamecollector.model.igdb.GameIG
+import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameIG
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.data.repository.IgdbRepository
@@ -220,7 +220,7 @@ class AddGameViewModel @Inject constructor(
                     is NetworkResponse.Success -> {
                         val gameCovers = response.body
                         if (gameCovers.isNotEmpty()) {
-                            gameCovers[0].url?.let { coverUrl ->
+                            gameCovers[0].getBigCoverUrl().let { coverUrl ->
                                 _selectedGame.value?.imageUri = coverUrl
                                 currentImageUri = null
                             }

@@ -1,6 +1,6 @@
 package com.jeeps.gamecollector.remaster.data.model.data.games
 
-import com.jeeps.gamecollector.model.hltb.GameplayHoursStats
+import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
 import java.io.Serializable
 //
 //class GameHoursStats : Serializable {

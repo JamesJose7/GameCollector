@@ -1,7 +1,7 @@
 package com.jeeps.gamecollector.remaster.data.repository
 
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
-import com.jeeps.gamecollector.model.hltb.GameplayHoursStats
+import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.data.firestore.GamesCollectionDao
 import com.jeeps.gamecollector.remaster.data.model.GamesDao
 import kotlinx.coroutines.ExperimentalCoroutinesApi

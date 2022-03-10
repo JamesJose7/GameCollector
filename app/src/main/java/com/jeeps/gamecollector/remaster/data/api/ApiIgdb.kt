@@ -1,8 +1,8 @@
 package com.jeeps.gamecollector.remaster.data.api
 
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.model.igdb.GameCoverIG
-import com.jeeps.gamecollector.model.igdb.GameIG
+import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameCoverIG
+import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameIG
 import com.jeeps.gamecollector.remaster.data.model.ErrorResponse
 import retrofit2.http.Body
 import retrofit2.http.POST

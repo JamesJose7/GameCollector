@@ -17,7 +17,7 @@ import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityGameDetailsBinding
 import com.jeeps.gamecollector.databinding.ContentGameDetailsBinding
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
-import com.jeeps.gamecollector.model.hltb.GameplayHoursStats
+import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.ADD_GAME_RESULT_MESSAGE
 import com.jeeps.gamecollector.remaster.ui.games.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM

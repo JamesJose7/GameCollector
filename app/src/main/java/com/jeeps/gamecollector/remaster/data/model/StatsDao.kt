@@ -1,7 +1,7 @@
 package com.jeeps.gamecollector.remaster.data.model
 
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.model.hltb.GameplayHoursStats
+import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.data.api.ApiStats
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
