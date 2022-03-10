@@ -3,8 +3,8 @@ package com.jeeps.gamecollector.remaster.data.model
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.model.User
-import com.jeeps.gamecollector.model.UserDetails
+import com.jeeps.gamecollector.remaster.data.model.data.user.User
+import com.jeeps.gamecollector.remaster.data.model.data.user.UserDetails
 import com.jeeps.gamecollector.remaster.data.api.ApiUser
 import com.jeeps.gamecollector.remaster.utils.PreferencesWrapper
 import kotlinx.coroutines.Dispatchers

@@ -2,7 +2,7 @@ package com.jeeps.gamecollector.remaster.data.model
 
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
-import com.jeeps.gamecollector.model.ToggleCompletionResponse
+import com.jeeps.gamecollector.remaster.data.model.data.games.ToggleCompletionResponse
 import com.jeeps.gamecollector.remaster.data.api.ApiGame
 import com.jeeps.gamecollector.remaster.utils.extensions.bearer
 import kotlinx.coroutines.Dispatchers

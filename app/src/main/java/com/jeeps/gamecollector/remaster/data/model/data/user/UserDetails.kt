@@ -1,13 +1,5 @@
-package com.jeeps.gamecollector.model;
+package com.jeeps.gamecollector.remaster.data.model.data.user
 
-public class UserDetails {
-    private User credentials;
-
-    public User getCredentials() {
-        return credentials;
-    }
-
-    public void setCredentials(User credentials) {
-        this.credentials = credentials;
-    }
-}
+data class UserDetails(
+    var credentials: User = User()
+)

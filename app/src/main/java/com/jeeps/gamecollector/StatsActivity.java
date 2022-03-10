@@ -27,7 +27,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.jeeps.gamecollector.adapters.PlatformStatsAdapter;
 import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.PlatformStats;
-import com.jeeps.gamecollector.model.UserStats;
+import com.jeeps.gamecollector.remaster.data.model.data.user.UserStats;
 import com.jeeps.gamecollector.utils.UserUtils;
 
 import java.util.ArrayList;

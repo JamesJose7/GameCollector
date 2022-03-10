@@ -1,6 +1,6 @@
 package com.jeeps.gamecollector.remaster.utils.extensions
 
-import com.jeeps.gamecollector.model.UserStats
+import com.jeeps.gamecollector.remaster.data.model.data.user.UserStats
 import kotlin.math.roundToInt
 
 fun UserStats.totalGames(): Int {

@@ -2,7 +2,7 @@ package com.jeeps.gamecollector.remaster.data.repository
 
 import com.firebase.ui.auth.IdpResponse
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.model.User
+import com.jeeps.gamecollector.remaster.data.model.data.user.User
 import com.jeeps.gamecollector.remaster.data.model.AuthenticationDao
 import com.jeeps.gamecollector.remaster.utils.user.UserUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,12 +27,12 @@ class AuthenticationRepository @Inject constructor(
 
         // Save user details for new users
         if (authResponse.isNewUser) {
-            val generatedUserName = authResponse.email?.let {
+            val generatedUserName: String = authResponse.email?.let {
                 UserUtils.convertEmailToUsername(it)
             } ?: UserUtils.generateRandomUsername()
 
             val newUserResponse = authenticationDao.saveNewUser(
-                User(user?.uid, generatedUserName, authResponse.email)
+                User(user?.uid ?: "", generatedUserName, authResponse.email ?: "")
             )
             when (newUserResponse) {
                 is NetworkResponse.Error -> {

@@ -1,21 +1,7 @@
-package com.jeeps.gamecollector.model;
+package com.jeeps.gamecollector.remaster.data.model.data.games
 
-import java.io.Serializable;
+import java.io.Serializable
 
-public class ToggleCompletionResponse implements Serializable {
-    private boolean completed;
-
-    public ToggleCompletionResponse(boolean completed) {
-        this.completed = completed;
-    }
-
-    public ToggleCompletionResponse() { }
-
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
-    }
-}
+data class ToggleCompletionResponse(
+    var isCompleted: Boolean = false
+) : Serializable

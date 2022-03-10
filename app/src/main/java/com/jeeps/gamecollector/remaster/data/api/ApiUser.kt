@@ -1,8 +1,8 @@
 package com.jeeps.gamecollector.remaster.data.api
 
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.model.User
-import com.jeeps.gamecollector.model.UserDetails
+import com.jeeps.gamecollector.remaster.data.model.data.user.User
+import com.jeeps.gamecollector.remaster.data.model.data.user.UserDetails
 import com.jeeps.gamecollector.remaster.data.model.ErrorResponse
 import com.jeeps.gamecollector.services.igdb.TwitchAuthToken
 import okhttp3.ResponseBody

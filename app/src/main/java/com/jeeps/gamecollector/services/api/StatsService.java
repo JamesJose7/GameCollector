@@ -1,6 +1,6 @@
 package com.jeeps.gamecollector.services.api;
 
-import com.jeeps.gamecollector.model.UserStats;
+import com.jeeps.gamecollector.remaster.data.model.data.user.UserStats;
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats;
 
 import retrofit2.Call;

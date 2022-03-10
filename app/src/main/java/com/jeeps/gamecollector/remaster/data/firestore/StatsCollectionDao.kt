@@ -1,7 +1,7 @@
 package com.jeeps.gamecollector.remaster.data.firestore
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.jeeps.gamecollector.model.UserStats
+import com.jeeps.gamecollector.remaster.data.model.data.user.UserStats
 import com.jeeps.gamecollector.remaster.data.State
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel

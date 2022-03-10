@@ -2,7 +2,7 @@ package com.jeeps.gamecollector.remaster.data.api
 
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
-import com.jeeps.gamecollector.model.ToggleCompletionResponse
+import com.jeeps.gamecollector.remaster.data.model.data.games.ToggleCompletionResponse
 import com.jeeps.gamecollector.remaster.data.model.ErrorResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
