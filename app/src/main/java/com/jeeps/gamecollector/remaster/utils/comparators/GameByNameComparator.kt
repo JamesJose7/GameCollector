@@ -1,29 +1,25 @@
-package com.jeeps.gamecollector.comparators;
+package com.jeeps.gamecollector.remaster.utils.comparators
 
-import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
-
-import java.util.Comparator;
+import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 
 /**
  * Created by jeeps on 1/9/2018.
  */
+class GameByNameComparator : Comparator<Game> {
+    private var desc: Boolean
 
-public class GameByNameComparator implements Comparator<Game> {
-
-    private boolean desc;
-
-    public GameByNameComparator(boolean desc) {
-        this.desc = desc;
+    constructor(desc: Boolean) {
+        this.desc = desc
     }
 
-    public GameByNameComparator() {
-        this.desc = false;
+    constructor() {
+        desc = false
     }
 
-    @Override
-    public int compare(Game game1, Game game2) {
-        if (!desc)
-            return game1.getName().compareToIgnoreCase(game2.getName());
-        return (game1.getName().compareToIgnoreCase(game2.getName())) * -1;
+    override fun compare(game1: Game, game2: Game): Int {
+        return if (!desc)
+            game1.name.compareTo(game2.name, true)
+        else
+            game1.name.compareTo(game2.name, true) * -1
     }
 }

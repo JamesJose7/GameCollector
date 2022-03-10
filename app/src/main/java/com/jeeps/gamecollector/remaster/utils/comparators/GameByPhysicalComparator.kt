@@ -1,29 +1,25 @@
-package com.jeeps.gamecollector.comparators;
+package com.jeeps.gamecollector.remaster.utils.comparators
 
-import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
-
-import java.util.Comparator;
+import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 
 /**
  * Created by jeeps on 1/9/2018.
  */
+class GameByPhysicalComparator : Comparator<Game> {
+    private var desc: Boolean
 
-public class GameByPhysicalComparator implements Comparator<Game> {
-
-    private boolean desc;
-
-    public GameByPhysicalComparator(boolean desc) {
-        this.desc = desc;
+    constructor(desc: Boolean) {
+        this.desc = desc
     }
 
-    public GameByPhysicalComparator() {
-        this.desc = false;
+    constructor() {
+        desc = false
     }
 
-    @Override
-    public int compare(Game game1, Game game2) {
-        if (!desc)
-            return Boolean.compare(game1.isPhysical(), game2.isPhysical());
-        return Boolean.compare(game1.isPhysical(), game2.isPhysical()) * -1;
+    override fun compare(game1: Game, game2: Game): Int {
+        return if (!desc)
+            game1.isPhysical.compareTo(game2.isPhysical)
+        else
+            game1.isPhysical.compareTo(game2.isPhysical) * -1
     }
 }

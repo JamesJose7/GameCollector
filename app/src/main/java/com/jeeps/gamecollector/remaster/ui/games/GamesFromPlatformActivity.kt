@@ -23,7 +23,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.adapters.GameCardAdapter
-import com.jeeps.gamecollector.comparators.*
+import com.jeeps.gamecollector.remaster.utils.comparators.*
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
 import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat

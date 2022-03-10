@@ -5,7 +5,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.comparators.GameByNameComparator
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByNameComparator
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
 import com.jeeps.gamecollector.remaster.data.State

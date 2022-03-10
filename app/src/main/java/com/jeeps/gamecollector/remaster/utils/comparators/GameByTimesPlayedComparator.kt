@@ -1,30 +1,25 @@
-package com.jeeps.gamecollector.comparators;
+package com.jeeps.gamecollector.remaster.utils.comparators
 
-import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
-
-import java.util.Comparator;
+import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 
 /**
  * Created by jeeps on 1/9/2018.
  */
+class GameByTimesPlayedComparator : Comparator<Game> {
+    private var desc: Boolean
 
-public class GameByTimesPlayedComparator implements Comparator<Game> {
-
-    private boolean desc;
-
-    public GameByTimesPlayedComparator(boolean desc) {
-        this.desc = desc;
+    constructor(desc: Boolean) {
+        this.desc = desc
     }
 
-    public GameByTimesPlayedComparator() {
-        this.desc = false;
+    constructor() {
+        desc = false
     }
 
-    @Override
-    public int compare(Game game1, Game game2) {
-        if (!desc)
-            return Integer.compare(game1.getTimesCompleted(), game2.getTimesCompleted());
-        return Integer.compare(game1.getTimesCompleted(), game2.getTimesCompleted()) * -1;
+    override fun compare(game1: Game, game2: Game): Int {
+        return if (!desc)
+            game1.timesCompleted.compareTo(game2.timesCompleted)
+        else
+            game1.timesCompleted.compareTo(game2.timesCompleted) * -1
     }
 }
-

@@ -1,34 +1,24 @@
-package com.jeeps.gamecollector.comparators;
+package com.jeeps.gamecollector.remaster.utils.comparators
 
-import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
-import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats;
+import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 
-import java.util.Comparator;
+class GameByHoursMainExtraComparator : Comparator<Game> {
+    private val desc: Boolean
 
-public class GameByHoursMainExtraComparator implements Comparator<Game> {
-    private final boolean desc;
-
-    public GameByHoursMainExtraComparator(boolean desc) {
-        this.desc = desc;
+    constructor(desc: Boolean) {
+        this.desc = desc
     }
 
-    public GameByHoursMainExtraComparator() {
-        this.desc = false;
+    constructor() {
+        desc = false
     }
 
-    @Override
-    public int compare(Game game1, Game game2) {
-        game1.getGameHoursStats();
-        GameHoursStats gameHoursStats1 = game1.getGameHoursStats();
-
-        game2.getGameHoursStats();
-        GameHoursStats gameHoursStats2 = game2.getGameHoursStats();
-        if (!desc)
-            return Double.compare(
-                    gameHoursStats1.getGameplayMainExtra(),
-                    gameHoursStats2.getGameplayMainExtra());
-        return Double.compare(
-                gameHoursStats1.getGameplayMainExtra(),
-                gameHoursStats2.getGameplayMainExtra()) * -1;
+    override fun compare(game1: Game, game2: Game): Int {
+        val (_, hours1) = game1.gameHoursStats
+        val (_, hours2) = game2.gameHoursStats
+        return if (!desc)
+            hours1.compareTo(hours2)
+        else
+            hours1.compareTo(hours2) * -1
     }
 }
