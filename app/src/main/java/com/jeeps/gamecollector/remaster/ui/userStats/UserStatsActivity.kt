@@ -6,7 +6,7 @@ import androidx.activity.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.jeeps.gamecollector.R
-import com.jeeps.gamecollector.adapters.PlatformStatsAdapter
+import com.jeeps.gamecollector.remaster.ui.adapters.PlatformStatsAdapter
 import com.jeeps.gamecollector.databinding.ActivityStatsBinding
 import com.jeeps.gamecollector.databinding.ContentStatsBinding
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.PlatformStats
@@ -102,8 +102,7 @@ class UserStatsActivity : BaseActivity() {
     }
 
     private fun setPlatformsAdapter(platformStats: List<PlatformStats>) {
-        val platformsStatsAdapter =
-            PlatformStatsAdapter(this, platformStats)
+        val platformsStatsAdapter = PlatformStatsAdapter(platformStats)
         content.platformStatsRecyclerview.adapter = platformsStatsAdapter
     }
 

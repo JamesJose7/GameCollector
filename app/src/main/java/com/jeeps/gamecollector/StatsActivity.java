@@ -24,7 +24,7 @@ import com.db.williamchart.view.DonutChartView;
 import com.github.ybq.android.spinkit.style.DoubleBounce;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.jeeps.gamecollector.adapters.PlatformStatsAdapter;
+import com.jeeps.gamecollector.remaster.ui.adapters.PlatformStatsAdapter;
 import com.jeeps.gamecollector.model.CurrentUser;
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.PlatformStats;
 import com.jeeps.gamecollector.remaster.data.model.data.user.UserStats;
@@ -99,7 +99,7 @@ public class StatsActivity extends AppCompatActivity {
         platformsRecyclerView.setHasFixedSize(true);
         platformsRecyclerView.setLayoutManager(layoutManager);
         platformsStats = new ArrayList<>();
-        platformStatsAdapter = new PlatformStatsAdapter(context, platformsStats);
+        platformStatsAdapter = new PlatformStatsAdapter(platformsStats);
         platformsRecyclerView.setAdapter(platformStatsAdapter);
 
         // Overall Chart
