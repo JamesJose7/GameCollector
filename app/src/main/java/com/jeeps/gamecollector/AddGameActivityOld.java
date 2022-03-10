@@ -172,8 +172,8 @@ public class AddGameActivityOld extends AppCompatActivity {
         nameEdit.setText(game.getName());
         shortNameEdit.setText(game.getShortName());
         //Set physical or digital
-        if (!game.isPhysical())
-            mRadioGroup.check(mRadioDigital.getId());
+//        if (!game.isPhysical)
+//            mRadioGroup.check(mRadioDigital.getId());
         //Set times commpleted
         mNumberPicker.setValue(game.getTimesCompleted());
         timesCompleted = game.getTimesCompleted();

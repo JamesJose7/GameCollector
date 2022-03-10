@@ -15,6 +15,7 @@ data class Game(
     var user: String = "",
     var dateAdded: String = "",
     var imageUri: String = "",
+    @field:JvmField
     var isPhysical: Boolean = true,
     var name: String = "",
     var shortName: String = "",

@@ -79,7 +79,7 @@ public class GameCardAdapter extends RecyclerView.Adapter<GameCardAdapter.MyView
         } else
             holder.coverProgressBar.setVisibility(View.INVISIBLE);
         //Display logo if it's digital
-        if (!game.isPhysical())
+        if (!game.isPhysical)
             holder.isDigital.setVisibility(View.VISIBLE);
         else {
             holder.isDigital.setVisibility(View.GONE);
