@@ -12,6 +12,7 @@
 
         <!-- Components -->
         <item name="bottomSheetDialogTheme">@style/BaseBottomSheetDialogTheme</item>
+        <item name="android:buttonStyleToggle">@style/BaseToggleButton</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -43,5 +44,10 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:textColorHint">@android:color/white</item>
+    </style>
+
+    <style name="BaseBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/BaseBottomSheetModalStyle</item>
+        <item name="android:buttonStyleToggle">@style/BaseToggleButton</item>
     </style>
 </resources>
