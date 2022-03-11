@@ -31,6 +31,8 @@ import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
 import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialog
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialogListener
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.SortControls
 import com.jeeps.gamecollector.remaster.utils.extensions.*
 import com.jeeps.gamecollector.utils.PlatformCovers
 import com.jeeps.gamecollector.views.GridSpacingItemDecoration
@@ -41,7 +43,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class GamesFromPlatformActivity : BaseActivity(),
-    GameCardAdapter.GameCardAdapterListener {
+    GameCardAdapter.GameCardAdapterListener, AdvancedFiltersDialogListener {
 
     private val binding by viewBinding(ActivityPlatformLibraryBinding::inflate)
     private lateinit var content: ContentPlatformLibraryBinding
@@ -101,7 +103,7 @@ class GamesFromPlatformActivity : BaseActivity(),
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_advanced_filters -> {
-                val advancedFiltersDialog = AdvancedFiltersDialog(this)
+                val advancedFiltersDialog = AdvancedFiltersDialog(this, this)
                 advancedFiltersDialog.show()
                 true
             }
@@ -167,6 +169,10 @@ class GamesFromPlatformActivity : BaseActivity(),
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun updateSortControls(sortControls: SortControls) {
+
     }
 
     private fun getIntentData() {
