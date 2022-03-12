@@ -95,7 +95,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             app:flexWrap="wrap"
-            app:justifyContent="space_around"
+            app:justifyContent="space_between"
             app:layout_constraintTop_toBottomOf="@id/miscellaneous_label">
 
             <ToggleButton
