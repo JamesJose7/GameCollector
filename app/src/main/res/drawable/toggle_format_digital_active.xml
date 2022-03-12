@@ -6,9 +6,9 @@
                 android:width="1dp"
                 android:color="@color/colorPrimary" />
             <corners android:radius="8dp" />
-            <solid android:color="@color/colorPrimaryTransparent" />
+            <solid android:color="@color/colorPrimary" />
             <padding
-                android:left="5dp"
+                android:left="8dp"
                 android:right="40dp" />
         </shape>
     </item>
@@ -16,6 +16,6 @@
         <bitmap
             android:gravity="start"
             android:src="@drawable/download_cloud"
-            android:tint="@color/textColorPrimary" />
+            android:tint="@android:color/white" />
     </item>
 </layer-list>
