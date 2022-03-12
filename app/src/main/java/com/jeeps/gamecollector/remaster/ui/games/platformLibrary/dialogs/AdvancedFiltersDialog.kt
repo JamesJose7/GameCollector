@@ -9,7 +9,8 @@ import com.jeeps.gamecollector.databinding.AdvancedFiltersDialogBinding
 
 class AdvancedFiltersDialog(
     context: Context,
-    private val listener: AdvancedFiltersDialogListener
+    private val listener: AdvancedFiltersDialogListener,
+    private val sortControls: SortControls
 ) : BottomSheetDialog(context) {
 
     private lateinit var binding: AdvancedFiltersDialogBinding
@@ -22,6 +23,7 @@ class AdvancedFiltersDialog(
         super.onCreate(savedInstanceState)
 
         bindSortControls()
+        activateEnabledToggles(sortControls)
     }
 
     private fun inflateViews() {
@@ -30,7 +32,10 @@ class AdvancedFiltersDialog(
     }
 
     private fun bindSortControls() {
-        val sortControls = SortControls()
+        binding.sortOrderToggle.setOnCheckedChangeListener { _, isChecked ->
+            sortControls.isAscending = !isChecked
+            listener.updateSortControls(sortControls)
+        }
 
         bindToggleControls(binding.sortFormatPhysicalToggle, sortControls) {
             sortControls.isPhysical = it
@@ -61,17 +66,19 @@ class AdvancedFiltersDialog(
         updateSortControl: (isChecked: Boolean) -> Unit
     ) {
         toggleButton.setOnCheckedChangeListener { view, isChecked ->
-            clearMiscellaneousToggles(sortControls)
-            updateSortControl(isChecked)
-            activateEnabledToggles(sortControls)
-            view.isChecked = isChecked
-            listener.updateSortControls(sortControls)
+            if (view.isPressed) {
+                clearMiscellaneousToggles(sortControls)
+                updateSortControl(isChecked)
+                activateEnabledToggles(sortControls)
+                listener.updateSortControls(sortControls)
+            }
         }
     }
 
     private fun activateEnabledToggles(sortControls: SortControls) {
         with(sortControls) {
             with(binding) {
+                sortOrderToggle.isChecked = !isAscending
                 sortFormatPhysicalToggle.isChecked = isPhysical
                 sortFormatDigitalToggle.isChecked = isDigital
                 sortAlphabeticalToggle.isChecked = isAlphabetical

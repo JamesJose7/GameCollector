@@ -13,6 +13,7 @@ import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.base.ErrorType
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.SortControls
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -36,6 +37,7 @@ class GamesFromPlatformViewModel @Inject constructor(
 
     private var currentOrder: Comparator<Game> = GameByNameComparator()
     private var currentQuery: String = ""
+    var currentSortControls: SortControls = SortControls()
 
     private val _currentSortStat = MutableLiveData(SortStat.NONE)
     val currentSortStat: LiveData<SortStat>
