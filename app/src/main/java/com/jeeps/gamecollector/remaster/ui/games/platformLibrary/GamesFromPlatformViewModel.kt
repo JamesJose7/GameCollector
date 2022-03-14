@@ -103,7 +103,7 @@ class GamesFromPlatformViewModel @Inject constructor(
         unfilteredGames: List<Game>,
         filtersList: List<(Game) -> Boolean>
     ): List<Game> {
-        val filteredGames = linkedSetOf<Game>()
+        val filteredGames = mutableListOf<Game>()
         filteredGames.addAll(
             unfilteredGames.filter { game ->
                 filtersList.all { filter ->
@@ -114,7 +114,7 @@ class GamesFromPlatformViewModel @Inject constructor(
         return if (filtersList.isEmpty())
             unfilteredGames.sortedWith(currentOrder)
         else
-            filteredGames.toList().sortedWith(currentOrder)
+            filteredGames.sortedWith(currentOrder)
     }
 
     fun setCurrentSortState(sortStat: SortStat) {
