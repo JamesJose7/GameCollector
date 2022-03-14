@@ -19,37 +19,21 @@
             android:textSize="25sp"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/clear_filters_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:paddingStart="25dp"
-            android:paddingEnd="10dp"
-            android:paddingVertical="8dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:background="@drawable/clear_filters_button_states"
-            android:textAllCaps="false"
-            android:text="Clear filters"
-            app:layout_constraintTop_toBottomOf="@id/filter_header_title"
-            app:layout_constraintStart_toStartOf="parent"
-            />
-
         <com.google.android.flexbox.FlexboxLayout
             android:id="@+id/filters_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             app:flexWrap="wrap"
-            app:justifyContent="space_between"
-            app:layout_constraintTop_toBottomOf="@id/clear_filters_button">
+            app:justifyContent="flex_start"
+            app:layout_constraintTop_toBottomOf="@id/filter_header_title">
 
             <ToggleButton
                 android:id="@+id/filter_completed_toggle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
+                android:layout_marginEnd="10dp"
                 android:textOff="Completed"
                 android:textOn="Completed"
                 />
@@ -59,6 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
+                android:layout_marginEnd="10dp"
                 android:textOff="Not completed"
                 android:textOn="Not completed"
                 />
@@ -68,6 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
+                android:layout_marginEnd="10dp"
                 android:textOff="Digital"
                 android:textOn="Digital"
                 />
@@ -77,11 +63,28 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
+                android:layout_marginEnd="10dp"
                 android:textOff="Physical"
                 android:textOn="Physical"
                 />
 
         </com.google.android.flexbox.FlexboxLayout>
+
+        <Button
+            android:id="@+id/clear_filters_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="25dp"
+            android:paddingEnd="10dp"
+            android:paddingVertical="8dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:background="@drawable/clear_filters_button_states"
+            android:textAllCaps="false"
+            android:text="Clear filters"
+            app:layout_constraintTop_toBottomOf="@id/filters_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            />
 
         <TextView
             android:id="@+id/sorting_header_title"
@@ -92,7 +95,7 @@
             android:text="Sorting"
             android:textColor="@color/textColorPrimary"
             android:textSize="25sp"
-            app:layout_constraintTop_toBottomOf="@id/filters_layout" />
+            app:layout_constraintTop_toBottomOf="@id/clear_filters_button" />
 
         <TextView
             android:id="@+id/order_label"
@@ -170,13 +173,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             app:flexWrap="wrap"
-            app:justifyContent="space_between"
+            app:justifyContent="flex_start"
             app:layout_constraintTop_toBottomOf="@id/miscellaneous_label">
 
             <ToggleButton
                 android:id="@+id/sort_alphabetical_toggle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:layout_marginBottom="10dp"
                 android:textOff="Alphabetical"
                 android:textOn="Alphabetical"
@@ -186,6 +190,7 @@
                 android:id="@+id/sort_times_completed_toggle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:layout_marginBottom="10dp"
                 android:textOff="Completion"
                 android:textOn="Completion"
@@ -195,6 +200,7 @@
                 android:id="@+id/sort_hours_main_toggle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:layout_marginBottom="10dp"
                 android:textOff="Hours (Main)"
                 android:textOn="Hours (Main)"
@@ -204,6 +210,7 @@
                 android:id="@+id/sort_hours_extra_toggle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:layout_marginBottom="10dp"
                 android:textOff="Hours (Main + Extra)"
                 android:textOn="Hours (Main + Extra)"
@@ -213,6 +220,7 @@
                 android:id="@+id/sort_hours_completionist_toggle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:layout_marginBottom="10dp"
                 android:textOff="Hours (Completionist)"
                 android:textOn="Hours (Completionist)"
