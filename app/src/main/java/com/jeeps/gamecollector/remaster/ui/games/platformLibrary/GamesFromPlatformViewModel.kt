@@ -104,11 +104,13 @@ class GamesFromPlatformViewModel @Inject constructor(
         filtersList: List<(Game) -> Boolean>
     ): List<Game> {
         val filteredGames = linkedSetOf<Game>()
-        filtersList.forEach { filterCondition ->
-            filteredGames.addAll(
-                unfilteredGames.filter(filterCondition)
-            )
-        }
+        filteredGames.addAll(
+            unfilteredGames.filter { game ->
+                filtersList.all { filter ->
+                    filter(game)
+                }
+            }
+        )
         return if (filtersList.isEmpty())
             unfilteredGames.sortedWith(currentOrder)
         else
@@ -127,7 +129,7 @@ class GamesFromPlatformViewModel @Inject constructor(
         if (currentFilterControls.isNotCleared()) updateFilters(currentFilterControls.getFilterData().filtersList)
     }
 
-    fun updateFilters(filtersList: List<(Game) -> Boolean>)  = dbGames.value?.let {
+    fun updateFilters(filtersList: List<(Game) -> Boolean>) = dbGames.value?.let {
         _games.value = filterGames(it, filtersList)
     }
 
