@@ -46,6 +46,8 @@ class GamesFromPlatformActivity : BaseActivity(),
     private val binding by viewBinding(ActivityPlatformLibraryBinding::inflate)
     private lateinit var content: ContentPlatformLibraryBinding
 
+    private lateinit var searchView: SearchView
+
     private val viewModel: GamesFromPlatformViewModel by viewModels()
 
     private val addGameResultLauncher =
@@ -83,15 +85,21 @@ class GamesFromPlatformActivity : BaseActivity(),
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_platform_library, menu)
 
-        val searchView: SearchView = menu?.findItem(R.id.search)?.actionView as SearchView
+        searchView = menu?.findItem(R.id.search)?.actionView as SearchView
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let { viewModel.handleSearch(it) }
+                query?.let {
+                    viewModel.handleSearch(it)
+                    viewModel.clearFilters()
+                }
                 return false
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                newText?.let { viewModel.handleSearch(it) }
+                newText?.let {
+                    viewModel.handleSearch(it)
+                    viewModel.clearFilters()
+                }
                 return false
             }
         })
@@ -174,10 +182,20 @@ class GamesFromPlatformActivity : BaseActivity(),
         }
     }
 
+    private fun resetSearchView() {
+        searchView.setQuery("", false)
+    }
+
     override fun updateFilterControls(filterControls: FilterControls) {
+        resetSearchView()
         val (filtersList) = filterControls.getFilterData()
         viewModel.currentFilterControls = filterControls
         viewModel.updateFilters(filtersList)
+    }
+
+    override fun clearFilters() {
+        viewModel.clearFilters(true)
+        resetSearchView()
     }
 
     override fun updateSortControls(sortControls: SortControls) {

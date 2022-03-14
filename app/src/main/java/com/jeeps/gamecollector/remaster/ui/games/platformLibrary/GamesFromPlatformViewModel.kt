@@ -131,8 +131,11 @@ class GamesFromPlatformViewModel @Inject constructor(
         _games.value = filterGames(it, filtersList)
     }
 
-    fun clearFilters() {
+    fun clearFilters(resetGamesList: Boolean = false) {
         currentFilterControls = FilterControls()
+        if (resetGamesList) {
+            updateFilters(listOf())
+        }
     }
 
     fun getGameAt(position: Int): Game? {

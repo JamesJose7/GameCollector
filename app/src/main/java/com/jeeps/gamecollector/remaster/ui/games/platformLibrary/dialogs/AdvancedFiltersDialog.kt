@@ -48,6 +48,11 @@ class AdvancedFiltersDialog(
                 listener.updateFilterControls(filterControls)
             }
         }
+
+        binding.clearFiltersButton.setOnClickListener {
+            listener.clearFilters()
+            clearFilters()
+        }
     }
 
     private fun bindSortControls() {
@@ -129,9 +134,22 @@ class AdvancedFiltersDialog(
             isHoursCompletionist = false
         }
     }
+
+    private fun clearFilters() {
+        with(filterControls) {
+            completed = false
+            notCompleted = false
+        }
+
+        with(binding) {
+            filterCompletedToggle.isChecked = false
+            filterNotCompletedToggle.isChecked = false
+        }
+    }
 }
 
 interface AdvancedFiltersDialogListener {
     fun updateFilterControls(filterControls: FilterControls)
+    fun clearFilters()
     fun updateSortControls(sortControls: SortControls)
 }
