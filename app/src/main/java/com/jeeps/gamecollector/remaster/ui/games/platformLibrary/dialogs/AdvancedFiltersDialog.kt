@@ -25,8 +25,8 @@ class AdvancedFiltersDialog(
 
         bindFilterControls()
         bindSortControls()
-        activateEnabledFilterToggles(filterControls)
-        activateEnabledSortToggles(sortControls)
+        activateEnabledFilterToggles()
+        activateEnabledSortToggles()
     }
 
     private fun inflateViews() {
@@ -64,45 +64,44 @@ class AdvancedFiltersDialog(
             listener.updateSortControls(sortControls)
         }
 
-        bindToggleControls(binding.sortFormatPhysicalToggle, sortControls) {
+        bindSortButton(binding.sortFormatPhysicalToggle) {
             sortControls.isPhysical = it
         }
-        bindToggleControls(binding.sortFormatDigitalToggle, sortControls) {
+        bindSortButton(binding.sortFormatDigitalToggle) {
             sortControls.isDigital = it
         }
-        bindToggleControls(binding.sortAlphabeticalToggle, sortControls) {
+        bindSortButton(binding.sortAlphabeticalToggle) {
             sortControls.isAlphabetical = it
         }
-        bindToggleControls(binding.sortTimesCompletedToggle, sortControls) {
+        bindSortButton(binding.sortTimesCompletedToggle) {
             sortControls.isCompletion = it
         }
-        bindToggleControls(binding.sortHoursMainToggle, sortControls) {
+        bindSortButton(binding.sortHoursMainToggle) {
             sortControls.isHoursMain = it
         }
-        bindToggleControls(binding.sortHoursExtraToggle, sortControls) {
+        bindSortButton(binding.sortHoursExtraToggle) {
             sortControls.isHoursExtra = it
         }
-        bindToggleControls(binding.sortHoursCompletionistToggle, sortControls) {
+        bindSortButton(binding.sortHoursCompletionistToggle) {
             sortControls.isHoursCompletionist = it
         }
     }
 
-    private fun bindToggleControls(
+    private fun bindSortButton(
         toggleButton: ToggleButton,
-        sortControls: SortControls,
         updateSortControl: (isChecked: Boolean) -> Unit
     ) {
         toggleButton.setOnCheckedChangeListener { view, isChecked ->
             if (view.isPressed) {
-                clearMiscellaneousToggles(sortControls)
+                clearMiscellaneousToggles()
                 updateSortControl(isChecked)
-                activateEnabledSortToggles(sortControls)
+                activateEnabledSortToggles()
                 listener.updateSortControls(sortControls)
             }
         }
     }
 
-    private fun activateEnabledSortToggles(sortControls: SortControls) {
+    private fun activateEnabledSortToggles() {
         with(sortControls) {
             with(binding) {
                 sortOrderToggle.isChecked = !isAscending
@@ -117,7 +116,7 @@ class AdvancedFiltersDialog(
         }
     }
 
-    private fun activateEnabledFilterToggles(filterControls: FilterControls) {
+    private fun activateEnabledFilterToggles() {
         with(filterControls) {
             with(binding) {
                 filterCompletedToggle.isChecked = completed
@@ -128,7 +127,7 @@ class AdvancedFiltersDialog(
         }
     }
 
-    private fun clearMiscellaneousToggles(sortControls: SortControls) {
+    private fun clearMiscellaneousToggles() {
         with(sortControls) {
             isPhysical = false
             isDigital = false
