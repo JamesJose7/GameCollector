@@ -63,6 +63,24 @@
                 android:textOn="Not completed"
                 />
 
+            <ToggleButton
+                android:id="@+id/filter_digital_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textOff="Digital"
+                android:textOn="Digital"
+                />
+
+            <ToggleButton
+                android:id="@+id/filter_physical_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textOff="Physical"
+                android:textOn="Physical"
+                />
+
         </com.google.android.flexbox.FlexboxLayout>
 
         <TextView

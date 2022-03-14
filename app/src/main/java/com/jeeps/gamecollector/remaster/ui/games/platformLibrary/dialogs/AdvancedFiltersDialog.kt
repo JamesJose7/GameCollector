@@ -35,23 +35,26 @@ class AdvancedFiltersDialog(
     }
 
     private fun bindFilterControls() {
-        binding.filterCompletedToggle.setOnCheckedChangeListener { toggleView, isChecked ->
-            if (toggleView.isPressed) {
-                filterControls.completed = isChecked
-                listener.updateFilterControls(filterControls)
-            }
-        }
-
-        binding.filterNotCompletedToggle.setOnCheckedChangeListener { toggleView, isChecked ->
-            if (toggleView.isPressed) {
-                filterControls.notCompleted = isChecked
-                listener.updateFilterControls(filterControls)
-            }
-        }
+        bindFilterButton(binding.filterCompletedToggle) { filterControls.completed = it }
+        bindFilterButton(binding.filterNotCompletedToggle) { filterControls.notCompleted = it }
+        bindFilterButton(binding.filterDigitalToggle) { filterControls.isDigital = it }
+        bindFilterButton(binding.filterPhysicalToggle) { filterControls.isPhysical = it }
 
         binding.clearFiltersButton.setOnClickListener {
             listener.clearFilters()
             clearFilters()
+        }
+    }
+
+    private fun bindFilterButton(
+        filterToggleButton: ToggleButton,
+        updateFilterControl: (Boolean) -> Unit
+    ) {
+        filterToggleButton.setOnCheckedChangeListener { toggleView, isChecked ->
+            if (toggleView.isPressed) {
+                updateFilterControl(isChecked)
+                listener.updateFilterControls(filterControls)
+            }
         }
     }
 
@@ -119,6 +122,8 @@ class AdvancedFiltersDialog(
             with(binding) {
                 filterCompletedToggle.isChecked = completed
                 filterNotCompletedToggle.isChecked = notCompleted
+                filterDigitalToggle.isChecked = isDigital
+                filterPhysicalToggle.isChecked = isPhysical
             }
         }
     }
@@ -139,11 +144,15 @@ class AdvancedFiltersDialog(
         with(filterControls) {
             completed = false
             notCompleted = false
+            isPhysical = false
+            isDigital = false
         }
 
         with(binding) {
             filterCompletedToggle.isChecked = false
             filterNotCompletedToggle.isChecked = false
+            filterDigitalToggle.isChecked = false
+            filterPhysicalToggle.isChecked = false
         }
     }
 }

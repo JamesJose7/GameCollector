@@ -4,7 +4,9 @@ import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 
 data class FilterControls(
     var completed: Boolean = false,
-    var notCompleted: Boolean = false
+    var notCompleted: Boolean = false,
+    var isDigital: Boolean = false,
+    var isPhysical: Boolean = false
 )
 
 data class FilterData(
@@ -17,10 +19,14 @@ fun FilterControls.getFilterData(): FilterData {
         predicates.add { game -> game.timesCompleted > 0 }
     if (notCompleted)
         predicates.add { game -> game.timesCompleted == 0 }
+    if (isDigital)
+        predicates.add { game -> !game.isPhysical }
+    if (isPhysical)
+        predicates.add { game -> game.isPhysical }
     return FilterData(predicates)
 }
 
 fun FilterControls.isNotCleared(): Boolean {
-    val controls = listOf(completed, notCompleted)
+    val controls = listOf(completed, notCompleted, isDigital, isPhysical)
     return controls.any { control -> control }
 }
