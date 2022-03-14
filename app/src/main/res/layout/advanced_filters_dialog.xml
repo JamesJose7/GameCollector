@@ -10,14 +10,64 @@
         android:paddingVertical="30dp">
 
         <TextView
-            android:id="@+id/header_title"
+            android:id="@+id/filter_header_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Filters"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="25sp"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/clear_filters_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Clear filters"
+            app:layout_constraintTop_toBottomOf="@id/filter_header_title"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/filters_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            app:flexWrap="wrap"
+            app:justifyContent="space_between"
+            app:layout_constraintTop_toBottomOf="@id/clear_filters_button">
+
+            <ToggleButton
+                android:id="@+id/filter_completed_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textOff="Completed"
+                android:textOn="Completed"
+                />
+
+            <ToggleButton
+                android:id="@+id/filter_not_completed_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textOff="Not completed"
+                android:textOn="Not completed"
+                />
+
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <TextView
+            android:id="@+id/sorting_header_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:gravity="center_horizontal"
             android:text="Sorting"
             android:textColor="@color/textColorPrimary"
             android:textSize="25sp"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/filters_layout" />
 
         <TextView
             android:id="@+id/order_label"
@@ -27,7 +77,7 @@
             android:text="Order"
             android:textColor="@color/textColorPrimary"
             android:textSize="18sp"
-            app:layout_constraintTop_toBottomOf="@id/header_title" />
+            app:layout_constraintTop_toBottomOf="@id/sorting_header_title" />
 
         <ToggleButton
             android:id="@+id/sort_order_toggle"

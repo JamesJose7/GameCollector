@@ -30,10 +30,7 @@ import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
 import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialog
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialogListener
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.SortControls
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getAppropriateComparator
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.*
 import com.jeeps.gamecollector.remaster.utils.extensions.*
 import com.jeeps.gamecollector.utils.PlatformCovers
 import com.jeeps.gamecollector.views.GridSpacingItemDecoration
@@ -107,6 +104,7 @@ class GamesFromPlatformActivity : BaseActivity(),
                 val advancedFiltersDialog = AdvancedFiltersDialog(
                     this,
                     this,
+                    viewModel.currentFilterControls,
                     viewModel.currentSortControls
                 )
                 advancedFiltersDialog.show()
@@ -174,6 +172,12 @@ class GamesFromPlatformActivity : BaseActivity(),
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun updateFilterControls(filterControls: FilterControls) {
+        val (filtersList) = filterControls.getFilterData()
+        viewModel.currentFilterControls = filterControls
+        viewModel.updateFilters(filtersList)
     }
 
     override fun updateSortControls(sortControls: SortControls) {

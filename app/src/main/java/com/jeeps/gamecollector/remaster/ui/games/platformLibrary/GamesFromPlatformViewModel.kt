@@ -5,15 +5,18 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.remaster.utils.comparators.GameByNameComparator
+import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
-import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.base.ErrorType
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterControls
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.SortControls
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getFilterData
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.isNotCleared
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByNameComparator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -37,6 +40,7 @@ class GamesFromPlatformViewModel @Inject constructor(
 
     private var currentOrder: Comparator<Game> = GameByNameComparator()
     private var currentQuery: String = ""
+    var currentFilterControls: FilterControls = FilterControls()
     var currentSortControls: SortControls = SortControls()
 
     private val _currentSortStat = MutableLiveData(SortStat.NONE)
@@ -57,6 +61,8 @@ class GamesFromPlatformViewModel @Inject constructor(
                 _games.value = sortGames(game, currentOrder)
                 val query = currentQuery.takeIf { it.isNotEmpty() }
                 query?.let { handleSearch(query) }
+                if (currentFilterControls.isNotCleared())
+                    updateFilters(currentFilterControls.getFilterData().filtersList)
             }
         }
     }
@@ -93,6 +99,22 @@ class GamesFromPlatformViewModel @Inject constructor(
         return unsortedGames.sortedWith(currentOrder)
     }
 
+    private fun filterGames(
+        unfilteredGames: List<Game>,
+        filtersList: List<(Game) -> Boolean>
+    ): List<Game> {
+        val filteredGames = linkedSetOf<Game>()
+        filtersList.forEach { filterCondition ->
+            filteredGames.addAll(
+                unfilteredGames.filter(filterCondition)
+            )
+        }
+        return if (filtersList.isEmpty())
+            unfilteredGames.sortedWith(currentOrder)
+        else
+            filteredGames.toList().sortedWith(currentOrder)
+    }
+
     fun setCurrentSortState(sortStat: SortStat) {
         _currentSortStat.value = sortStat
     }
@@ -102,6 +124,15 @@ class GamesFromPlatformViewModel @Inject constructor(
     }.also {
         currentOrder = comparator
         if (currentQuery.isNotEmpty()) handleSearch(currentQuery)
+        if (currentFilterControls.isNotCleared()) updateFilters(currentFilterControls.getFilterData().filtersList)
+    }
+
+    fun updateFilters(filtersList: List<(Game) -> Boolean>)  = dbGames.value?.let {
+        _games.value = filterGames(it, filtersList)
+    }
+
+    fun clearFilters() {
+        currentFilterControls = FilterControls()
     }
 
     fun getGameAt(position: Int): Game? {
