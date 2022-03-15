@@ -1,18 +1,20 @@
-package com.jeeps.gamecollector.remaster.ui.games
+package com.jeeps.gamecollector.remaster.ui.games.platformLibrary
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.remaster.utils.comparators.GameByNameComparator
+import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
-import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.base.ErrorType
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.*
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByNameComparator
+import com.jeeps.gamecollector.remaster.utils.extensions.value
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -33,17 +35,25 @@ class GamesFromPlatformViewModel @Inject constructor(
         }
 
     var platformName: String = ""
+    var currentSortControls: SortControls = SortControls()
+    var currentShowInfoControls: ShowInfoControls = ShowInfoControls()
+    var gamePendingDeletion: Game? = null
 
+    private var dbGames = MutableLiveData<List<Game>>()
     private var currentOrder: Comparator<Game> = GameByNameComparator()
     private var currentQuery: String = ""
+
+    private val _currentFilterControls = MutableLiveData<FilterControls>()
+    val currentFilterControls: LiveData<FilterControls>
+        get() = _currentFilterControls
+
+    private val _filteredStats = MediatorLiveData<FilterStats>()
+    val filteredStats: MediatorLiveData<FilterStats>
+        get() = _filteredStats
 
     private val _currentSortStat = MutableLiveData(SortStat.NONE)
     val currentSortStat: LiveData<SortStat>
         get() = _currentSortStat
-
-    var gamePendingDeletion: Game? = null
-
-    private var dbGames = MutableLiveData<List<Game>>()
 
     private val _games = MediatorLiveData<List<Game>>()
     val games: LiveData<List<Game>>
@@ -55,6 +65,23 @@ class GamesFromPlatformViewModel @Inject constructor(
                 _games.value = sortGames(game, currentOrder)
                 val query = currentQuery.takeIf { it.isNotEmpty() }
                 query?.let { handleSearch(query) }
+                currentFilterControls.value?.let { filters ->
+                    if (filters.isNotCleared()) {
+                        updateFilters(filters.getFilterData().filtersList)
+                    }
+                }
+            }
+        }
+
+        _filteredStats.addSource(games) { result ->
+            result?.let { games ->
+                _filteredStats.value = if (currentFilterControls.value?.isNotCleared().value()) {
+                    val totalAmount = dbGames.value?.size ?: 0
+                    val filteredAmount = if (totalAmount == 0) 0 else games.size
+                    FilterStats(true, filteredAmount, totalAmount)
+                } else {
+                    FilterStats()
+                }
             }
         }
     }
@@ -91,8 +118,30 @@ class GamesFromPlatformViewModel @Inject constructor(
         return unsortedGames.sortedWith(currentOrder)
     }
 
-    fun setCurrentSortState(sortStat: SortStat) {
+    private fun filterGames(
+        unfilteredGames: List<Game>,
+        filtersList: List<(Game) -> Boolean>
+    ): List<Game> {
+        val filteredGames = mutableListOf<Game>()
+        filteredGames.addAll(
+            unfilteredGames.filter { game ->
+                filtersList.all { filter ->
+                    filter(game)
+                }
+            }
+        )
+        return if (filtersList.isEmpty())
+            unfilteredGames.sortedWith(currentOrder)
+        else
+            filteredGames.sortedWith(currentOrder)
+    }
+
+    fun setCurrentSortStat(sortStat: SortStat) {
         _currentSortStat.value = sortStat
+    }
+
+    fun setFilterControls(filterControls: FilterControls) {
+        _currentFilterControls.value = filterControls
     }
 
     fun rearrangeGames(comparator: Comparator<Game>) = dbGames.value?.let {
@@ -100,6 +149,22 @@ class GamesFromPlatformViewModel @Inject constructor(
     }.also {
         currentOrder = comparator
         if (currentQuery.isNotEmpty()) handleSearch(currentQuery)
+        currentFilterControls.value?.let { filters ->
+            if (filters.isNotCleared()) {
+                updateFilters(filters.getFilterData().filtersList)
+            }
+        }
+    }
+
+    fun updateFilters(filtersList: List<(Game) -> Boolean>) = dbGames.value?.let {
+        _games.value = filterGames(it, filtersList)
+    }
+
+    fun clearFilters(resetGamesList: Boolean = false) {
+        _currentFilterControls.value = FilterControls()
+        if (resetGamesList) {
+            updateFilters(listOf())
+        }
     }
 
     fun getGameAt(position: Int): Game? {

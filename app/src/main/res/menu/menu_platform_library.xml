@@ -10,9 +10,17 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
 
     <item
+        android:id="@+id/action_advanced_filters"
+        android:icon="@drawable/ic_filter"
+        android:orderInCategory="99"
+        android:title="Advanced Filters"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/filter_menu"
         android:orderInCategory="100"
         android:title="Filter"
+        android:visible="false"
         app:showAsAction="never">
 
         <menu>

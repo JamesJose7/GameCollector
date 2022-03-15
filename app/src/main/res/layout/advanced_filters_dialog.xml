@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="30dp">
+
+        <TextView
+            android:id="@+id/filter_header_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Filters"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="25sp"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/filters_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            app:flexWrap="wrap"
+            app:justifyContent="flex_start"
+            app:layout_constraintTop_toBottomOf="@id/filter_header_title">
+
+            <ToggleButton
+                android:id="@+id/filter_completed_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="10dp"
+                android:textOff="Completed"
+                android:textOn="Completed"
+                />
+
+            <ToggleButton
+                android:id="@+id/filter_not_completed_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="10dp"
+                android:textOff="Not completed"
+                android:textOn="Not completed"
+                />
+
+            <ToggleButton
+                android:id="@+id/filter_digital_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="10dp"
+                android:textOff="Digital"
+                android:textOn="Digital"
+                />
+
+            <ToggleButton
+                android:id="@+id/filter_physical_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="10dp"
+                android:textOff="Physical"
+                android:textOn="Physical"
+                />
+
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <Button
+            android:id="@+id/clear_filters_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="25dp"
+            android:paddingEnd="10dp"
+            android:paddingVertical="8dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:background="@drawable/clear_filters_button_states"
+            android:textAllCaps="false"
+            android:text="Clear filters"
+            app:layout_constraintTop_toBottomOf="@id/filters_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <TextView
+            android:id="@+id/sorting_header_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_horizontal"
+            android:text="Sorting"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="25sp"
+            app:layout_constraintTop_toBottomOf="@id/clear_filters_button" />
+
+        <TextView
+            android:id="@+id/order_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Order"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/sorting_header_title" />
+
+        <ToggleButton
+            android:id="@+id/sort_order_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/toggle_sort_background"
+            android:textColor="@color/textColorPrimary"
+            android:paddingStart="30dp"
+            android:paddingEnd="10dp"
+            android:textOff="Ascending"
+            android:textOn="Descending"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/order_label" />
+
+        <TextView
+            android:id="@+id/format_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Format"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/sort_order_toggle" />
+
+        <ToggleButton
+            android:id="@+id/sort_format_digital_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/toggle_format_digital_background"
+            android:paddingStart="38dp"
+            android:paddingEnd="10dp"
+            android:textOff="Digital"
+            android:textOn="Digital"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/format_label" />
+
+        <ToggleButton
+            android:id="@+id/sort_format_physical_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/toggle_format_physical_background"
+            android:paddingStart="35dp"
+            android:paddingEnd="10dp"
+            android:textOff="Physical"
+            android:textOn="Physical"
+            app:layout_constraintStart_toEndOf="@id/sort_format_digital_toggle"
+            app:layout_constraintTop_toBottomOf="@id/format_label" />
+
+        <TextView
+            android:id="@+id/miscellaneous_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Miscellaneous"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/sort_format_digital_toggle" />
+
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/sorting_miscellaneous_flexbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            app:flexWrap="wrap"
+            app:justifyContent="flex_start"
+            app:layout_constraintTop_toBottomOf="@id/miscellaneous_label">
+
+            <ToggleButton
+                android:id="@+id/sort_alphabetical_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:textOff="Alphabetical"
+                android:textOn="Alphabetical"
+                />
+
+            <ToggleButton
+                android:id="@+id/sort_times_completed_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:textOff="Completion"
+                android:textOn="Completion"
+                />
+
+            <ToggleButton
+                android:id="@+id/sort_hours_main_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:textOff="Hours (Main)"
+                android:textOn="Hours (Main)"
+                />
+
+            <ToggleButton
+                android:id="@+id/sort_hours_extra_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:textOff="Hours (Main + Extra)"
+                android:textOn="Hours (Main + Extra)"
+                />
+
+            <ToggleButton
+                android:id="@+id/sort_hours_completionist_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:textOff="Hours (Completionist)"
+                android:textOn="Hours (Completionist)"
+                />
+
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <TextView
+            android:id="@+id/show_info_header_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_horizontal"
+            android:text="Show info"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="25sp"
+            app:layout_constraintTop_toBottomOf="@id/sorting_miscellaneous_flexbox" />
+
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/show_info_flexbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            app:flexWrap="wrap"
+            app:justifyContent="flex_start"
+            app:layout_constraintTop_toBottomOf="@id/show_info_header_title">
+
+            <ToggleButton
+                android:id="@+id/info_hours_main_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:textOff="Hours (Main)"
+                android:textOn="Hours (Main)"
+                />
+
+            <ToggleButton
+                android:id="@+id/info_hours_extra_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:textOff="Hours (Main + Extra)"
+                android:textOn="Hours (Main + Extra)"
+                />
+
+            <ToggleButton
+                android:id="@+id/info_hours_completionist_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:textOff="Hours (Completionist)"
+                android:textOn="Hours (Completionist)"
+                />
+        </com.google.android.flexbox.FlexboxLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

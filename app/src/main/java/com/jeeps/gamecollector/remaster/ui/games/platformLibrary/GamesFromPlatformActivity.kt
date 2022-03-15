@@ -1,5 +1,6 @@
-package com.jeeps.gamecollector.remaster.ui.games
+package com.jeeps.gamecollector.remaster.ui.games.platformLibrary
 
+import android.animation.ValueAnimator
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
@@ -14,22 +15,26 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.animation.addListener
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.util.Pair
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.adapters.GameCardAdapter
-import com.jeeps.gamecollector.remaster.utils.comparators.*
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
 import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
 import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.*
+import com.jeeps.gamecollector.remaster.utils.comparators.*
 import com.jeeps.gamecollector.remaster.utils.extensions.*
 import com.jeeps.gamecollector.utils.PlatformCovers
 import com.jeeps.gamecollector.views.GridSpacingItemDecoration
@@ -40,12 +45,17 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class GamesFromPlatformActivity : BaseActivity(),
-    GameCardAdapter.GameCardAdapterListener {
+    GameCardAdapter.GameCardAdapterListener, AdvancedFiltersDialogListener {
 
     private val binding by viewBinding(ActivityPlatformLibraryBinding::inflate)
     private lateinit var content: ContentPlatformLibraryBinding
 
+    private lateinit var searchView: SearchView
+
     private val viewModel: GamesFromPlatformViewModel by viewModels()
+
+    private var isAnimating: Boolean = false
+    private var currentFilterAnimationState = FilterHeaderAnimationState.STATE_DOWN
 
     private val addGameResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -66,12 +76,14 @@ class GamesFromPlatformActivity : BaseActivity(),
 
         initCollapsingToolbar()
         initializeGamesAdapter()
+        addFilterStatsHeaderAnimation()
 
         bindFab()
         getIntentData()
         displayPlatformCover()
 
         bindUserGames()
+        bindFilterStats()
     }
 
     override fun onDestroy() {
@@ -82,15 +94,21 @@ class GamesFromPlatformActivity : BaseActivity(),
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_platform_library, menu)
 
-        val searchView: SearchView = menu?.findItem(R.id.search)?.actionView as SearchView
+        searchView = menu?.findItem(R.id.search)?.actionView as SearchView
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let { viewModel.handleSearch(it) }
+                query?.let {
+                    viewModel.handleSearch(it)
+                    viewModel.clearFilters()
+                }
                 return false
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                newText?.let { viewModel.handleSearch(it) }
+                newText?.let {
+                    viewModel.handleSearch(it)
+                    viewModel.clearFilters()
+                }
                 return false
             }
         })
@@ -99,68 +117,111 @@ class GamesFromPlatformActivity : BaseActivity(),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_advanced_filters -> {
+                val advancedFiltersDialog = AdvancedFiltersDialog(
+                    this,
+                    this,
+                    viewModel.currentFilterControls.value ?: FilterControls(),
+                    viewModel.currentSortControls,
+                    getInfoControlsFromSortStat(
+                        viewModel.currentSortStat.value
+                    )
+                )
+                advancedFiltersDialog.show()
+                true
+            }
             R.id.action_filter_alph -> {
-                viewModel.setCurrentSortState(SortStat.NONE)
+                viewModel.setCurrentSortStat(SortStat.NONE)
                 viewModel.rearrangeGames(GameByNameComparator())
                 true
             }
             R.id.action_filter_alph_desc -> {
-                viewModel.setCurrentSortState(SortStat.NONE)
+                viewModel.setCurrentSortStat(SortStat.NONE)
                 viewModel.rearrangeGames(GameByNameComparator(true))
                 true
             }
             R.id.action_filter_physical -> {
-                viewModel.setCurrentSortState(SortStat.NONE)
+                viewModel.setCurrentSortStat(SortStat.NONE)
                 viewModel.rearrangeGames(GameByPhysicalComparator(true))
                 true
             }
             R.id.action_filter_alph_physical_desc -> {
-                viewModel.setCurrentSortState(SortStat.NONE)
+                viewModel.setCurrentSortStat(SortStat.NONE)
                 viewModel.rearrangeGames(GameByPhysicalComparator())
                 true
             }
             R.id.action_filter_timesc -> {
-                viewModel.setCurrentSortState(SortStat.NONE)
+                viewModel.setCurrentSortStat(SortStat.NONE)
                 viewModel.rearrangeGames(GameByTimesPlayedComparator())
                 true
             }
             R.id.action_filter_alph_timesc_desc -> {
-                viewModel.setCurrentSortState(SortStat.NONE)
+                viewModel.setCurrentSortStat(SortStat.NONE)
                 viewModel.rearrangeGames(GameByTimesPlayedComparator(true))
                 true
             }
             R.id.action_filter_hoursmain -> {
-                viewModel.setCurrentSortState(SortStat.HOURS_MAIN)
+                viewModel.setCurrentSortStat(SortStat.HOURS_MAIN)
                 viewModel.rearrangeGames(GameByHoursStoryComparator())
                 true
             }
             R.id.action_filter_hoursmain_desc -> {
-                viewModel.setCurrentSortState(SortStat.HOURS_MAIN)
+                viewModel.setCurrentSortStat(SortStat.HOURS_MAIN)
                 viewModel.rearrangeGames(GameByHoursStoryComparator(true))
                 true
             }
             R.id.action_filter_hoursme -> {
-                viewModel.setCurrentSortState(SortStat.HOURS_MAIN_EXTRA)
+                viewModel.setCurrentSortStat(SortStat.HOURS_MAIN_EXTRA)
                 viewModel.rearrangeGames(GameByHoursMainExtraComparator())
                 true
             }
             R.id.action_filter_hoursme_desc -> {
-                viewModel.setCurrentSortState(SortStat.HOURS_MAIN_EXTRA)
+                viewModel.setCurrentSortStat(SortStat.HOURS_MAIN_EXTRA)
                 viewModel.rearrangeGames(GameByHoursMainExtraComparator(true))
                 true
             }
             R.id.action_filter_hourscompletionist -> {
-                viewModel.setCurrentSortState(SortStat.HOURS_COMPLETIONIST)
+                viewModel.setCurrentSortStat(SortStat.HOURS_COMPLETIONIST)
                 viewModel.rearrangeGames(GameByHoursCompletionistComparator())
                 true
             }
             R.id.action_filter_hourscompletionist_desc -> {
-                viewModel.setCurrentSortState(SortStat.HOURS_COMPLETIONIST)
+                viewModel.setCurrentSortStat(SortStat.HOURS_COMPLETIONIST)
                 viewModel.rearrangeGames(GameByHoursCompletionistComparator(true))
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun resetSearchView() {
+        searchView.setQuery("", false)
+    }
+
+    override fun updateFilterControls(filterControls: FilterControls) {
+        resetSearchView()
+        val (filtersList) = filterControls.getFilterData()
+        viewModel.setFilterControls(filterControls)
+        viewModel.updateFilters(filtersList)
+    }
+
+    override fun clearFilters() {
+        viewModel.clearFilters(true)
+        resetSearchView()
+    }
+
+    override fun updateSortControls(sortControls: SortControls) {
+        val (comparator, sortStat) = sortControls.getAppropriateComparator()
+        viewModel.currentSortControls = sortControls
+        viewModel.setCurrentSortStat(sortStat)
+        viewModel.rearrangeGames(comparator)
+    }
+
+    override fun updateShowInfoControls(showInfoControls: ShowInfoControls) {
+        val (sortStat) = showInfoControls.getInfoData()
+        viewModel.currentShowInfoControls = showInfoControls
+        viewModel.setCurrentSortStat(sortStat)
+        gamesAdapter.notifyItemRangeChanged(0, viewModel.games.value?.size ?: 0)
     }
 
     private fun getIntentData() {
@@ -252,6 +313,17 @@ class GamesFromPlatformActivity : BaseActivity(),
         }
     }
 
+    private fun bindFilterStats() {
+        viewModel.filteredStats.observe(this) {
+            it?.let { stats ->
+                content.filterStatsCard.visibility = if (stats.showStats) View.VISIBLE else View.GONE
+                val plural = if (stats.totalAmount <= 1) "" else "s"
+                val statsText = "Showing ${stats.filteredAmount} out of ${stats.totalAmount} game$plural"
+                content.filterStatsTv.text = statsText
+            }
+        }
+    }
+
     override fun deleteSelectedGame(position: Int) {
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             when (which) {
@@ -314,6 +386,47 @@ class GamesFromPlatformActivity : BaseActivity(),
             result.data?.getStringExtra(ADD_GAME_RESULT_MESSAGE)?.let { message ->
                 showSnackBar(binding.root, message)
             }
+        }
+    }
+
+    private fun addFilterStatsHeaderAnimation() {
+        content.gamesRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (!recyclerView.canScrollVertically(-1) &&
+                        recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
+                    runFilterHeaderAnimation(FilterHeaderAnimationState.STATE_DOWN)
+                } else if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
+                    runFilterHeaderAnimation(FilterHeaderAnimationState.STATE_TOP)
+                }
+            }
+        })
+    }
+
+    private fun runFilterHeaderAnimation(animationState: FilterHeaderAnimationState) {
+        if (!isAnimating && animationState != currentFilterAnimationState) {
+            val newMargin = if (animationState == FilterHeaderAnimationState.STATE_TOP) {
+                dpToPx(12f)
+             } else {
+                dpToPx(55f)
+            }
+            val layoutParams: ConstraintLayout.LayoutParams? =
+                content.filterStatsCard.layoutParams as? ConstraintLayout.LayoutParams
+            val animator: ValueAnimator = ValueAnimator.ofInt(layoutParams?.topMargin ?: 0, newMargin)
+            animator.addUpdateListener { valueAnimator ->
+                layoutParams?.topMargin = valueAnimator?.animatedValue as? Int ?: 0
+                content.filterStatsCard.requestLayout()
+            }
+
+            animator.addListener(
+                onStart = { isAnimating = true },
+                onEnd = {
+                    isAnimating = false
+                    currentFilterAnimationState = animationState
+                }
+            )
+            animator.duration = 300
+            animator.start()
         }
     }
 
