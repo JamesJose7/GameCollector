@@ -43,6 +43,8 @@ class GamesFromPlatformViewModel @Inject constructor(
     val currentFilterControls: LiveData<FilterControls>
         get() = _currentFilterControls
 
+    var currentShowInfoControls: ShowInfoControls = ShowInfoControls()
+
     private val _filteredStats = MediatorLiveData<FilterStats>()
     val filteredStats: MediatorLiveData<FilterStats>
         get() = _filteredStats
@@ -136,7 +138,7 @@ class GamesFromPlatformViewModel @Inject constructor(
             filteredGames.sortedWith(currentOrder)
     }
 
-    fun setCurrentSortState(sortStat: SortStat) {
+    fun setCurrentSortStat(sortStat: SortStat) {
         _currentSortStat.value = sortStat
     }
 

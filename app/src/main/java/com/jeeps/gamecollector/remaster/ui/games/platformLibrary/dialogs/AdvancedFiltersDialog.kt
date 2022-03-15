@@ -12,6 +12,7 @@ class AdvancedFiltersDialog(
     private val listener: AdvancedFiltersDialogListener,
     private val filterControls: FilterControls,
     private val sortControls: SortControls,
+    private val showInfoControls: ShowInfoControls
 ) : BottomSheetDialog(context) {
 
     private lateinit var binding: AdvancedFiltersDialogBinding
@@ -25,8 +26,10 @@ class AdvancedFiltersDialog(
 
         bindFilterControls()
         bindSortControls()
+        bindShowInfoControls()
         activateEnabledFilterToggles()
         activateEnabledSortToggles()
+        activateEnabledShowInfoToggles()
     }
 
     private fun inflateViews() {
@@ -93,10 +96,39 @@ class AdvancedFiltersDialog(
     ) {
         toggleButton.setOnCheckedChangeListener { view, isChecked ->
             if (view.isPressed) {
+                clearShowInfoControls()
+                activateEnabledShowInfoToggles()
+
                 clearMiscellaneousToggles()
                 updateSortControl(isChecked)
                 activateEnabledSortToggles()
                 listener.updateSortControls(sortControls)
+            }
+        }
+    }
+
+    private fun bindShowInfoControls() {
+        bindShowInfoButton(binding.infoHoursMainToggle) {
+            showInfoControls.isHoursMain = it
+        }
+        bindShowInfoButton(binding.infoHoursExtraToggle) {
+            showInfoControls.isHoursExtra = it
+        }
+        bindShowInfoButton(binding.infoHoursCompletionistToggle) {
+            showInfoControls.isHoursCompletionist = it
+        }
+    }
+
+    private fun bindShowInfoButton(
+        toggleButton: ToggleButton,
+        updateShowInfoControl: (isChecked: Boolean) -> Unit
+    ) {
+        toggleButton.setOnCheckedChangeListener { view, isChecked ->
+            if (view.isPressed) {
+                clearShowInfoControls()
+                updateShowInfoControl(isChecked)
+                activateEnabledShowInfoToggles()
+                listener.updateShowInfoControls(showInfoControls)
             }
         }
     }
@@ -123,6 +155,16 @@ class AdvancedFiltersDialog(
                 filterNotCompletedToggle.isChecked = notCompleted
                 filterDigitalToggle.isChecked = isDigital
                 filterPhysicalToggle.isChecked = isPhysical
+            }
+        }
+    }
+
+    private fun activateEnabledShowInfoToggles() {
+        with(showInfoControls) {
+            with(binding) {
+                infoHoursMainToggle.isChecked = isHoursMain
+                infoHoursExtraToggle.isChecked = isHoursExtra
+                infoHoursCompletionistToggle.isChecked = isHoursCompletionist
             }
         }
     }
@@ -154,10 +196,19 @@ class AdvancedFiltersDialog(
             filterPhysicalToggle.isChecked = false
         }
     }
+
+    private fun clearShowInfoControls() {
+        with(showInfoControls) {
+            isHoursMain = false
+            isHoursExtra = false
+            isHoursCompletionist = false
+        }
+    }
 }
 
 interface AdvancedFiltersDialogListener {
     fun updateFilterControls(filterControls: FilterControls)
     fun clearFilters()
     fun updateSortControls(sortControls: SortControls)
+    fun updateShowInfoControls(showInfoControls: ShowInfoControls)
 }
