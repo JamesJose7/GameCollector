@@ -13,6 +13,12 @@ data class FilterData(
     val filtersList: List<(Game) -> Boolean>
 )
 
+data class FilterStats(
+    val showStats: Boolean = false,
+    val filteredAmount: Int = 0,
+    val totalAmount: Int = 0
+)
+
 fun FilterControls.getFilterData(): FilterData {
     val predicates = mutableListOf<(Game) -> Boolean>()
     if (completed)

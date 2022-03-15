@@ -12,11 +12,9 @@ import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.base.ErrorType
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterControls
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.SortControls
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getFilterData
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.isNotCleared
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.*
 import com.jeeps.gamecollector.remaster.utils.comparators.GameByNameComparator
+import com.jeeps.gamecollector.remaster.utils.extensions.value
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -40,8 +38,14 @@ class GamesFromPlatformViewModel @Inject constructor(
 
     private var currentOrder: Comparator<Game> = GameByNameComparator()
     private var currentQuery: String = ""
-    var currentFilterControls: FilterControls = FilterControls()
     var currentSortControls: SortControls = SortControls()
+    private val _currentFilterControls = MutableLiveData<FilterControls>()
+    val currentFilterControls: LiveData<FilterControls>
+        get() = _currentFilterControls
+
+    private val _filteredStats = MediatorLiveData<FilterStats>()
+    val filteredStats: MediatorLiveData<FilterStats>
+        get() = _filteredStats
 
     private val _currentSortStat = MutableLiveData(SortStat.NONE)
     val currentSortStat: LiveData<SortStat>
@@ -61,8 +65,23 @@ class GamesFromPlatformViewModel @Inject constructor(
                 _games.value = sortGames(game, currentOrder)
                 val query = currentQuery.takeIf { it.isNotEmpty() }
                 query?.let { handleSearch(query) }
-                if (currentFilterControls.isNotCleared())
-                    updateFilters(currentFilterControls.getFilterData().filtersList)
+                currentFilterControls.value?.let { filters ->
+                    if (filters.isNotCleared()) {
+                        updateFilters(filters.getFilterData().filtersList)
+                    }
+                }
+            }
+        }
+
+        _filteredStats.addSource(games) { result ->
+            result?.let { games ->
+                _filteredStats.value = if (currentFilterControls.value?.isNotCleared().value()) {
+                    val totalAmount = dbGames.value?.size ?: 0
+                    val filteredAmount = if (totalAmount == 0) 0 else games.size
+                    FilterStats(true, filteredAmount, totalAmount)
+                } else {
+                    FilterStats()
+                }
             }
         }
     }
@@ -121,12 +140,20 @@ class GamesFromPlatformViewModel @Inject constructor(
         _currentSortStat.value = sortStat
     }
 
+    fun setFilterControls(filterControls: FilterControls) {
+        _currentFilterControls.value = filterControls
+    }
+
     fun rearrangeGames(comparator: Comparator<Game>) = dbGames.value?.let {
         _games.value = sortGames(it, comparator)
     }.also {
         currentOrder = comparator
         if (currentQuery.isNotEmpty()) handleSearch(currentQuery)
-        if (currentFilterControls.isNotCleared()) updateFilters(currentFilterControls.getFilterData().filtersList)
+        currentFilterControls.value?.let { filters ->
+            if (filters.isNotCleared()) {
+                updateFilters(filters.getFilterData().filtersList)
+            }
+        }
     }
 
     fun updateFilters(filtersList: List<(Game) -> Boolean>) = dbGames.value?.let {
@@ -134,7 +161,7 @@ class GamesFromPlatformViewModel @Inject constructor(
     }
 
     fun clearFilters(resetGamesList: Boolean = false) {
-        currentFilterControls = FilterControls()
+        _currentFilterControls.value = FilterControls()
         if (resetGamesList) {
             updateFilters(listOf())
         }

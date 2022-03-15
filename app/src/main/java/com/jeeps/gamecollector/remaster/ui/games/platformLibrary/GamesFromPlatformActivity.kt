@@ -1,5 +1,6 @@
 package com.jeeps.gamecollector.remaster.ui.games.platformLibrary
 
+import android.animation.ValueAnimator
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
@@ -14,16 +15,18 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.animation.addListener
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.util.Pair
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.adapters.GameCardAdapter
-import com.jeeps.gamecollector.remaster.utils.comparators.*
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
 import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
@@ -31,6 +34,7 @@ import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
 import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.*
+import com.jeeps.gamecollector.remaster.utils.comparators.*
 import com.jeeps.gamecollector.remaster.utils.extensions.*
 import com.jeeps.gamecollector.utils.PlatformCovers
 import com.jeeps.gamecollector.views.GridSpacingItemDecoration
@@ -49,6 +53,9 @@ class GamesFromPlatformActivity : BaseActivity(),
     private lateinit var searchView: SearchView
 
     private val viewModel: GamesFromPlatformViewModel by viewModels()
+
+    private var isAnimating: Boolean = false
+    private var currentFilterAnimationState = FilterHeaderAnimationState.STATE_DOWN
 
     private val addGameResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -69,12 +76,14 @@ class GamesFromPlatformActivity : BaseActivity(),
 
         initCollapsingToolbar()
         initializeGamesAdapter()
+        addFilterStatsHeaderAnimation()
 
         bindFab()
         getIntentData()
         displayPlatformCover()
 
         bindUserGames()
+        bindFilterStats()
     }
 
     override fun onDestroy() {
@@ -112,7 +121,7 @@ class GamesFromPlatformActivity : BaseActivity(),
                 val advancedFiltersDialog = AdvancedFiltersDialog(
                     this,
                     this,
-                    viewModel.currentFilterControls,
+                    viewModel.currentFilterControls.value ?: FilterControls(),
                     viewModel.currentSortControls
                 )
                 advancedFiltersDialog.show()
@@ -189,7 +198,7 @@ class GamesFromPlatformActivity : BaseActivity(),
     override fun updateFilterControls(filterControls: FilterControls) {
         resetSearchView()
         val (filtersList) = filterControls.getFilterData()
-        viewModel.currentFilterControls = filterControls
+        viewModel.setFilterControls(filterControls)
         viewModel.updateFilters(filtersList)
     }
 
@@ -294,6 +303,17 @@ class GamesFromPlatformActivity : BaseActivity(),
         }
     }
 
+    private fun bindFilterStats() {
+        viewModel.filteredStats.observe(this) {
+            it?.let { stats ->
+                content.filterStatsCard.visibility = if (stats.showStats) View.VISIBLE else View.GONE
+                val plural = if (stats.totalAmount <= 1) "" else "s"
+                val statsText = "Showing ${stats.filteredAmount} out of ${stats.totalAmount} game$plural"
+                content.filterStatsTv.text = statsText
+            }
+        }
+    }
+
     override fun deleteSelectedGame(position: Int) {
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             when (which) {
@@ -356,6 +376,47 @@ class GamesFromPlatformActivity : BaseActivity(),
             result.data?.getStringExtra(ADD_GAME_RESULT_MESSAGE)?.let { message ->
                 showSnackBar(binding.root, message)
             }
+        }
+    }
+
+    private fun addFilterStatsHeaderAnimation() {
+        content.gamesRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (!recyclerView.canScrollVertically(-1) &&
+                        recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
+                    runFilterHeaderAnimation(FilterHeaderAnimationState.STATE_DOWN)
+                } else if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
+                    runFilterHeaderAnimation(FilterHeaderAnimationState.STATE_TOP)
+                }
+            }
+        })
+    }
+
+    private fun runFilterHeaderAnimation(animationState: FilterHeaderAnimationState) {
+        if (!isAnimating && animationState != currentFilterAnimationState) {
+            val newMargin = if (animationState == FilterHeaderAnimationState.STATE_TOP) {
+                dpToPx(12f)
+             } else {
+                dpToPx(55f)
+            }
+            val layoutParams: ConstraintLayout.LayoutParams? =
+                content.filterStatsCard.layoutParams as? ConstraintLayout.LayoutParams
+            val animator: ValueAnimator = ValueAnimator.ofInt(layoutParams?.topMargin ?: 0, newMargin)
+            animator.addUpdateListener { valueAnimator ->
+                layoutParams?.topMargin = valueAnimator?.animatedValue as? Int ?: 0
+                content.filterStatsCard.requestLayout()
+            }
+
+            animator.addListener(
+                onStart = { isAnimating = true },
+                onEnd = {
+                    isAnimating = false
+                    currentFilterAnimationState = animationState
+                }
+            )
+            animator.duration = 300
+            animator.start()
         }
     }
 

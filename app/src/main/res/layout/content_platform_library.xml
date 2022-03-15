@@ -9,6 +9,36 @@
     tools:context=".remaster.ui.games.platformLibrary.GamesFromPlatformActivity"
     tools:showIn="@layout/activity_platform_library">
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/filter_stats_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="55dp"
+        android:layout_marginEnd="-10dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="10dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:paddingVertical="4dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="18dp">
+            <TextView
+                android:id="@+id/filter_stats_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                tools:text="Showing 3 out of 10 games" />
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/games_recycler_view"
         android:layout_width="match_parent"
