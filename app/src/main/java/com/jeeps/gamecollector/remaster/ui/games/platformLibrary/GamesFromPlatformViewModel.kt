@@ -35,15 +35,17 @@ class GamesFromPlatformViewModel @Inject constructor(
         }
 
     var platformName: String = ""
+    var currentSortControls: SortControls = SortControls()
+    var currentShowInfoControls: ShowInfoControls = ShowInfoControls()
+    var gamePendingDeletion: Game? = null
 
+    private var dbGames = MutableLiveData<List<Game>>()
     private var currentOrder: Comparator<Game> = GameByNameComparator()
     private var currentQuery: String = ""
-    var currentSortControls: SortControls = SortControls()
+
     private val _currentFilterControls = MutableLiveData<FilterControls>()
     val currentFilterControls: LiveData<FilterControls>
         get() = _currentFilterControls
-
-    var currentShowInfoControls: ShowInfoControls = ShowInfoControls()
 
     private val _filteredStats = MediatorLiveData<FilterStats>()
     val filteredStats: MediatorLiveData<FilterStats>
@@ -52,10 +54,6 @@ class GamesFromPlatformViewModel @Inject constructor(
     private val _currentSortStat = MutableLiveData(SortStat.NONE)
     val currentSortStat: LiveData<SortStat>
         get() = _currentSortStat
-
-    var gamePendingDeletion: Game? = null
-
-    private var dbGames = MutableLiveData<List<Game>>()
 
     private val _games = MediatorLiveData<List<Game>>()
     val games: LiveData<List<Game>>
