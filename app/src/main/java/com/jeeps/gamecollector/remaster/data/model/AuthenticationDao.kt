@@ -36,9 +36,6 @@ class AuthenticationDao @Inject constructor(
                         }
                         continuation.resume(token)
                     }
-                    .addOnFailureListener {
-                        continuation.resume("")
-                    }
             } else {
                 continuation.resume("")
             }
