@@ -20,3 +20,20 @@ suspend fun <S> BaseViewModel.handleNetworkResponse(
         }
     }
 }
+
+suspend fun <S> BaseViewModel.handleNetworkResponse(
+    response: NetworkResponse<S, ErrorResponse>,
+    onSuccess: suspend (S) -> Unit,
+    onFailure: suspend (ErrorResponse?) -> Unit
+): S? {
+    return when (response) {
+        is NetworkResponse.Success -> {
+            onSuccess(response.body)
+            response.body
+        }
+        is NetworkResponse.Error -> {
+            onFailure(response.body)
+            null
+        }
+    }
+}

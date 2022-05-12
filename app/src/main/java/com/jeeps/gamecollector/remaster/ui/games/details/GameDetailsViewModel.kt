@@ -45,6 +45,10 @@ class GameDetailsViewModel @Inject constructor(
     val gameHoursStats: LiveData<GameplayHoursStats>
         get() = _gameHoursStats
 
+    private val _showHoursErrorMessage = MutableLiveData<Boolean>(false)
+    val showHoursErrorMessage: LiveData<Boolean>
+        get() = _showHoursErrorMessage
+
     var selectedGamePosition: Int = -1
     var platformName: String? = null
     var platformId: String? = null
@@ -80,7 +84,7 @@ class GameDetailsViewModel @Inject constructor(
     fun updateGameCompletion() {
         viewModelScope.launch {
             val token = authenticationRepository.getUserToken()
-            selectedGame.value?.id?.let {  gameId ->
+            selectedGame.value?.id?.let { gameId ->
                 handleNetworkResponse(gamesRepository.toggleGameCompletion(token, gameId)) {
                     val isCompleted = it.completed
                     val message =
@@ -97,12 +101,16 @@ class GameDetailsViewModel @Inject constructor(
     private fun getGameHours() {
         viewModelScope.launch {
             _selectedGame.value?.let { game ->
-                handleNetworkResponse(statsRepository.getGameHours(game.name)) { stats ->
-                    if (isStoredHoursDifferentFromIgbd(game.gameHoursStats, stats)) {
-                        _gameHoursStats.value = stats
-                        updateGameHours(stats, game.id)
-                    }
-                }
+                handleNetworkResponse(statsRepository.getGameHours(game.name),
+                    { stats ->
+                        if (isStoredHoursDifferentFromIgbd(game.gameHoursStats, stats)) {
+                            _gameHoursStats.value = stats
+                            updateGameHours(stats, game.id)
+                        }
+                        _showHoursErrorMessage.postValue(false)
+                    }, {
+                        _showHoursErrorMessage.postValue(true)
+                    })
             }
         }
     }
@@ -116,7 +124,10 @@ class GameDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun isStoredHoursDifferentFromIgbd(storedHours: GameHoursStats, igdbHours: GameplayHoursStats): Boolean {
+    private fun isStoredHoursDifferentFromIgbd(
+        storedHours: GameHoursStats,
+        igdbHours: GameplayHoursStats
+    ): Boolean {
         return storedHours.gameplayCompletionist != igdbHours.gameplayCompletionist ||
                 storedHours.gameplayMain != igdbHours.gameplayMain ||
                 storedHours.gameplayMainExtra != igdbHours.gameplayMainExtra
