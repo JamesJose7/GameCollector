@@ -6,13 +6,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
-import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameIG
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.data.repository.IgdbRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
-import com.jeeps.gamecollector.remaster.ui.base.ErrorType
 import com.jeeps.gamecollector.remaster.utils.Event
+import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import com.jeeps.gamecollector.remaster.utils.extensions.similarity
 import com.jeeps.gamecollector.utils.IgdbUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -130,16 +129,8 @@ class AddGameViewModel @Inject constructor(
                         stopLoading()
                     }
                 }
-                is NetworkResponse.ServerError -> {
-                    handleError(ErrorType.SERVER_ERROR, response.error)
-                    stopLoading()
-                }
-                is NetworkResponse.NetworkError -> {
-                    handleError(ErrorType.NETWORK_ERROR, response.error)
-                    stopLoading()
-                }
-                is NetworkResponse.UnknownError -> {
-                    handleError(ErrorType.UNKNOWN_ERROR, response.error)
+                is NetworkResponse.Error -> {
+                    handleError(response)
                     stopLoading()
                 }
             }
@@ -150,26 +141,13 @@ class AddGameViewModel @Inject constructor(
         viewModelScope.launch {
             startLoading()
             val token = authenticationRepository.getUserToken()
-            when (val response = gamesRepository.editGame(token, game.id, game)) {
-                is NetworkResponse.Success -> {
-                    if (currentImageUri != null) {
-                        pendingMessage = "Game edited successfully"
-                        _isImageReadyToUpload.value = Event(true)
-                    } else {
-                        postServerMessage("Game edited successfully")
-                        stopLoading()
-                    }
-                }
-                is NetworkResponse.ServerError -> {
-                    handleError(ErrorType.SERVER_ERROR, response.error)
-                    stopLoading()
-                }
-                is NetworkResponse.NetworkError -> {
-                    handleError(ErrorType.NETWORK_ERROR, response.error)
-                    stopLoading()
-                }
-                is NetworkResponse.UnknownError -> {
-                    handleError(ErrorType.UNKNOWN_ERROR, response.error)
+
+            handleNetworkResponse(gamesRepository.editGame(token, game.id, game)) {
+                if (currentImageUri != null) {
+                    pendingMessage = "Game edited successfully"
+                    _isImageReadyToUpload.value = Event(true)
+                } else {
+                    postServerMessage("Game edited successfully")
                     stopLoading()
                 }
             }
@@ -179,33 +157,19 @@ class AddGameViewModel @Inject constructor(
     private fun saveGameAfterGettingCover(game: Game, isEdit: Boolean) {
         viewModelScope.launch {
             startLoading()
-            val igdbGames: List<GameIG>? = when (val response = igdbRepository
-                    .searchGames(IgdbUtils.getSearchGamesQuery(game.name))) {
-                is NetworkResponse.Success -> {
-                    response.body
-                }
-                is NetworkResponse.ServerError -> {
-                    handleError(ErrorType.SERVER_ERROR, response.error)
-                    stopLoading()
-                    null
-                }
-                is NetworkResponse.NetworkError -> {
-                    handleError(ErrorType.NETWORK_ERROR, response.error)
-                    stopLoading()
-                    null
-                }
-                is NetworkResponse.UnknownError -> {
-                    handleError(ErrorType.UNKNOWN_ERROR, response.error)
-                    stopLoading()
-                    null
-                }
-            }
+            val igdbGames =
+                handleNetworkResponse(igdbRepository.searchGames(IgdbUtils.getSearchGamesQuery(game.name)))
+
             val selectedGame = if (igdbGames == null || igdbGames.isEmpty()) {
                 null
             } else {
                 // Exclude DLC and sort based on most similar name based on the user input
                 val sortedGames = igdbGames
-                    .sortedByDescending { igGame -> igGame.name.similarity(_selectedGame.value?.name ?: "") }
+                    .sortedByDescending { igGame ->
+                        igGame.name.similarity(
+                            _selectedGame.value?.name ?: ""
+                        )
+                    }
 
                 sortedGames
                     .firstOrNull { igGame -> igGame.category != 1 }
@@ -229,7 +193,7 @@ class AddGameViewModel @Inject constructor(
                     }
                     is NetworkResponse.Error -> {
                         stopLoading()
-                        handleError(ErrorType.UNKNOWN_ERROR, response.error)
+                        handleError(response)
                         continueSavingGame(isEdit, game)
                     }
                 }
@@ -250,20 +214,10 @@ class AddGameViewModel @Inject constructor(
                     .asRequestBody("image/png".toMediaTypeOrNull())
                 val body: MultipartBody.Part =
                     MultipartBody.Part.createFormData("image", image.name, requestFile)
-                when (val response = gamesRepository
+
+                handleNetworkResponse(gamesRepository
                     .uploadGameCover(token, selectedGame.value?.id ?: "", body)) {
-                    is NetworkResponse.Success -> {
-                        postServerMessage(pendingMessage)
-                    }
-                    is NetworkResponse.ServerError -> {
-                        handleError(ErrorType.SERVER_ERROR, response.error)
-                    }
-                    is NetworkResponse.NetworkError -> {
-                        handleError(ErrorType.NETWORK_ERROR, response.error)
-                    }
-                    is NetworkResponse.UnknownError -> {
-                        handleError(ErrorType.UNKNOWN_ERROR, response.error)
-                    }
+                    postServerMessage(pendingMessage)
                 }
                 if (image.exists()) {
                     image.delete()

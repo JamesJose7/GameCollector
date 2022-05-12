@@ -28,20 +28,14 @@ class GamesDao @Inject constructor(
     }
 
     suspend fun postGame(token: String, game: Game): NetworkResponse<Game, ErrorResponse> {
-        return withContext(NonCancellable) {
-            apiGame.postGame(token.bearer(), game)
-        }
+        return apiGame.postGame(token.bearer(), game)
     }
 
     suspend fun editGame(token: String, gameId: String, game: Game): NetworkResponse<ResponseBody, ErrorResponse> {
-        return withContext(NonCancellable) {
-            apiGame.editGame(token.bearer(), gameId, game)
-        }
+        return apiGame.editGame(token.bearer(), gameId, game)
     }
 
     suspend fun uploadGameCover(token: String, gameId: String, body: MultipartBody.Part): NetworkResponse<ResponseBody, ErrorResponse> {
-        return withContext(NonCancellable) {
-            apiGame.uploadGameCover(token.bearer(), gameId, body)
-        }
+        return apiGame.uploadGameCover(token.bearer(), gameId, body)
     }
 }
