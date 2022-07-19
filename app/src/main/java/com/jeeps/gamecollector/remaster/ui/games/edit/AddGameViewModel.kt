@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
+import com.jeeps.gamecollector.remaster.data.model.data.games.addAdditionalGameDetails
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.data.repository.IgdbRepository
@@ -118,19 +119,13 @@ class AddGameViewModel @Inject constructor(
         viewModelScope.launch {
             startLoading()
             val token = authenticationRepository.getUserToken()
-            when (val response = gamesRepository.saveNewGame(token, game)) {
-                is NetworkResponse.Success -> {
-                    if (currentImageUri != null) {
-                        setSelectedGame(response.body)
-                        pendingMessage = "Game created successfully"
-                        _isImageReadyToUpload.value = Event(true)
-                    } else {
-                        postServerMessage("Game created successfully")
-                        stopLoading()
-                    }
-                }
-                is NetworkResponse.Error -> {
-                    handleError(response)
+            handleNetworkResponse(gamesRepository.saveNewGame(token, game)) {
+                if (currentImageUri != null) {
+                    setSelectedGame(it)
+                    pendingMessage = "Game created successfully"
+                    _isImageReadyToUpload.value = Event(true)
+                } else {
+                    postServerMessage("Game created successfully")
                     stopLoading()
                 }
             }
@@ -178,6 +173,7 @@ class AddGameViewModel @Inject constructor(
             if (selectedGame == null) {
                 continueSavingGame(isEdit, game)
             } else {
+                game.addAdditionalGameDetails(selectedGame)
                 // Get image cover
                 when (val response = igdbRepository
                     .getGameCoverById(IgdbUtils.getCoverImageQuery(selectedGame.cover))) {
