@@ -4,10 +4,18 @@ import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameIG
 import java.io.Serializable
+import java.time.DateTimeException
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 /**
  * Created by jeeps on 12/23/2017.
  */
+
+private const val RELEASE_DATE_FORMAT = "MMM dd, YYYY"
+
 data class Game(
     @SerializedName("gameId")
     var id: String = "",
@@ -61,15 +69,29 @@ data class Game(
 
 fun Game.addAdditionalGameDetails(gameIG: GameIG) {
     firstReleaseDate = gameIG.firstReleaseDate
-    ageRatings = gameIG.ageRatings
-    criticsRating = gameIG.criticsRating
-    criticsRatingCount = gameIG.criticsRatingCount
-    userRating = gameIG.userRating
-    userRatingCount = gameIG.userRatingCount
-    totalRating = gameIG.totalRating
-    totalRatingCount = gameIG.totalRatingCount
-    genres = gameIG.genres
-    storyline = gameIG.storyline
-    summary = gameIG.summary
-    url = gameIG.url
+    ageRatings = gameIG.ageRatings ?: emptyList()
+    criticsRating = gameIG.criticsRating ?: 0.0
+    criticsRatingCount = gameIG.criticsRatingCount ?: 0
+    userRating = gameIG.userRating ?: 0.0
+    userRatingCount = gameIG.userRatingCount ?: 0
+    totalRating = gameIG.totalRating ?: 0.0
+    totalRatingCount = gameIG.totalRatingCount ?: 0
+    genres = gameIG.genres ?: emptyList()
+    storyline = gameIG.storyline ?: ""
+    summary = gameIG.summary ?: ""
+    url = gameIG.url ?: ""
+}
+
+fun Game?.releaseDateFormatted(): String {
+    if (this == null || firstReleaseDate == 0L) return ""
+    return try {
+        val date = Instant.ofEpochSecond(firstReleaseDate)
+        val formatter = DateTimeFormatter
+            .ofPattern(RELEASE_DATE_FORMAT)
+            .withZone(ZoneId.from(ZoneOffset.UTC))
+        formatter.format(date)
+    } catch (e: DateTimeException) {
+        e.printStackTrace()
+        ""
+    }
 }

@@ -58,7 +58,10 @@ class GameDetailsActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.rootLayout)
         setSupportActionBar(binding.toolbar)
-        content = binding.content
+        content = binding.content.apply {
+            gameDetailsViewModel = viewModel
+            lifecycleOwner = this@GameDetailsActivity
+        }
 
         getIntentData()
 
@@ -171,17 +174,20 @@ class GameDetailsActivity : BaseActivity() {
     }
 
     private fun animateStatusBarColor(colorTo: Int) {
-        val colorFrom = ContextCompat.getColor(this, R.color.colorPrimary)
-        ObjectAnimator
-            .ofObject(
-                binding.toolbar, "backgroundColor",
-                ArgbEvaluator(),
-                colorFrom,
-                colorTo
-            )
-            .setDuration(300)
-            .start()
-        window.statusBarColor = colorTo
+        if (!viewModel.toolbarAnimationStarted) {
+            viewModel.toolbarAnimationStarted = true
+            val colorFrom = ContextCompat.getColor(this, R.color.colorPrimary)
+            ObjectAnimator
+                .ofObject(
+                    binding.toolbar, "backgroundColor",
+                    ArgbEvaluator(),
+                    colorFrom,
+                    colorTo
+                )
+                .setDuration(300)
+                .start()
+            window.statusBarColor = colorTo
+        }
     }
 
     private fun formatGamePlayHours(stats: GameplayHoursStats) {

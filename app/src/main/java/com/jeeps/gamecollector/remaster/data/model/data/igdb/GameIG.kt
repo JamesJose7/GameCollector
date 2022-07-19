@@ -11,24 +11,24 @@ data class GameIG(
     var firstReleaseDate: Long = 0,
     var name: String = "",
     @SerializedName("age_ratings")
-    var ageRatings: List<Int>,
+    var ageRatings: List<Int>?,
     @SerializedName("aggregated_rating")
-    var criticsRating: Double,
+    var criticsRating: Double?,
     @SerializedName("aggregated_rating_count")
-    var criticsRatingCount: Int,
+    var criticsRatingCount: Int?,
     @SerializedName("rating")
-    var userRating: Double,
+    var userRating: Double?,
     @SerializedName("rating_count")
-    var userRatingCount: Int,
+    var userRatingCount: Int?,
     @SerializedName("total_rating")
-    var totalRating: Double,
+    var totalRating: Double?,
     @SerializedName("total_rating_count")
-    var totalRatingCount: Int,
+    var totalRatingCount: Int?,
 
-    var genres: List<Int>,
-    var storyline: String,
-    var summary: String,
-    var url: String
+    var genres: List<Int>?,
+    var storyline: String?,
+    var summary: String?,
+    var url: String?
 )
 
 fun List<GameIG>?.findMostSimilarGame(gameName: String): GameIG? {

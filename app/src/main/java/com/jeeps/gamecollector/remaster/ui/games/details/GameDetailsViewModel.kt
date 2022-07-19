@@ -38,6 +38,8 @@ class GameDetailsViewModel @Inject constructor(
     private val statsRepository: UserStatsRepository
 ) : BaseViewModel() {
 
+    var toolbarAnimationStarted = false
+
     private val _selectedGame = MutableLiveData<Game>()
     val selectedGame: LiveData<Game>
         get() = _selectedGame
@@ -50,7 +52,7 @@ class GameDetailsViewModel @Inject constructor(
     val gameHoursStats: LiveData<GameplayHoursStats>
         get() = _gameHoursStats
 
-    private val _showHoursErrorMessage = MutableLiveData<Boolean>(false)
+    private val _showHoursErrorMessage = MutableLiveData(false)
     val showHoursErrorMessage: LiveData<Boolean>
         get() = _showHoursErrorMessage
 
