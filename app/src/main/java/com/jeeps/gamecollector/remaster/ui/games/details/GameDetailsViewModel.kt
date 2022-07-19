@@ -10,13 +10,17 @@ import androidx.palette.graphics.Palette
 import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats
+import com.jeeps.gamecollector.remaster.data.model.data.games.addAdditionalGameDetails
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
+import com.jeeps.gamecollector.remaster.data.model.data.igdb.findMostSimilarGame
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
+import com.jeeps.gamecollector.remaster.data.repository.IgdbRepository
 import com.jeeps.gamecollector.remaster.data.repository.UserStatsRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.base.ErrorType
 import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
+import com.jeeps.gamecollector.utils.IgdbUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,6 +34,7 @@ import javax.inject.Inject
 class GameDetailsViewModel @Inject constructor(
     private val authenticationRepository: AuthenticationRepository,
     private val gamesRepository: GamesRepository,
+    private val igdbRepository: IgdbRepository,
     private val statsRepository: UserStatsRepository
 ) : BaseViewModel() {
 
@@ -57,6 +62,7 @@ class GameDetailsViewModel @Inject constructor(
         _selectedGame.value = game
         _gameHoursStats.value = GameplayHoursStats(game.gameHoursStats)
         getGameHours()
+        updateGameDetails()
     }
 
     fun getColorBasedOnCover() {
@@ -132,4 +138,22 @@ class GameDetailsViewModel @Inject constructor(
                 storedHours.gameplayMain != igdbHours.gameplayMain ||
                 storedHours.gameplayMainExtra != igdbHours.gameplayMainExtra
     }
+
+    private fun updateGameDetails() = _selectedGame.value?.let { game ->
+        if (game.url.isNotEmpty()) return@let
+
+        viewModelScope.launch {
+            val igdbGames =
+                handleNetworkResponse(igdbRepository.searchGames(IgdbUtils.getSearchGamesQuery(game.name)))
+            igdbGames.findMostSimilarGame(game.name)?.let { gameIG ->
+                game.addAdditionalGameDetails(gameIG)
+
+                val token = authenticationRepository.getUserToken()
+                handleNetworkResponse(gamesRepository.editGame(token, game.id, game)) {
+                    _selectedGame.value = game
+                }
+            }
+        }
+    }
+
 }

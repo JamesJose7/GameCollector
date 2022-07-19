@@ -1,6 +1,7 @@
 package com.jeeps.gamecollector.remaster.data.model.data.igdb
 
 import com.google.gson.annotations.SerializedName
+import com.jeeps.gamecollector.remaster.utils.extensions.similarity
 
 data class GameIG(
     var id: Int = 0,
@@ -29,3 +30,15 @@ data class GameIG(
     var summary: String,
     var url: String
 )
+
+fun List<GameIG>?.findMostSimilarGame(gameName: String): GameIG? {
+    return if (this == null || isEmpty()) {
+        null
+    } else {
+        // Exclude DLC and sort based on most similar name based on the user input
+        val sortedGames = sortedByDescending { igGame -> igGame.name.similarity(gameName) }
+
+        sortedGames
+            .firstOrNull { igGame -> igGame.category != 1 }
+    }
+}
