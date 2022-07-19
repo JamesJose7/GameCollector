@@ -226,6 +226,15 @@
 
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/hours_error_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="No stats found for this game. Try renaming it."
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>

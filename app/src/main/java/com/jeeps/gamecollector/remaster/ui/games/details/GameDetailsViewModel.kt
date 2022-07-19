@@ -7,16 +7,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
-import com.haroldadmin.cnradapter.NetworkResponse
+import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
-import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.data.repository.UserStatsRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.base.ErrorType
+import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,6 +44,10 @@ class GameDetailsViewModel @Inject constructor(
     private val _gameHoursStats = MutableLiveData<GameplayHoursStats>()
     val gameHoursStats: LiveData<GameplayHoursStats>
         get() = _gameHoursStats
+
+    private val _showHoursErrorMessage = MutableLiveData<Boolean>(false)
+    val showHoursErrorMessage: LiveData<Boolean>
+        get() = _showHoursErrorMessage
 
     var selectedGamePosition: Int = -1
     var platformName: String? = null
@@ -80,26 +84,15 @@ class GameDetailsViewModel @Inject constructor(
     fun updateGameCompletion() {
         viewModelScope.launch {
             val token = authenticationRepository.getUserToken()
-            selectedGame.value?.id?.let {  gameId ->
-                when (val response = gamesRepository.toggleGameCompletion(token, gameId)) {
-                    is NetworkResponse.Success -> {
-                        val isCompleted = response.body.completed
-                        val message =
-                            if (isCompleted) "Marked as complete"
-                            else "Marked as incomplete"
-                        postServerMessage(message)
+            selectedGame.value?.id?.let { gameId ->
+                handleNetworkResponse(gamesRepository.toggleGameCompletion(token, gameId)) {
+                    val isCompleted = it.completed
+                    val message =
+                        if (isCompleted) "Marked as complete"
+                        else "Marked as incomplete"
+                    postServerMessage(message)
 
-                        _selectedGame.value?.timesCompleted = if (isCompleted) 1 else 0
-                    }
-                    is NetworkResponse.ServerError -> {
-                        handleError(ErrorType.SERVER_ERROR, response.error)
-                    }
-                    is NetworkResponse.NetworkError -> {
-                        handleError(ErrorType.NETWORK_ERROR, response.error)
-                    }
-                    is NetworkResponse.UnknownError -> {
-                        handleError(ErrorType.UNKNOWN_ERROR, response.error)
-                    }
+                    _selectedGame.value?.timesCompleted = if (isCompleted) 1 else 0
                 }
             }
         }
@@ -108,24 +101,16 @@ class GameDetailsViewModel @Inject constructor(
     private fun getGameHours() {
         viewModelScope.launch {
             _selectedGame.value?.let { game ->
-                when (val response = statsRepository.getGameHours(game.name)) {
-                    is NetworkResponse.Success -> {
-                        val stats = response.body
+                handleNetworkResponse(statsRepository.getGameHours(game.name),
+                    { stats ->
                         if (isStoredHoursDifferentFromIgbd(game.gameHoursStats, stats)) {
                             _gameHoursStats.value = stats
                             updateGameHours(stats, game.id)
                         }
-                    }
-                    is NetworkResponse.ServerError -> {
-                        handleError(ErrorType.SERVER_ERROR, response.error)
-                    }
-                    is NetworkResponse.NetworkError -> {
-                        handleError(ErrorType.NETWORK_ERROR, response.error)
-                    }
-                    is NetworkResponse.UnknownError -> {
-                        handleError(ErrorType.UNKNOWN_ERROR, response.error)
-                    }
-                }
+                        _showHoursErrorMessage.postValue(false)
+                    }, {
+                        _showHoursErrorMessage.postValue(true)
+                    })
             }
         }
     }
@@ -139,7 +124,10 @@ class GameDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun isStoredHoursDifferentFromIgbd(storedHours: GameHoursStats, igdbHours: GameplayHoursStats): Boolean {
+    private fun isStoredHoursDifferentFromIgbd(
+        storedHours: GameHoursStats,
+        igdbHours: GameplayHoursStats
+    ): Boolean {
         return storedHours.gameplayCompletionist != igdbHours.gameplayCompletionist ||
                 storedHours.gameplayMain != igdbHours.gameplayMain ||
                 storedHours.gameplayMainExtra != igdbHours.gameplayMainExtra

@@ -5,6 +5,7 @@ import com.jeeps.gamecollector.BuildConfig
 import com.jeeps.gamecollector.remaster.data.api.ApiUser
 import com.jeeps.gamecollector.remaster.utils.PreferencesWrapper
 import com.jeeps.gamecollector.remaster.utils.constants.PreferencesKeys
+import com.jeeps.gamecollector.remaster.utils.extensions.bearer
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
@@ -40,7 +41,7 @@ class IgdbInterceptor @Inject constructor(
                 val token = when (val igdbAuth = apiUser.igdbAuth()) {
                     is NetworkResponse.Success -> {
                         val accessToken = igdbAuth.body.access_token
-                        "Bearer $accessToken"
+                        accessToken.bearer()
                     }
                     is NetworkResponse.Error -> null
                 }

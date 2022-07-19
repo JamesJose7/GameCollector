@@ -4,13 +4,12 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.PlatformsRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
-import com.jeeps.gamecollector.remaster.ui.base.ErrorType
 import com.jeeps.gamecollector.remaster.utils.Event
+import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -82,25 +81,11 @@ class AddPlatformViewModel @Inject constructor(
 
     private suspend fun saveNewPlatform() {
         val token = authenticationRepository.getUserToken()
-        _platform.value?.let {
-            it.imageUri = currentImageUri.toString()
-            when (val response = platformsRepository.savePlatform(token, it)) {
-                is NetworkResponse.Success -> {
-                    it.id = response.body.id
-                    _isPlatformSaved.postValue(Event(true))
-                }
-                is NetworkResponse.ServerError -> {
-                    handleError(ErrorType.SERVER_ERROR, response.error)
-                    stopLoading()
-                }
-                is NetworkResponse.NetworkError -> {
-                    handleError(ErrorType.NETWORK_ERROR, response.error)
-                    stopLoading()
-                }
-                is NetworkResponse.UnknownError -> {
-                    handleError(ErrorType.UNKNOWN_ERROR, response.error)
-                    stopLoading()
-                }
+        _platform.value?.let { currentPlatform ->
+            currentPlatform.imageUri = currentImageUri.toString()
+            handleNetworkResponse(platformsRepository.savePlatform(token, currentPlatform)) { newPlatform ->
+                currentPlatform.id = newPlatform.id
+                _isPlatformSaved.postValue(Event(true))
             }
         }
     }
@@ -108,22 +93,8 @@ class AddPlatformViewModel @Inject constructor(
     private suspend fun editPlatform() {
         val token = authenticationRepository.getUserToken()
         _platform.value?.let {
-            when (val response = platformsRepository.editPlatform(token, it)) {
-                is NetworkResponse.Success -> {
-                    _isPlatformSaved.postValue(Event(true))
-                }
-                is NetworkResponse.ServerError -> {
-                    handleError(ErrorType.SERVER_ERROR, response.error)
-                    stopLoading()
-                }
-                is NetworkResponse.NetworkError -> {
-                    handleError(ErrorType.NETWORK_ERROR, response.error)
-                    stopLoading()
-                }
-                is NetworkResponse.UnknownError -> {
-                    handleError(ErrorType.UNKNOWN_ERROR, response.error)
-                    stopLoading()
-                }
+            handleNetworkResponse(platformsRepository.editPlatform(token, it)) {
+                _isPlatformSaved.postValue(Event(true))
             }
         }
     }
@@ -136,20 +107,10 @@ class AddPlatformViewModel @Inject constructor(
                     .asRequestBody("image/png".toMediaTypeOrNull())
                 val body: MultipartBody.Part =
                     MultipartBody.Part.createFormData("image", file.name, requestFile)
-                when (val response = platformsRepository.uploadPlatformCover(
+
+                handleNetworkResponse(platformsRepository.uploadPlatformCover(
                     token, _platform.value?.id ?: "", body)) {
-                    is NetworkResponse.Success -> {
-                        if (file.exists()) file.delete()
-                    }
-                    is NetworkResponse.ServerError -> {
-                        handleError(ErrorType.SERVER_ERROR, response.error)
-                    }
-                    is NetworkResponse.NetworkError -> {
-                        handleError(ErrorType.NETWORK_ERROR, response.error)
-                    }
-                    is NetworkResponse.UnknownError -> {
-                        handleError(ErrorType.UNKNOWN_ERROR, response.error)
-                    }
+                    if (file.exists()) file.delete()
                 }
             }
 

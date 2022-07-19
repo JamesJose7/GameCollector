@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.RadioButton
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
@@ -160,7 +161,9 @@ class AddGameActivity : BaseActivity() {
 
     private fun bindAlerts() {
         viewModel.errorMessage.observe(this) {
-            it?.let { showToast(it) }
+            it?.let {
+                showToast(it, Toast.LENGTH_LONG)
+            }
         }
 
         viewModel.serverMessage.observe(this) { messageEvent ->

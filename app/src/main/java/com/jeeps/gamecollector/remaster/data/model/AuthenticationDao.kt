@@ -3,13 +3,12 @@ package com.jeeps.gamecollector.remaster.data.model
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.haroldadmin.cnradapter.NetworkResponse
+import com.jeeps.gamecollector.remaster.data.api.ApiUser
 import com.jeeps.gamecollector.remaster.data.model.data.user.User
 import com.jeeps.gamecollector.remaster.data.model.data.user.UserDetails
-import com.jeeps.gamecollector.remaster.data.api.ApiUser
 import com.jeeps.gamecollector.remaster.utils.PreferencesWrapper
-import kotlinx.coroutines.Dispatchers
+import com.jeeps.gamecollector.remaster.utils.extensions.bearer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -20,8 +19,6 @@ class AuthenticationDao @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val apiUser: ApiUser
 ) {
-
-    private val dispatcher = Dispatchers.IO
 
     fun getCurrentFirebaseUser(): FirebaseUser? {
         return firebaseAuth.currentUser
@@ -39,9 +36,6 @@ class AuthenticationDao @Inject constructor(
                         }
                         continuation.resume(token)
                     }
-                    .addOnFailureListener {
-                        continuation.resume("")
-                    }
             } else {
                 continuation.resume("")
             }
@@ -54,9 +48,7 @@ class AuthenticationDao @Inject constructor(
     }
 
     suspend fun saveNewUser(user: User): NetworkResponse<ResponseBody, ErrorResponse> {
-        return withContext(dispatcher) {
-            apiUser.signupUserDetails(user)
-        }
+        return apiUser.signupUserDetails(user)
     }
 
     fun saveUserDetailsLocally(username: String, uid: String, token: String) {
@@ -74,9 +66,7 @@ class AuthenticationDao @Inject constructor(
     }
 
     suspend fun getUserDetails(token: String): NetworkResponse<UserDetails, ErrorResponse> {
-        return withContext(dispatcher) {
-            apiUser.getUser("Bearer $token")
-        }
+        return apiUser.getUser(token.bearer())
     }
 
     companion object {

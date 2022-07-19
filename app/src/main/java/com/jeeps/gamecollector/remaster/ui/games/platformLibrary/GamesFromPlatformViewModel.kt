@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
@@ -14,6 +13,7 @@ import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.base.ErrorType
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.*
 import com.jeeps.gamecollector.remaster.utils.comparators.GameByNameComparator
+import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import com.jeeps.gamecollector.remaster.utils.extensions.value
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -173,22 +173,12 @@ class GamesFromPlatformViewModel @Inject constructor(
 
     fun deleteGame(game: Game) {
         gamePendingDeletion = null
+
         viewModelScope.launch {
             val token = authenticationRepository.getUserToken()
 
-            when (val response = gamesRepository.deleteGame(token, game.id)) {
-                is NetworkResponse.Success -> {
-                    postServerMessage("Game deleted successfully")
-                }
-                is NetworkResponse.ServerError -> {
-                    handleError(ErrorType.SERVER_ERROR, response.error)
-                }
-                is NetworkResponse.NetworkError -> {
-                    handleError(ErrorType.NETWORK_ERROR, response.error)
-                }
-                is NetworkResponse.UnknownError -> {
-                    handleError(ErrorType.UNKNOWN_ERROR, response.error)
-                }
+            handleNetworkResponse(gamesRepository.deleteGame(token, game.id)) {
+                postServerMessage("Game deleted successfully")
             }
         }
     }

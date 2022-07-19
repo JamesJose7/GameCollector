@@ -65,6 +65,7 @@ class GameDetailsActivity : BaseActivity() {
         bindViews()
         bindFab()
         bindAlerts()
+        bindHoursErrorMessage()
     }
 
     private fun getIntentData() {
@@ -118,6 +119,13 @@ class GameDetailsActivity : BaseActivity() {
             messageEvent?.getContentIfNotHandled()?.let {
                 showSnackBar(binding.root, it)
             }
+        }
+    }
+
+    private fun bindHoursErrorMessage() {
+        viewModel.showHoursErrorMessage.observe(this) {
+            val showMessage = it ?: false
+            content.hoursErrorMessage.visibility = if (showMessage) View.VISIBLE else View.GONE
         }
     }
 
