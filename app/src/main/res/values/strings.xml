@@ -29,4 +29,8 @@
     <string name="main_story_label">Main Story</string>
     <string name="main_extra_label">Main + Extra</string>
     <string name="completionist_label">Completionist</string>
+    <string name="no_hours_stats_error">No stats found for this game. Try renaming it.</string>
+    <string name="hours_stats">Hours stats</string>
+    <string name="completed">Completed</string>
+    <string name="game_cover">Game cover</string>
 </resources>
