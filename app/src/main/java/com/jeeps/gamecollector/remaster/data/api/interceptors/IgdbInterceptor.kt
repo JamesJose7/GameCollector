@@ -9,6 +9,7 @@ import com.jeeps.gamecollector.remaster.utils.extensions.bearer
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
+import okhttp3.Request
 import okhttp3.Response
 import javax.inject.Inject
 
@@ -16,23 +17,41 @@ class IgdbInterceptor @Inject constructor(
     private val apiUser: ApiUser
 ) : Interceptor {
 
-    override fun intercept(chain: Interceptor.Chain): Response {
-        getTwitchAuthToken()
-        val token = PreferencesWrapper
+    val token: String
+        get() = PreferencesWrapper
             .read(PreferencesKeys.TWITCH_AUTH_TOKEN, String::class.java) ?: ""
 
-        val original = chain.request()
-        val request = original.newBuilder()
-            .header("Client-ID", CLIENT_ID)
-            .header("Authorization", token)
-            .header("Content-Type", "text/plain")
-            .method(original.method, original.body)
-            .build()
+    override fun intercept(chain: Interceptor.Chain): Response {
+        fetchTwitchAuthToken()
 
-        return chain.proceed(request)
+        val original = chain.request()
+        val request = buildRequest(original, token)
+
+        val response = chain.proceed(request)
+        return when (response.code) {
+            401 -> {
+                response.close()
+                invalidateToken()
+                fetchTwitchAuthToken()
+                val newRequest = buildRequest(original, token)
+                return chain.proceed(newRequest)
+            }
+            else -> response
+        }
     }
 
-    private fun getTwitchAuthToken() = runBlocking {
+    private fun buildRequest(original: Request, token: String) = original.newBuilder()
+        .header("Client-ID", CLIENT_ID)
+        .header("Authorization", token)
+        .header("Content-Type", "text/plain")
+        .method(original.method, original.body)
+        .build()
+
+    private fun invalidateToken() {
+        PreferencesWrapper.save(PreferencesKeys.TWITCH_AUTH_TOKEN, "")
+    }
+
+    private fun fetchTwitchAuthToken() = runBlocking {
         launch {
             if (PreferencesWrapper
                     .read(PreferencesKeys.TWITCH_AUTH_TOKEN, String::class.java)
