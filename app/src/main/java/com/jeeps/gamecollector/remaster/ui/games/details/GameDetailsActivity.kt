@@ -4,7 +4,7 @@ import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
-import android.transition.Explode
+import android.transition.Fade
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
@@ -28,6 +28,7 @@ import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
 import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
+import com.jeeps.gamecollector.remaster.utils.extensions.withExclusions
 import com.jeeps.gamecollector.utils.ColorsUtils.getColorByHoursRange
 import com.jeeps.gamecollector.utils.FormatUtils
 import com.squareup.picasso.Picasso
@@ -52,7 +53,8 @@ class GameDetailsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Setup exit transition
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        window.enterTransition = Explode()
+        window.enterTransition = Fade().withExclusions()
+        window.exitTransition = Fade().withExclusions()
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
 
         super.onCreate(savedInstanceState)

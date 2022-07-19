@@ -33,4 +33,7 @@
     <string name="hours_stats">Hours stats</string>
     <string name="completed">Completed</string>
     <string name="game_cover">Game cover</string>
+    <string name="add_platform">Add platform</string>
+    <string name="platform_cover">Platform cover</string>
+    <string name="edit_game">Edit game</string>
 </resources>
