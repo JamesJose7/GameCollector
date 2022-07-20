@@ -69,6 +69,7 @@ dependencies {
 
     /* Third party */
     implementation 'com.jakewharton:butterknife:10.2.1'
+    implementation 'io.github.florent37:shapeofview:1.4.7'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1'
 
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'

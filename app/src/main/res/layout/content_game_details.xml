@@ -262,6 +262,74 @@
 
         </androidx.cardview.widget.CardView>
 
+        <TextView
+            android:id="@+id/ratings_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/ratings_title"
+            android:textColor="@color/textColorPrimary"
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/hours_stats_card"
+            app:layout_constraintStart_toStartOf="@id/left_margin"
+            app:layout_constraintEnd_toEndOf="@id/right_margin"/>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/ratings_card"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="10dp"
+            app:layout_constraintTop_toBottomOf="@id/ratings_title"
+            app:layout_constraintStart_toStartOf="@id/left_margin"
+            app:layout_constraintEnd_toEndOf="@id/right_margin">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="20dp"
+                android:paddingHorizontal="10dp"
+                android:clipToPadding="false"
+                android:clipChildren="false">
+
+                <com.jeeps.gamecollector.views.RatingChip
+                    android:id="@+id/critics_rating_chip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:rating="@{gameDetailsViewModel.selectedGame.userRating}"
+                    app:ratingTitle="@{`Users`}"
+                    app:ratingSubtitle="@{gameDetailsViewModel.selectedGame.userRatingCount + ` reviews`}"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/users_rating_chip"/>
+
+                <com.jeeps.gamecollector.views.RatingChip
+                    android:id="@+id/users_rating_chip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:rating="@{gameDetailsViewModel.selectedGame.criticsRating}"
+                    app:ratingTitle="@{`Critics`}"
+                    app:ratingSubtitle="@{gameDetailsViewModel.selectedGame.criticsRatingCount + ` reviews`}"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/critics_rating_chip"
+                    app:layout_constraintEnd_toStartOf="@id/total_rating_chip"/>
+
+                <com.jeeps.gamecollector.views.RatingChip
+                    android:id="@+id/total_rating_chip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:rating="@{gameDetailsViewModel.selectedGame.totalRating}"
+                    app:ratingTitle="@{`Total`}"
+                    app:ratingSubtitle="@{gameDetailsViewModel.selectedGame.totalRatingCount + ` reviews`}"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/users_rating_chip"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.cardview.widget.CardView>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

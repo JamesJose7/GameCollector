@@ -27,4 +27,14 @@ public class ColorsUtils {
         else
             return context.getColor(R.color.hours_range_100);
     }
+
+    @ColorInt
+    public static int getColorByRatingRange(Context context, double rating) {
+        if (rating >= 80)
+            return context.getColor(R.color.rating_range_80);
+        else if (rating >= 40)
+            return context.getColor(R.color.rating_range_40);
+        else
+            return context.getColor(R.color.rating_range_0);
+    }
 }

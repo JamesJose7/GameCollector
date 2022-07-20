@@ -20,4 +20,9 @@
     <color name="hours_range_60">#f3b800</color>
     <color name="hours_range_80">#db8200</color>
     <color name="hours_range_100">#b64201</color>
+
+    <!-- Users rating palette -->
+    <color name="rating_range_0">#b64201</color>
+    <color name="rating_range_40">#f3b800</color>
+    <color name="rating_range_80">#508104</color>
 </resources>
