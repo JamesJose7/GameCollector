@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter
  * Created by jeeps on 12/23/2017.
  */
 
-private const val RELEASE_DATE_FORMAT = "MMM dd, YYYY"
+private const val RELEASE_DATE_FORMAT = "MMM dd, yyyy"
 
 data class Game(
     @SerializedName("gameId")
