@@ -8,7 +8,7 @@ data class GameIG(
     var category: Int = 0,
     var cover: Int = 0,
     @SerializedName("first_release_date")
-    var firstReleaseDate: Long = 0,
+    var firstReleaseDate: Long? = 0,
     var name: String = "",
     @SerializedName("age_ratings")
     var ageRatings: List<Int>?,

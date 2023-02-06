@@ -68,7 +68,7 @@ data class Game(
 }
 
 fun Game.addAdditionalGameDetails(gameIG: GameIG) {
-    firstReleaseDate = gameIG.firstReleaseDate
+    firstReleaseDate = gameIG.firstReleaseDate ?: 0
     ageRatings = gameIG.ageRatings ?: emptyList()
     criticsRating = gameIG.criticsRating ?: 0.0
     criticsRatingCount = gameIG.criticsRatingCount ?: 0
