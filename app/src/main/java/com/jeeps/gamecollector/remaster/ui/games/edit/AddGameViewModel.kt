@@ -14,6 +14,7 @@ import com.jeeps.gamecollector.remaster.data.repository.IgdbRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.utils.Event
 import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
+import com.jeeps.gamecollector.remaster.utils.getCurrentTimeInUtcString
 import com.jeeps.gamecollector.utils.IgdbUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -91,7 +92,9 @@ class AddGameViewModel @Inject constructor(
             platformName ?: "",
             "",
             ""
-        )
+        ).apply {
+            dateAdded = getCurrentTimeInUtcString()
+        }
         setSelectedGame(game)
     }
 
@@ -197,8 +200,10 @@ class AddGameViewModel @Inject constructor(
                 val body: MultipartBody.Part =
                     MultipartBody.Part.createFormData("image", image.name, requestFile)
 
-                handleNetworkResponse(gamesRepository
-                    .uploadGameCover(token, selectedGame.value?.id ?: "", body)) {
+                handleNetworkResponse(
+                    gamesRepository
+                        .uploadGameCover(token, selectedGame.value?.id ?: "", body)
+                ) {
                     postServerMessage(pendingMessage)
                 }
                 if (image.exists()) {
