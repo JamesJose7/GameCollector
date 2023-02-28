@@ -101,10 +101,17 @@
                     android:layout_marginBottom="5dp" />
 
                 <TextView
-                    android:id="@+id/game_release_date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
+                    android:text="@string/released_in"
+                    android:textSize="11sp"
+                    android:textColor="@color/textSecondaryColor"/>
+
+                <TextView
+                    android:id="@+id/game_release_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="@{GameKt.releaseDateFormatted(gameDetailsViewModel.selectedGame)}"
                     tools:text="Jan 01, 2022"
                     android:textSize="17sp"

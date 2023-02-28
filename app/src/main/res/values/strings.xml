@@ -37,4 +37,5 @@
     <string name="platform_cover">Platform cover</string>
     <string name="edit_game">Edit game</string>
     <string name="ratings_title">Ratings</string>
+    <string name="released_in">Released in</string>
 </resources>
