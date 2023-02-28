@@ -157,6 +157,10 @@ class GameDetailsActivity : BaseActivity() {
     }
 
     private fun setupCompleteSwitch() {
+        content.completedButton.setOnClickListener {
+            content.completeSwitch.performClick()
+        }
+
         content.completeSwitch.setEventListener(object : SparkEventListener {
             override fun onEvent(button: ImageView?, buttonState: Boolean) {
                 viewModel.updateGameCompletion()
