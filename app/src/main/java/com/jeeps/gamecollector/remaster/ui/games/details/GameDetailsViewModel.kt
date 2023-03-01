@@ -63,7 +63,7 @@ class GameDetailsViewModel @Inject constructor(
     fun setSelectedGame(game: Game) {
         _selectedGame.value = game
         _gameHoursStats.value = GameplayHoursStats(game.gameHoursStats)
-        getGameHours()
+        checkIfGameHasHoursStats(game.gameHoursStats)
         updateGameDetails()
     }
 
@@ -104,6 +104,13 @@ class GameDetailsViewModel @Inject constructor(
                     _selectedGame.postValue(_selectedGame.value)
                 }
             }
+        }
+    }
+
+    private fun checkIfGameHasHoursStats(gameHoursStats: GameHoursStats) {
+        val emptyHoursStats = GameHoursStats()
+        if (gameHoursStats == emptyHoursStats) {
+            getGameHours()
         }
     }
 
