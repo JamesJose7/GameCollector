@@ -378,7 +378,6 @@ class GamesFromPlatformActivity : BaseActivity(),
             .makeSceneTransitionAnimation(
                 this,
                 Pair.create(imageView, "cover"),
-                Pair.create(titleView, "gameTitle"),
                 Pair.create(binding.fab, "fab")
             )
         addGameResultLauncher.launch(intent, activityOptions)
@@ -417,7 +416,7 @@ class GamesFromPlatformActivity : BaseActivity(),
                 content.filterStatsCard.layoutParams as? ConstraintLayout.LayoutParams
             val animator: ValueAnimator = ValueAnimator.ofInt(layoutParams?.topMargin ?: 0, newMargin)
             animator.addUpdateListener { valueAnimator ->
-                layoutParams?.topMargin = valueAnimator?.animatedValue as? Int ?: 0
+                layoutParams?.topMargin = valueAnimator.animatedValue as? Int ?: 0
                 content.filterStatsCard.requestLayout()
             }
 

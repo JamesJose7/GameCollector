@@ -78,7 +78,6 @@
 
                 <TextView
                     android:id="@+id/game_title"
-                    android:transitionName="gameTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="1dp"
