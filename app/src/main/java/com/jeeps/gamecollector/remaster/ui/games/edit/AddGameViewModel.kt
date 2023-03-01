@@ -6,13 +6,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
+import com.jeeps.gamecollector.remaster.data.model.data.games.addAdditionalGameDetails
+import com.jeeps.gamecollector.remaster.data.model.data.igdb.findMostSimilarGame
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.data.repository.IgdbRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.utils.Event
 import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
-import com.jeeps.gamecollector.remaster.utils.extensions.similarity
+import com.jeeps.gamecollector.remaster.utils.getCurrentTimeInUtcString
 import com.jeeps.gamecollector.utils.IgdbUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -90,7 +92,9 @@ class AddGameViewModel @Inject constructor(
             platformName ?: "",
             "",
             ""
-        )
+        ).apply {
+            dateAdded = getCurrentTimeInUtcString()
+        }
         setSelectedGame(game)
     }
 
@@ -118,19 +122,13 @@ class AddGameViewModel @Inject constructor(
         viewModelScope.launch {
             startLoading()
             val token = authenticationRepository.getUserToken()
-            when (val response = gamesRepository.saveNewGame(token, game)) {
-                is NetworkResponse.Success -> {
-                    if (currentImageUri != null) {
-                        setSelectedGame(response.body)
-                        pendingMessage = "Game created successfully"
-                        _isImageReadyToUpload.value = Event(true)
-                    } else {
-                        postServerMessage("Game created successfully")
-                        stopLoading()
-                    }
-                }
-                is NetworkResponse.Error -> {
-                    handleError(response)
+            handleNetworkResponse(gamesRepository.saveNewGame(token, game)) {
+                if (currentImageUri != null) {
+                    setSelectedGame(it)
+                    pendingMessage = "Game created successfully"
+                    _isImageReadyToUpload.value = Event(true)
+                } else {
+                    postServerMessage("Game created successfully")
                     stopLoading()
                 }
             }
@@ -159,25 +157,12 @@ class AddGameViewModel @Inject constructor(
             startLoading()
             val igdbGames =
                 handleNetworkResponse(igdbRepository.searchGames(IgdbUtils.getSearchGamesQuery(game.name)))
-
-            val selectedGame = if (igdbGames == null || igdbGames.isEmpty()) {
-                null
-            } else {
-                // Exclude DLC and sort based on most similar name based on the user input
-                val sortedGames = igdbGames
-                    .sortedByDescending { igGame ->
-                        igGame.name.similarity(
-                            _selectedGame.value?.name ?: ""
-                        )
-                    }
-
-                sortedGames
-                    .firstOrNull { igGame -> igGame.category != 1 }
-            }
+            val selectedGame = igdbGames.findMostSimilarGame(_selectedGame.value?.name ?: "")
 
             if (selectedGame == null) {
                 continueSavingGame(isEdit, game)
             } else {
+                game.addAdditionalGameDetails(selectedGame)
                 // Get image cover
                 when (val response = igdbRepository
                     .getGameCoverById(IgdbUtils.getCoverImageQuery(selectedGame.cover))) {
@@ -215,8 +200,10 @@ class AddGameViewModel @Inject constructor(
                 val body: MultipartBody.Part =
                     MultipartBody.Part.createFormData("image", image.name, requestFile)
 
-                handleNetworkResponse(gamesRepository
-                    .uploadGameCover(token, selectedGame.value?.id ?: "", body)) {
+                handleNetworkResponse(
+                    gamesRepository
+                        .uploadGameCover(token, selectedGame.value?.id ?: "", body)
+                ) {
                     postServerMessage(pendingMessage)
                 }
                 if (image.exists()) {

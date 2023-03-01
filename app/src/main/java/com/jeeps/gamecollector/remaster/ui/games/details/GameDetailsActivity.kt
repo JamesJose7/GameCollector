@@ -4,7 +4,7 @@ import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
-import android.transition.Explode
+import android.transition.Fade
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
@@ -28,6 +28,7 @@ import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
 import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
+import com.jeeps.gamecollector.remaster.utils.extensions.withExclusions
 import com.jeeps.gamecollector.utils.ColorsUtils.getColorByHoursRange
 import com.jeeps.gamecollector.utils.FormatUtils
 import com.squareup.picasso.Picasso
@@ -52,13 +53,17 @@ class GameDetailsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Setup exit transition
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        window.enterTransition = Explode()
+        window.enterTransition = Fade().withExclusions()
+        window.exitTransition = Fade().withExclusions()
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
 
         super.onCreate(savedInstanceState)
         setContentView(binding.rootLayout)
         setSupportActionBar(binding.toolbar)
-        content = binding.content
+        content = binding.content.apply {
+            gameDetailsViewModel = viewModel
+            lifecycleOwner = this@GameDetailsActivity
+        }
 
         getIntentData()
 
@@ -90,7 +95,7 @@ class GameDetailsActivity : BaseActivity() {
                     content.gamePublisher.text = game.publisher
                 content.gamePlatform.text = game.platform
 
-                content.completeSwitch.isChecked = game.timesCompleted > 0
+                updateGameCompletedButton(game)
                 setupCompleteSwitch()
 
                 getCoverColors()
@@ -102,6 +107,18 @@ class GameDetailsActivity : BaseActivity() {
                 formatGamePlayHours(stats)
             }
         }
+    }
+
+    private fun updateGameCompletedButton(game: Game) = with(content) {
+        val isComplete = game.timesCompleted > 0
+        content.completeSwitch.isChecked = isComplete
+
+        val backgroundColor = if (isComplete) {
+            ContextCompat.getColor(root.context, R.color.success_darker)
+        } else {
+            ContextCompat.getColor(root.context, R.color.inactive_darker)
+        }
+        completedButtonBackground.setCardBackgroundColor(backgroundColor)
     }
 
     private fun bindFab() {
@@ -152,6 +169,10 @@ class GameDetailsActivity : BaseActivity() {
     }
 
     private fun setupCompleteSwitch() {
+        content.completedButton.setOnClickListener {
+            content.completeSwitch.performClick()
+        }
+
         content.completeSwitch.setEventListener(object : SparkEventListener {
             override fun onEvent(button: ImageView?, buttonState: Boolean) {
                 viewModel.updateGameCompletion()
@@ -171,17 +192,20 @@ class GameDetailsActivity : BaseActivity() {
     }
 
     private fun animateStatusBarColor(colorTo: Int) {
-        val colorFrom = ContextCompat.getColor(this, R.color.colorPrimary)
-        ObjectAnimator
-            .ofObject(
-                binding.toolbar, "backgroundColor",
-                ArgbEvaluator(),
-                colorFrom,
-                colorTo
-            )
-            .setDuration(300)
-            .start()
-        window.statusBarColor = colorTo
+        if (!viewModel.toolbarAnimationStarted) {
+            viewModel.toolbarAnimationStarted = true
+            val colorFrom = ContextCompat.getColor(this, R.color.colorPrimary)
+            ObjectAnimator
+                .ofObject(
+                    binding.toolbar, "backgroundColor",
+                    ArgbEvaluator(),
+                    colorFrom,
+                    colorTo
+                )
+                .setDuration(300)
+                .start()
+            window.statusBarColor = colorTo
+        }
     }
 
     private fun formatGamePlayHours(stats: GameplayHoursStats) {

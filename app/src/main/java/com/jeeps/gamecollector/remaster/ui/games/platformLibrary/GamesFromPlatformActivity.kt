@@ -4,7 +4,7 @@ import android.animation.ValueAnimator
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.transition.Explode
+import android.transition.Fade
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -66,7 +66,8 @@ class GamesFromPlatformActivity : BaseActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        window.exitTransition = Explode()
+        window.exitTransition = Fade().withExclusions()
+        window.enterTransition = Fade().withExclusions()
 
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -377,7 +378,9 @@ class GamesFromPlatformActivity : BaseActivity(),
             .makeSceneTransitionAnimation(
                 this,
                 Pair.create(imageView, "cover"),
-                Pair.create(titleView, "gameTitle"))
+                Pair.create(titleView, "gameTitle"),
+                Pair.create(binding.fab, "fab")
+            )
         addGameResultLauncher.launch(intent, activityOptions)
     }
 

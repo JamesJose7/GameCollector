@@ -29,4 +29,13 @@
     <string name="main_story_label">Main Story</string>
     <string name="main_extra_label">Main + Extra</string>
     <string name="completionist_label">Completionist</string>
+    <string name="no_hours_stats_error">No stats found for this game. Try renaming it.</string>
+    <string name="hours_stats">Hours stats</string>
+    <string name="completed">Completed</string>
+    <string name="game_cover">Game cover</string>
+    <string name="add_platform">Add platform</string>
+    <string name="platform_cover">Platform cover</string>
+    <string name="edit_game">Edit game</string>
+    <string name="ratings_title">Ratings</string>
+    <string name="released_in">Released in</string>
 </resources>
