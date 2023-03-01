@@ -12,4 +12,25 @@ data class GameHoursStats(
         gameplayHoursStats.gameplayMain,
         gameplayHoursStats.gameplayMainExtra,
         gameplayHoursStats.gameplayCompletionist)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as GameHoursStats
+
+        if (gameplayMain != other.gameplayMain) return false
+        if (gameplayMainExtra != other.gameplayMainExtra) return false
+        if (gameplayCompletionist != other.gameplayCompletionist) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = gameplayMain.hashCode()
+        result = 31 * result + gameplayMainExtra.hashCode()
+        result = 31 * result + gameplayCompletionist.hashCode()
+        return result
+    }
+
 }

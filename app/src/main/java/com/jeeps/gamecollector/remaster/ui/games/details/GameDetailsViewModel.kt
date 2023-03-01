@@ -56,6 +56,10 @@ class GameDetailsViewModel @Inject constructor(
     val showHoursErrorMessage: LiveData<Boolean>
         get() = _showHoursErrorMessage
 
+    private val _loadingGameHours = MutableLiveData(false)
+    val loadingGameHours: LiveData<Boolean>
+        get() = _loadingGameHours
+
     var selectedGamePosition: Int = -1
     var platformName: String? = null
     var platformId: String? = null
@@ -63,7 +67,7 @@ class GameDetailsViewModel @Inject constructor(
     fun setSelectedGame(game: Game) {
         _selectedGame.value = game
         _gameHoursStats.value = GameplayHoursStats(game.gameHoursStats)
-        getGameHours()
+        checkIfGameHasHoursStats(game.gameHoursStats)
         updateGameDetails()
     }
 
@@ -107,8 +111,16 @@ class GameDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun getGameHours() {
+    private fun checkIfGameHasHoursStats(gameHoursStats: GameHoursStats) {
+        val emptyHoursStats = GameHoursStats()
+        if (gameHoursStats == emptyHoursStats) {
+            getGameHours()
+        }
+    }
+
+    fun getGameHours() {
         viewModelScope.launch {
+            _loadingGameHours.postValue(true)
             _selectedGame.value?.let { game ->
                 handleNetworkResponse(statsRepository.getGameHours(game.name),
                     { stats ->
@@ -121,6 +133,7 @@ class GameDetailsViewModel @Inject constructor(
                         _showHoursErrorMessage.postValue(true)
                     })
             }
+            _loadingGameHours.postValue(false)
         }
     }
 

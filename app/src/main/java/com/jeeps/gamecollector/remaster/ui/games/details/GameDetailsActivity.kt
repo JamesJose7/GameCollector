@@ -71,6 +71,7 @@ class GameDetailsActivity : BaseActivity() {
         bindFab()
         bindAlerts()
         bindHoursErrorMessage()
+        bindRefreshHoursButton()
     }
 
     private fun getIntentData() {
@@ -143,6 +144,12 @@ class GameDetailsActivity : BaseActivity() {
         viewModel.showHoursErrorMessage.observe(this) {
             val showMessage = it ?: false
             content.hoursErrorMessage.visibility = if (showMessage) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun bindRefreshHoursButton() {
+        content.refreshHoursButton.setOnClickListener {
+            viewModel.getGameHours()
         }
     }
 
