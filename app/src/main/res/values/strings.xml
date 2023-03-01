@@ -38,4 +38,5 @@
     <string name="edit_game">Edit game</string>
     <string name="ratings_title">Ratings</string>
     <string name="released_in">Released in</string>
+    <string name="content_description_refresh_icon">Refresh icon</string>
 </resources>
