@@ -95,7 +95,7 @@ class GameDetailsActivity : BaseActivity() {
                     content.gamePublisher.text = game.publisher
                 content.gamePlatform.text = game.platform
 
-                content.completeSwitch.isChecked = game.timesCompleted > 0
+                updateGameCompletedButton(game)
                 setupCompleteSwitch()
 
                 getCoverColors()
@@ -107,6 +107,18 @@ class GameDetailsActivity : BaseActivity() {
                 formatGamePlayHours(stats)
             }
         }
+    }
+
+    private fun updateGameCompletedButton(game: Game) = with(content) {
+        val isComplete = game.timesCompleted > 0
+        content.completeSwitch.isChecked = isComplete
+
+        val backgroundColor = if (isComplete) {
+            ContextCompat.getColor(root.context, R.color.success_darker)
+        } else {
+            ContextCompat.getColor(root.context, R.color.inactive_darker)
+        }
+        completedButtonBackground.setCardBackgroundColor(backgroundColor)
     }
 
     private fun bindFab() {

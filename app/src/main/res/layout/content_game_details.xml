@@ -140,10 +140,12 @@
                 app:layout_constraintBottom_toBottomOf="parent">
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/completed_button_background"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     app:cardElevation="5dp"
                     app:cardCornerRadius="10dp"
+                    app:cardBackgroundColor="@color/inactive_darker"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -159,7 +161,7 @@
                     android:elevation="5dp"
                     android:text="@string/completed"
                     android:textSize="20sp"
-                    android:textColor="@color/textSecondaryColor"
+                    android:textColor="#fff"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/complete_switch"
                     app:layout_constraintTop_toTopOf="parent"

@@ -101,6 +101,7 @@ class GameDetailsViewModel @Inject constructor(
                     postServerMessage(message)
 
                     _selectedGame.value?.timesCompleted = if (isCompleted) 1 else 0
+                    _selectedGame.postValue(_selectedGame.value)
                 }
             }
         }
