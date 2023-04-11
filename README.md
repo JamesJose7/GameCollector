@@ -1,7 +1,7 @@
 # GameCollector
 Game library organizer
 
-(Front end app only, backend repository is not public at the moment)
+Back end repo: https://github.com/JamesJose7/game-collector-backend
 
 # Features
 
