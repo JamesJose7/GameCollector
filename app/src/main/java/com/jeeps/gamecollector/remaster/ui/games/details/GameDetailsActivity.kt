@@ -29,8 +29,8 @@ import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import com.jeeps.gamecollector.remaster.utils.extensions.withExclusions
-import com.jeeps.gamecollector.utils.ColorsUtils.getColorByHoursRange
-import com.jeeps.gamecollector.utils.FormatUtils
+import com.jeeps.gamecollector.deprecated.utils.ColorsUtils.getColorByHoursRange
+import com.jeeps.gamecollector.deprecated.utils.FormatUtils
 import com.squareup.picasso.Picasso
 import com.varunest.sparkbutton.SparkEventListener
 import dagger.hilt.android.AndroidEntryPoint

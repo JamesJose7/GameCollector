@@ -8,7 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.snackbar.Snackbar
-import com.jeeps.gamecollector.utils.FileUtils
+import com.jeeps.gamecollector.deprecated.utils.FileUtils
 import java.io.File
 import kotlin.math.roundToInt
 

@@ -26,7 +26,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jeeps.gamecollector.R
-import com.jeeps.gamecollector.adapters.GameCardAdapter
+import com.jeeps.gamecollector.deprecated.adapters.GameCardAdapter
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
 import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
@@ -36,8 +36,8 @@ import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.*
 import com.jeeps.gamecollector.remaster.utils.comparators.*
 import com.jeeps.gamecollector.remaster.utils.extensions.*
-import com.jeeps.gamecollector.utils.PlatformCovers
-import com.jeeps.gamecollector.views.GridSpacingItemDecoration
+import com.jeeps.gamecollector.deprecated.utils.PlatformCovers
+import com.jeeps.gamecollector.deprecated.views.GridSpacingItemDecoration
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi

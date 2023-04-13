@@ -20,7 +20,7 @@ import com.jeeps.gamecollector.remaster.data.repository.UserStatsRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.base.ErrorType
 import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
-import com.jeeps.gamecollector.utils.IgdbUtils
+import com.jeeps.gamecollector.remaster.utils.IgdbUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

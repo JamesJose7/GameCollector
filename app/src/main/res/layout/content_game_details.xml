@@ -373,7 +373,7 @@
                 android:clipToPadding="false"
                 android:clipChildren="false">
 
-                <com.jeeps.gamecollector.views.RatingChip
+                <com.jeeps.gamecollector.remaster.ui.views.RatingChip
                     android:id="@+id/critics_rating_chip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -384,7 +384,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/users_rating_chip"/>
 
-                <com.jeeps.gamecollector.views.RatingChip
+                <com.jeeps.gamecollector.remaster.ui.views.RatingChip
                     android:id="@+id/users_rating_chip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -395,7 +395,7 @@
                     app:layout_constraintStart_toEndOf="@id/critics_rating_chip"
                     app:layout_constraintEnd_toStartOf="@id/total_rating_chip"/>
 
-                <com.jeeps.gamecollector.views.RatingChip
+                <com.jeeps.gamecollector.remaster.ui.views.RatingChip
                     android:id="@+id/total_rating_chip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

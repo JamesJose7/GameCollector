@@ -4,7 +4,7 @@ import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.data.model.data.user.User
 import com.jeeps.gamecollector.remaster.data.model.data.user.UserDetails
 import com.jeeps.gamecollector.remaster.data.model.ErrorResponse
-import com.jeeps.gamecollector.services.igdb.TwitchAuthToken
+import com.jeeps.gamecollector.deprecated.services.igdb.TwitchAuthToken
 import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET

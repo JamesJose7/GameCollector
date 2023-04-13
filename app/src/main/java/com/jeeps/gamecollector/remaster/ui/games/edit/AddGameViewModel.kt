@@ -15,7 +15,7 @@ import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.utils.Event
 import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import com.jeeps.gamecollector.remaster.utils.getCurrentTimeInUtcString
-import com.jeeps.gamecollector.utils.IgdbUtils
+import com.jeeps.gamecollector.remaster.utils.IgdbUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch

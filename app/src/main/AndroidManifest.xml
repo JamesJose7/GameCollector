@@ -19,12 +19,12 @@
             android:name=".remaster.ui.games.edit.AddGameActivity"
             android:exported="false"
             android:label="@string/title_activity_add_game"
-            android:parentActivityName=".PlatformLibraryActivity"
+            android:parentActivityName=".deprecated.PlatformLibraryActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" >
         <meta-data
             android:name="android.support.PARENT_ACTIVITY"
-            android:value="com.jeeps.gamecollector.PlatformLibraryActivity" />
+            android:value="com.jeeps.gamecollector.deprecated.PlatformLibraryActivity" />
         </activity>
         <activity
             android:name=".remaster.ui.games.platformLibrary.GamesFromPlatformActivity"
@@ -78,20 +78,20 @@
             android:label="@string/title_activity_game_details"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".GameDetailsActivityOld"
+            android:name=".deprecated.GameDetailsActivityOld"
             android:label="@string/title_activity_game_details"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".AddPlatformActivityOld"
+            android:name=".deprecated.AddPlatformActivityOld"
             android:label="@string/title_activity_add_platform"
-            android:parentActivityName=".MainLibraryActivity"
+            android:parentActivityName=".deprecated.MainLibraryActivity"
             android:theme="@style/AppTheme.NoActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jeeps.gamecollector.MainLibraryActivity" />
+                android:value="com.jeeps.gamecollector.deprecated.MainLibraryActivity" />
         </activity>
         <activity
-            android:name=".MainLibraryActivity"
+            android:name=".deprecated.MainLibraryActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" >
@@ -104,34 +104,34 @@
             <!-- </intent-filter> -->
         </activity>
         <activity
-            android:name=".PlatformLibraryActivity"
+            android:name=".deprecated.PlatformLibraryActivity"
             android:label="@string/title_activity_platform_library"
-            android:parentActivityName=".MainLibraryActivity"
+            android:parentActivityName=".deprecated.MainLibraryActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jeeps.gamecollector.MainLibraryActivity" />
+                android:value="com.jeeps.gamecollector.deprecated.MainLibraryActivity" />
         </activity>
         <activity
-            android:name=".AddGameActivityOld"
+            android:name=".deprecated.AddGameActivityOld"
             android:label="@string/title_activity_add_game"
-            android:parentActivityName=".PlatformLibraryActivity"
+            android:parentActivityName=".deprecated.PlatformLibraryActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jeeps.gamecollector.PlatformLibraryActivity" />
+                android:value="com.jeeps.gamecollector.deprecated.PlatformLibraryActivity" />
         </activity>
         <activity
-            android:name=".StatsActivity"
+            android:name=".deprecated.StatsActivity"
             android:label="@string/title_activity_stats"
-            android:parentActivityName=".MainLibraryActivity"
+            android:parentActivityName=".deprecated.MainLibraryActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jeeps.gamecollector.MainLibraryActivity" />
+                android:value="com.jeeps.gamecollector.deprecated.MainLibraryActivity" />
         </activity>
     </application>
 

@@ -17,7 +17,7 @@ import com.jeeps.gamecollector.remaster.utils.extensions.compressImage
 import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
-import com.jeeps.gamecollector.utils.PlatformColors
+import com.jeeps.gamecollector.deprecated.utils.PlatformColors
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
