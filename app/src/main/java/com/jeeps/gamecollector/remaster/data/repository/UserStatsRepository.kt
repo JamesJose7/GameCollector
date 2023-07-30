@@ -1,17 +1,42 @@
 package com.jeeps.gamecollector.remaster.data.repository
 
-import com.jeeps.gamecollector.remaster.data.firestore.StatsCollectionDao
-import com.jeeps.gamecollector.remaster.data.model.StatsDao
+import com.google.firebase.firestore.FirebaseFirestore
+import com.jeeps.gamecollector.remaster.data.State
+import com.jeeps.gamecollector.remaster.data.api.ApiStats
+import com.jeeps.gamecollector.remaster.data.model.data.user.UserStats
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 class UserStatsRepository @Inject constructor(
-    private val statsCollectionDao: StatsCollectionDao,
-    private val statsDao: StatsDao
+    private val firebaseFirestore: FirebaseFirestore,
+    private val apiStats: ApiStats
 ) {
 
-    suspend fun getUserStats(username: String) = statsCollectionDao.getUserStats(username)
+    suspend fun getUserStats(username: String) : Flow<State<UserStats?>> = callbackFlow {
+        trySend(State.Loading())
 
-    suspend fun getGameHours(gameName: String) = statsDao.getGameHours(gameName)
+        val userStatsRef = firebaseFirestore
+            .collection("stats")
+            .whereEqualTo("user", username)
+            .limit(1)
+
+        val subscription = userStatsRef
+            .addSnapshotListener { snapshot, e ->
+                e?.let {
+                    trySend(State.Failed(it.message.toString(), e))
+                    cancel(it.message.toString())
+                }
+                val stats = snapshot?.documents?.get(0)?.toObject(UserStats::class.java)
+                trySend(State.Success(stats))
+            }
+
+        awaitClose { subscription.remove() }
+    }
+
+    suspend fun getGameHours(gameName: String) = apiStats.getGameHours(gameName)
 }
