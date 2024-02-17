@@ -3,6 +3,7 @@ package com.jeeps.gamecollector.deprecated.utils;
 import android.content.Context;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
 
 import com.jeeps.gamecollector.R;
 
@@ -36,5 +37,15 @@ public class ColorsUtils {
             return context.getColor(R.color.rating_range_40);
         else
             return context.getColor(R.color.rating_range_0);
+    }
+
+    @ColorRes
+    public static int getColorByRatingRange(double rating) {
+        if (rating >= 80)
+            return R.color.rating_range_80;
+        else if (rating >= 40)
+            return R.color.rating_range_40;
+        else
+            return R.color.rating_range_0;
     }
 }
