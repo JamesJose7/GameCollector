@@ -12,25 +12,45 @@ import android.widget.ImageView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.compose.AppTheme
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityGameDetailsBinding
 import com.jeeps.gamecollector.databinding.ContentGameDetailsBinding
+import com.jeeps.gamecollector.deprecated.utils.ColorsUtils.getColorByHoursRange
+import com.jeeps.gamecollector.deprecated.utils.FormatUtils
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
+import com.jeeps.gamecollector.remaster.ui.composables.RatingChip
+import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.ADD_GAME_RESULT_MESSAGE
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM_NAME
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.SELECTED_GAME
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.SELECTED_GAME_POSITION
-import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
+import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
 import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import com.jeeps.gamecollector.remaster.utils.extensions.withExclusions
-import com.jeeps.gamecollector.deprecated.utils.ColorsUtils.getColorByHoursRange
-import com.jeeps.gamecollector.deprecated.utils.FormatUtils
 import com.squareup.picasso.Picasso
 import com.varunest.sparkbutton.SparkEventListener
 import dagger.hilt.android.AndroidEntryPoint
@@ -108,6 +128,7 @@ class GameDetailsActivity : BaseActivity() {
                 formatGamePlayHours(stats)
             }
         }
+        content.ratingsCardCompose.setComposable { GameRatingsCard(viewModel) }
     }
 
     private fun updateGameCompletedButton(game: Game) = with(content) {
@@ -227,5 +248,74 @@ class GameDetailsActivity : BaseActivity() {
         content.completionistHours.text =
             getString(R.string.hours_template, FormatUtils.formatDecimal(stats.gameplayCompletionist))
         content.completionistHours.setTextColor(getColorByHoursRange(this, stats.gameplayCompletionist))
+    }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@Composable
+fun GameRatingsCard(
+    gameDetailsViewModel: GameDetailsViewModel = viewModel()
+) {
+    val selectedGame by gameDetailsViewModel.selectedGame.observeAsState(Game())
+
+    GameRatingsCardContent(
+        userRating = selectedGame.userRating,
+        userRatingCount = selectedGame.userRatingCount,
+        criticsRating = selectedGame.criticsRating,
+        criticsRatingCount = selectedGame.criticsRatingCount,
+        totalRating = selectedGame.totalRating,
+        totalRatingCount = selectedGame.totalRatingCount
+    )
+}
+
+@Composable
+fun GameRatingsCardContent(
+    userRating: Double,
+    userRatingCount: Int,
+    criticsRating: Double,
+    criticsRatingCount: Int,
+    totalRating: Double,
+    totalRatingCount: Int,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .background(color = Color.White)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp, horizontal = 10.dp)
+        ) {
+            RatingChip("Users", userRating, userRatingCount)
+            RatingChip("Critics", criticsRating, criticsRatingCount)
+            RatingChip("Total", totalRating, totalRatingCount)
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GameRatingsPreview() {
+    AppTheme {
+        Column(
+            modifier = Modifier.padding(10.dp)
+        ) {
+            GameRatingsCardContent(
+                userRating = 10.0,
+                userRatingCount = 10,
+                criticsRating = 50.0,
+                criticsRatingCount = 213,
+                totalRating = 90.0,
+                totalRatingCount = 223
+            )
+        }
     }
 }
