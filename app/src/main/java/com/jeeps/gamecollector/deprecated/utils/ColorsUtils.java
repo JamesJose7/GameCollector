@@ -29,6 +29,20 @@ public class ColorsUtils {
             return context.getColor(R.color.hours_range_100);
     }
 
+    @ColorRes
+    public static int getColorByHoursRange(double hours) {
+        if (hours <= RANGE_20)
+            return R.color.hours_range_20;
+        else if (hours < RANGE_40)
+            return R.color.hours_range_40;
+        else if (hours < RANGE_60)
+            return R.color.hours_range_60;
+        else if (hours < RANGE_80)
+            return R.color.hours_range_80;
+        else
+            return R.color.hours_range_100;
+    }
+
     @ColorInt
     public static int getColorByRatingRange(Context context, double rating) {
         if (rating >= 80)

@@ -2,6 +2,7 @@ package com.jeeps.gamecollector.remaster.ui.composables
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,16 +25,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.compose.AppTheme
 import com.jeeps.gamecollector.R
+import com.jeeps.gamecollector.deprecated.utils.ColorsUtils
+import kotlin.math.roundToInt
 
 
 @Composable
 fun HourStats(
-    storyHours: Int,
-    mainExtraHours: Int,
-    completionistHours: Int,
+    storyHours: Double,
+    mainExtraHours: Double,
+    completionistHours: Double,
     isLoadingStats: Boolean,
     isError: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRefreshClick: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -58,6 +62,7 @@ fun HourStats(
         if (isLoadingStats) {
             CircularProgressIndicator(
                 color = colorResource(id = R.color.colorAccent),
+                strokeWidth = 2.dp,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .size(30.dp)
@@ -69,6 +74,7 @@ fun HourStats(
                 colorFilter = ColorFilter.tint(color = colorResource(id = R.color.textSecondaryColor)),
                 contentDescription = stringResource(id = R.string.content_description_refresh_icon),
                 modifier = Modifier
+                    .clickable { onRefreshClick() }
                     .size(30.dp)
                     .padding(5.dp)
                     .align(Alignment.TopEnd)
@@ -80,7 +86,7 @@ fun HourStats(
 @Composable
 private fun HourStat(
     label: String,
-    hours: Int,
+    hours: Double,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -93,8 +99,8 @@ private fun HourStat(
             modifier = Modifier.weight(40f)
         )
         Text(
-            text = "$hours Hours",
-            color = colorResource(id = R.color.textSecondaryColor),
+            text = stringResource(id = R.string.hours_template, hours.roundToInt()),
+            color = colorResource(id = ColorsUtils.getColorByHoursRange(hours)),
             fontSize = 17.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(60f)
@@ -118,9 +124,9 @@ private fun ErrorMessage(
 fun HourStatsPreview() {
     AppTheme {
         HourStats(
-            storyHours = 50,
-            mainExtraHours = 97,
-            completionistHours = 188,
+            storyHours = 50.0,
+            mainExtraHours = 97.0,
+            completionistHours = 188.0,
             isLoadingStats = false,
             isError = false
         )
@@ -132,9 +138,9 @@ fun HourStatsPreview() {
 fun HourStatsLoadingPreview() {
     AppTheme {
         HourStats(
-            storyHours = 50,
-            mainExtraHours = 97,
-            completionistHours = 188,
+            storyHours = 50.0,
+            mainExtraHours = 97.0,
+            completionistHours = 188.0,
             isLoadingStats = true,
             isError = false
         )
@@ -146,9 +152,9 @@ fun HourStatsLoadingPreview() {
 fun HourStatsErrorPreview() {
     AppTheme {
         HourStats(
-            storyHours = 50,
-            mainExtraHours = 97,
-            completionistHours = 188,
+            storyHours = 50.0,
+            mainExtraHours = 97.0,
+            completionistHours = 188.0,
             isLoadingStats = false,
             isError = true
         )

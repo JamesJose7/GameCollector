@@ -39,6 +39,7 @@ import com.jeeps.gamecollector.deprecated.utils.FormatUtils
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
+import com.jeeps.gamecollector.remaster.ui.composables.HourStats
 import com.jeeps.gamecollector.remaster.ui.composables.RatingChip
 import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.ADD_GAME_RESULT_MESSAGE
@@ -129,6 +130,7 @@ class GameDetailsActivity : BaseActivity() {
             }
         }
         content.ratingsCardCompose.setComposable { GameRatingsCard(viewModel) }
+        content.gameHoursCompose.setComposable { HourStatsCard(viewModel) }
     }
 
     private fun updateGameCompletedButton(game: Game) = with(content) {
@@ -253,6 +255,56 @@ class GameDetailsActivity : BaseActivity() {
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Composable
+fun HourStatsCard(
+    gameDetailsViewModel: GameDetailsViewModel = viewModel()
+) {
+    val stats by gameDetailsViewModel.gameHoursStats.observeAsState(GameplayHoursStats())
+    val isLoading by gameDetailsViewModel.loadingGameHours.observeAsState(true)
+    val isError by gameDetailsViewModel.showHoursErrorMessage.observeAsState(false)
+
+    HourStatsCardContent(
+        storyHours = stats.gameplayMain,
+        mainExtraHours = stats.gameplayMainExtra,
+        completionistHours = stats.gameplayCompletionist,
+        isLoadingStats = isLoading,
+        isError = isError,
+        onRefreshClick = { gameDetailsViewModel.getGameHours() }
+    )
+}
+
+@Composable
+fun HourStatsCardContent(
+    storyHours: Double,
+    mainExtraHours: Double,
+    completionistHours: Double,
+    isLoadingStats: Boolean,
+    isError: Boolean,
+    modifier: Modifier = Modifier,
+    onRefreshClick: () -> Unit = {}
+) {
+    Card(
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .background(color = Color.White)
+    ) {
+        HourStats(
+            storyHours = storyHours,
+            mainExtraHours = mainExtraHours,
+            completionistHours = completionistHours,
+            isLoadingStats = isLoadingStats,
+            isError = isError,
+            onRefreshClick = onRefreshClick
+        )
+    }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@Composable
 fun GameRatingsCard(
     gameDetailsViewModel: GameDetailsViewModel = viewModel()
 ) {
@@ -297,6 +349,24 @@ fun GameRatingsCardContent(
             RatingChip("Users", userRating, userRatingCount)
             RatingChip("Critics", criticsRating, criticsRatingCount)
             RatingChip("Total", totalRating, totalRatingCount)
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HourStatsPreview() {
+    AppTheme {
+        Column(
+            modifier = Modifier.padding(10.dp)
+        ) {
+            HourStatsCardContent(
+                storyHours = 50.0,
+                mainExtraHours = 97.0,
+                completionistHours = 188.0,
+                isLoadingStats = false,
+                isError = false
+            )
         }
     }
 }
