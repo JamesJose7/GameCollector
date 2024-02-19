@@ -34,8 +34,6 @@ import com.example.compose.AppTheme
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityGameDetailsBinding
 import com.jeeps.gamecollector.databinding.ContentGameDetailsBinding
-import com.jeeps.gamecollector.deprecated.utils.ColorsUtils.getColorByHoursRange
-import com.jeeps.gamecollector.deprecated.utils.FormatUtils
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
@@ -91,8 +89,6 @@ class GameDetailsActivity : BaseActivity() {
         bindViews()
         bindFab()
         bindAlerts()
-        bindHoursErrorMessage()
-        bindRefreshHoursButton()
     }
 
     private fun getIntentData() {
@@ -124,11 +120,6 @@ class GameDetailsActivity : BaseActivity() {
             }
         }
 
-        viewModel.gameHoursStats.observe(this) {
-            it?.let { stats ->
-                formatGamePlayHours(stats)
-            }
-        }
         content.ratingsCardCompose.setComposable { GameRatingsCard(viewModel) }
         content.gameHoursCompose.setComposable { HourStatsCard(viewModel) }
     }
@@ -160,19 +151,6 @@ class GameDetailsActivity : BaseActivity() {
             messageEvent?.getContentIfNotHandled()?.let {
                 showSnackBar(binding.root, it)
             }
-        }
-    }
-
-    private fun bindHoursErrorMessage() {
-        viewModel.showHoursErrorMessage.observe(this) {
-            val showMessage = it ?: false
-            content.hoursErrorMessage.visibility = if (showMessage) View.VISIBLE else View.GONE
-        }
-    }
-
-    private fun bindRefreshHoursButton() {
-        content.refreshHoursButton.setOnClickListener {
-            viewModel.getGameHours()
         }
     }
 
@@ -236,20 +214,6 @@ class GameDetailsActivity : BaseActivity() {
                 .start()
             window.statusBarColor = colorTo
         }
-    }
-
-    private fun formatGamePlayHours(stats: GameplayHoursStats) {
-        content.storyHours.text =
-            getString(R.string.hours_template, FormatUtils.formatDecimal(stats.gameplayMain))
-        content.storyHours.setTextColor(getColorByHoursRange(this, stats.gameplayMain))
-
-        content.mainExtraHours.text =
-            getString(R.string.hours_template, FormatUtils.formatDecimal(stats.gameplayMainExtra))
-        content.mainExtraHours.setTextColor(getColorByHoursRange(this, stats.gameplayMainExtra))
-
-        content.completionistHours.text =
-            getString(R.string.hours_template, FormatUtils.formatDecimal(stats.gameplayCompletionist))
-        content.completionistHours.setTextColor(getColorByHoursRange(this, stats.gameplayCompletionist))
     }
 }
 
