@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -35,6 +36,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
@@ -54,6 +58,7 @@ import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.releaseDateFormatted
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
+import com.jeeps.gamecollector.remaster.ui.composables.FireworksAnimation
 import com.jeeps.gamecollector.remaster.ui.composables.HourStats
 import com.jeeps.gamecollector.remaster.ui.composables.RatingChip
 import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
@@ -222,7 +227,9 @@ fun GameDetailsScreen(
     isStatsError: Boolean,
     onRefreshClick: () -> Unit = {}
 ) {
+    var isCompletedButtonClicked by rememberSaveable { mutableStateOf(false) }
     val title = game.shortName.ifEmpty { game.name }
+    val isComplete = game.timesCompleted > 0
 
     ConstraintLayout(
         modifier = modifier
@@ -231,6 +238,7 @@ fun GameDetailsScreen(
             .verticalScroll(rememberScrollState())
     ) {
         val (header, completedButton, lottieAnimation, details) = createRefs()
+        val middleGuideline = createGuidelineFromStart(0.4f)
 
         Row(
             modifier = Modifier
@@ -281,9 +289,25 @@ fun GameDetailsScreen(
             }
         }
 
+        if (isComplete && isCompletedButtonClicked) {
+            FireworksAnimation(
+                animationReps = 2,
+                modifier = Modifier
+                    .size(200.dp)
+                    .constrainAs(lottieAnimation) {
+                        bottom.linkTo(completedButton.top)
+                        start.linkTo(middleGuideline)
+                        end.linkTo(parent.end)
+                    }
+            )
+        }
+
         CompletedButton(
             game = game,
-            onGameCompletedClick = onGameCompletedClick,
+            onGameCompletedClick = {
+                onGameCompletedClick()
+                isCompletedButtonClicked = true
+            },
             modifier = Modifier
                 .padding(horizontal = 10.dp)
                 .constrainAs(completedButton) {
