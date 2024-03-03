@@ -66,15 +66,11 @@ public class GameDetailsActivityOld extends AppCompatActivity {
 
     @BindView(R.id.game_cover)
     ImageView gameCoverView;
-    @BindView(R.id.game_title)
     TextView gameTitleText;
-    @BindView(R.id.game_publisher)
     TextView gamePublisherText;
-    @BindView(R.id.game_platform)
     TextView gamePlatformText;
     @BindView(R.id.fab)
     FloatingActionButton fabButton;
-    @BindView(R.id.complete_switch)
     SparkButton completeSwitch;
 
     TextView mainStoryHoursTv;

@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.transition.Fade
 import android.view.Window
 import android.view.WindowManager
-import android.widget.ImageView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -67,7 +66,6 @@ import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import com.jeeps.gamecollector.remaster.utils.extensions.withExclusions
 import com.squareup.picasso.Picasso
-import com.varunest.sparkbutton.SparkEventListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -121,28 +119,11 @@ class GameDetailsActivity : BaseActivity() {
                 if (game.imageUri.isNotEmpty())
                     Picasso.get().load(game.imageUri).into(content.gameCover)
 
-                updateGameCompletedButton(game)
-                setupCompleteSwitch()
-
                 getCoverColors()
             }
         }
 
         content.screenCompose.setComposable { GameDetailsScreen(viewModel) }
-        content.ratingsCardCompose.setComposable { GameRatingsCard(viewModel) }
-        content.gameHoursCompose.setComposable { HourStatsCard(viewModel) }
-    }
-
-    private fun updateGameCompletedButton(game: Game) = with(content) {
-        val isComplete = game.timesCompleted > 0
-        content.completeSwitch.isChecked = isComplete
-
-        val backgroundColor = if (isComplete) {
-            ContextCompat.getColor(root.context, R.color.success_darker)
-        } else {
-            ContextCompat.getColor(root.context, R.color.inactive_darker)
-        }
-        completedButtonBackground.setCardBackgroundColor(backgroundColor)
     }
 
     private fun bindFab() {
@@ -183,22 +164,6 @@ class GameDetailsActivity : BaseActivity() {
             setResult(result.resultCode, intent)
             finish()
         }
-    }
-
-    private fun setupCompleteSwitch() {
-        content.completedButton.setOnClickListener {
-            content.completeSwitch.performClick()
-        }
-
-        content.completeSwitch.setEventListener(object : SparkEventListener {
-            override fun onEvent(button: ImageView?, buttonState: Boolean) {
-                viewModel.updateGameCompletion()
-            }
-
-            override fun onEventAnimationEnd(button: ImageView?, buttonState: Boolean) {}
-
-            override fun onEventAnimationStart(button: ImageView?, buttonState: Boolean) {}
-        })
     }
 
     private fun getCoverColors() {
@@ -364,23 +329,6 @@ fun SectionTitle(
     )
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
-@Composable
-fun HourStatsCard(
-    gameDetailsViewModel: GameDetailsViewModel = viewModel()
-) {
-    val stats by gameDetailsViewModel.gameHoursStats.observeAsState(GameplayHoursStats())
-    val isLoading by gameDetailsViewModel.loadingGameHours.observeAsState(true)
-    val isError by gameDetailsViewModel.showHoursErrorMessage.observeAsState(false)
-
-    HourStatsCardContent(
-        hoursStats = stats,
-        isLoadingStats = isLoading,
-        isError = isError,
-        onRefreshClick = { gameDetailsViewModel.getGameHours() }
-    )
-}
-
 @Composable
 fun HourStatsCardContent(
     hoursStats: GameplayHoursStats,
@@ -408,17 +356,6 @@ fun HourStatsCardContent(
             onRefreshClick = onRefreshClick
         )
     }
-}
-
-@Composable
-fun GameRatingsCard(
-    gameDetailsViewModel: GameDetailsViewModel = viewModel()
-) {
-    val selectedGame by gameDetailsViewModel.selectedGame.observeAsState(Game())
-
-    GameRatingsCardContent(
-        game = selectedGame
-    )
 }
 
 @Composable
@@ -477,48 +414,5 @@ fun GameDetailsPreview() {
             isLoadingStats = false,
             isStatsError = false
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HourStatsPreview() {
-    val stats = GameplayHoursStats(
-        gameplayMain = 50.0,
-        gameplayMainExtra = 97.0,
-        gameplayCompletionist = 88.0
-    )
-    AppTheme {
-        Column(
-            modifier = Modifier.padding(10.dp)
-        ) {
-            HourStatsCardContent(
-                hoursStats = stats,
-                isLoadingStats = false,
-                isError = false
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GameRatingsPreview() {
-    val game = Game(
-        userRating = 10.0,
-        userRatingCount = 10,
-        criticsRating = 50.0,
-        criticsRatingCount = 213,
-        totalRating = 90.0,
-        totalRatingCount = 223
-    )
-    AppTheme {
-        Column(
-            modifier = Modifier.padding(10.dp)
-        ) {
-            GameRatingsCardContent(
-                game = game
-            )
-        }
     }
 }
