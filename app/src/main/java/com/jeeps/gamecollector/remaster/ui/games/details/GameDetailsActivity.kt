@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.compose.AppTheme
@@ -222,14 +224,20 @@ fun GameDetailsScreen(
 ) {
     val title = game.shortName.ifEmpty { game.name }
 
-    Column(
+    ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
             .background(color = Color.White)
+            .verticalScroll(rememberScrollState())
     ) {
+        val (header, completedButton, lottieAnimation, details) = createRefs()
+
         Row(
             modifier = Modifier
-                .padding(start = 10.dp, end = 10.dp, top = 10.dp)
+                .padding(horizontal = 10.dp)
+                .constrainAs(header) {
+                    top.linkTo(parent.top, margin = 10.dp)
+                }
         ) {
             Spacer(modifier = Modifier
                 .width(150.dp)
@@ -248,42 +256,72 @@ fun GameDetailsScreen(
                         color = colorResource(id = R.color.textSecondaryColor)
                     )
                 }
-                Text(text = game.platform, fontSize = 17.sp, color = colorResource(id = R.color.textSecondaryColor), modifier = Modifier.padding(top = 10.dp, bottom = 5.dp))
-                HorizontalDivider(thickness = 0.5.dp, color = Color(0x555e5e5e), modifier = Modifier.padding(bottom = 5.dp))
-                Text(text = stringResource(id = R.string.released_in), fontSize = 11.sp, color = colorResource(id = R.color.textSecondaryColor), modifier = Modifier.padding(top = 10.dp))
-                Text(text = game.releaseDateFormatted(), fontSize = 17.sp, color = colorResource(id = R.color.textSecondaryColor))
+                Text(
+                    text = game.platform,
+                    fontSize = 17.sp,
+                    color = colorResource(id = R.color.textSecondaryColor),
+                    modifier = Modifier.padding(top = 10.dp, bottom = 5.dp)
+                )
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = Color(0x555e5e5e),
+                    modifier = Modifier.padding(bottom = 5.dp)
+                )
+                Text(
+                    text = stringResource(id = R.string.released_in),
+                    fontSize = 11.sp,
+                    color = colorResource(id = R.color.textSecondaryColor),
+                    modifier = Modifier.padding(top = 10.dp)
+                )
+                Text(
+                    text = game.releaseDateFormatted(),
+                    fontSize = 17.sp,
+                    color = colorResource(id = R.color.textSecondaryColor)
+                )
             }
         }
+
         CompletedButton(
             game = game,
             onGameCompletedClick = onGameCompletedClick,
             modifier = Modifier
-                .padding(top = 16.dp)
                 .padding(horizontal = 10.dp)
+                .constrainAs(completedButton) {
+                    top.linkTo(header.bottom, margin = 16.dp)
+                }
         )
-        SectionTitle(text = stringResource(id = R.string.hours_stats),
-            modifier
-                .padding(horizontal = 10.dp)
-                .padding(top = 20.dp))
-        HourStatsCardContent(
-            hoursStats = hoursStats,
-            isLoadingStats = isLoadingStats,
-            isError = isStatsError,
-            onRefreshClick = onRefreshClick,
-            modifier = Modifier
-                .padding(horizontal = 10.dp)
-                .padding(top = 10.dp)
-        )
-        SectionTitle(text = stringResource(id = R.string.ratings_title),
-            modifier
-                .padding(horizontal = 10.dp)
-                .padding(top = 20.dp)
-        )
-        GameRatingsCardContent(
-            game = game, modifier = Modifier
-                .padding(horizontal = 10.dp)
-                .padding(top = 10.dp)
-        )
+
+        Column(
+            modifier = modifier
+                .wrapContentHeight()
+                .fillMaxWidth()
+                .constrainAs(details) {
+                    top.linkTo(completedButton.bottom)
+                }
+        ) {
+            SectionTitle(text = stringResource(id = R.string.hours_stats),
+                modifier
+                    .padding(horizontal = 10.dp)
+                    .padding(top = 20.dp))
+            HourStatsCardContent(
+                hoursStats = hoursStats,
+                isLoadingStats = isLoadingStats,
+                isError = isStatsError,
+                onRefreshClick = onRefreshClick,
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .padding(top = 10.dp)
+            )
+            SectionTitle(text = stringResource(id = R.string.ratings_title),
+                modifier
+                    .padding(horizontal = 10.dp)
+                    .padding(top = 20.dp)
+            )
+            GameRatingsCardContent(
+                game = game, modifier = Modifier
+                    .padding(all = 10.dp)
+            )
+        }
     }
 }
 
