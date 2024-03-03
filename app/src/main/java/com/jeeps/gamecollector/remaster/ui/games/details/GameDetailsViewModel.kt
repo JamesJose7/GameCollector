@@ -104,8 +104,10 @@ class GameDetailsViewModel @Inject constructor(
                         else "Marked as incomplete"
                     postServerMessage(message)
 
-                    _selectedGame.value?.timesCompleted = if (isCompleted) 1 else 0
-                    _selectedGame.postValue(_selectedGame.value)
+                    val timesCompleted = if (isCompleted) 1 else 0
+                    _selectedGame.value?.copy(timesCompleted = timesCompleted)?.let { game ->
+                        _selectedGame.postValue(game)
+                    }
                 }
             }
         }
