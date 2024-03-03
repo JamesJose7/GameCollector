@@ -296,12 +296,17 @@ fun CompletedButton(
     val isComplete = game.timesCompleted > 0
     val buttonTitle = if (isComplete) { R.string.completed } else { R.string.unfinished }
     val backgroundColor = if (isComplete) { R.color.success_darker } else { R.color.inactive_darker }
+    val rippleColor = if (!isComplete) { R.color.success_darker } else { R.color.inactive_darker }
+    val elevation = if (isComplete) { 10.dp } else { 1.dp }
 
     ElevatedButton(
         onClick = { onGameCompletedClick() },
         shape = RoundedCornerShape(size = 10.dp),
-        colors = ButtonDefaults.elevatedButtonColors(containerColor = colorResource(id = backgroundColor)),
-        // elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
+        colors = ButtonDefaults.elevatedButtonColors(
+            containerColor = colorResource(id = backgroundColor),
+            contentColor = colorResource(id = rippleColor)
+        ),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = elevation),
         modifier = modifier.fillMaxWidth()
     ) {
         Text(
