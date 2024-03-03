@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.jeeps.gamecollector.remaster.ui.games.details
 
 import android.animation.ArgbEvaluator
@@ -5,7 +7,6 @@ import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.transition.Fade
-import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.ImageView
@@ -16,18 +17,32 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.compose.AppTheme
@@ -35,6 +50,7 @@ import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityGameDetailsBinding
 import com.jeeps.gamecollector.databinding.ContentGameDetailsBinding
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
+import com.jeeps.gamecollector.remaster.data.model.data.games.releaseDateFormatted
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.composables.HourStats
@@ -104,14 +120,6 @@ class GameDetailsActivity : BaseActivity() {
                 game.currentSortStat = ""
                 if (game.imageUri.isNotEmpty())
                     Picasso.get().load(game.imageUri).into(content.gameCover)
-                val title = game.shortName.ifEmpty { game.name }
-                content.gameTitle.text = title
-
-                if (game.publisher.isEmpty())
-                    content.gamePublisher.visibility = View.GONE
-                else
-                    content.gamePublisher.text = game.publisher
-                content.gamePlatform.text = game.platform
 
                 updateGameCompletedButton(game)
                 setupCompleteSwitch()
@@ -120,6 +128,7 @@ class GameDetailsActivity : BaseActivity() {
             }
         }
 
+        content.screenCompose.setComposable { GameDetailsScreen(viewModel) }
         content.ratingsCardCompose.setComposable { GameRatingsCard(viewModel) }
         content.gameHoursCompose.setComposable { HourStatsCard(viewModel) }
     }
@@ -217,6 +226,144 @@ class GameDetailsActivity : BaseActivity() {
     }
 }
 
+
+@Composable
+fun GameDetailsScreen(
+    gameDetailsViewModel: GameDetailsViewModel = viewModel()
+) {
+    val game by gameDetailsViewModel.selectedGame.observeAsState(Game())
+    val stats by gameDetailsViewModel.gameHoursStats.observeAsState(GameplayHoursStats())
+    val isLoading by gameDetailsViewModel.loadingGameHours.observeAsState(true)
+    val isError by gameDetailsViewModel.showHoursErrorMessage.observeAsState(false)
+
+    GameDetailsScreen(
+        game = game,
+        hoursStats = stats,
+        isLoadingStats = isLoading,
+        isStatsError = isError,
+        onRefreshClick = { gameDetailsViewModel.getGameHours() },
+        onGameCompletedClick = { gameDetailsViewModel.updateGameCompletion() }
+    )
+}
+@Composable
+fun GameDetailsScreen(
+    modifier: Modifier = Modifier,
+    game: Game,
+    onGameCompletedClick: () -> Unit = {},
+    hoursStats: GameplayHoursStats,
+    isLoadingStats: Boolean,
+    isStatsError: Boolean,
+    onRefreshClick: () -> Unit = {}
+) {
+    val title = game.shortName.ifEmpty { game.name }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(color = Color.White)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(start = 10.dp, end = 10.dp, top = 10.dp)
+        ) {
+            Spacer(modifier = Modifier
+                .width(150.dp)
+                .height(200.dp))
+            Column(
+                modifier = Modifier
+                    .height(200.dp)
+                    .padding(start = 10.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Text(text = title, fontSize = 19.sp, color = colorResource(id = R.color.textColorPrimary), modifier = Modifier.padding(bottom = 1.dp))
+                if (game.publisher.isNotEmpty()) {
+                    Text(
+                        text = game.publisher,
+                        fontSize = 15.sp,
+                        color = colorResource(id = R.color.textSecondaryColor)
+                    )
+                }
+                Text(text = game.platform, fontSize = 17.sp, color = colorResource(id = R.color.textSecondaryColor), modifier = Modifier.padding(top = 10.dp, bottom = 5.dp))
+                HorizontalDivider(thickness = 0.5.dp, color = Color(0x555e5e5e), modifier = Modifier.padding(bottom = 5.dp))
+                Text(text = stringResource(id = R.string.released_in), fontSize = 11.sp, color = colorResource(id = R.color.textSecondaryColor), modifier = Modifier.padding(top = 10.dp))
+                Text(text = game.releaseDateFormatted(), fontSize = 17.sp, color = colorResource(id = R.color.textSecondaryColor))
+            }
+        }
+        CompletedButton(
+            game = game,
+            onGameCompletedClick = onGameCompletedClick,
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .padding(horizontal = 10.dp)
+        )
+        SectionTitle(text = stringResource(id = R.string.hours_stats),
+            modifier
+                .padding(horizontal = 10.dp)
+                .padding(top = 20.dp))
+        HourStatsCardContent(
+            hoursStats = hoursStats,
+            isLoadingStats = isLoadingStats,
+            isError = isStatsError,
+            onRefreshClick = onRefreshClick,
+            modifier = Modifier
+                .padding(horizontal = 10.dp)
+                .padding(top = 10.dp)
+        )
+        SectionTitle(text = stringResource(id = R.string.ratings_title),
+            modifier
+                .padding(horizontal = 10.dp)
+                .padding(top = 20.dp)
+        )
+        GameRatingsCardContent(
+            game = game, modifier = Modifier
+                .padding(horizontal = 10.dp)
+                .padding(top = 10.dp)
+        )
+    }
+}
+
+@Composable
+fun CompletedButton(
+    modifier: Modifier = Modifier,
+    game: Game,
+    onGameCompletedClick: () -> Unit = {}
+) {
+    val isComplete = game.timesCompleted > 0
+    val buttonTitle = if (isComplete) { R.string.completed } else { R.string.unfinished }
+    val backgroundColor = if (isComplete) { R.color.success_darker } else { R.color.inactive_darker }
+
+    ElevatedButton(
+        onClick = { onGameCompletedClick() },
+        shape = RoundedCornerShape(size = 10.dp),
+        colors = ButtonDefaults.elevatedButtonColors(containerColor = colorResource(id = backgroundColor)),
+        // elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = stringResource(id = buttonTitle),
+            fontSize = 20.sp,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        )
+    }
+}
+
+@Composable
+fun SectionTitle(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = text,
+        fontSize = 20.sp,
+        color = colorResource(id = R.color.textColorPrimary),
+        modifier = modifier.fillMaxWidth()
+    )
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun HourStatsCard(
@@ -227,9 +374,7 @@ fun HourStatsCard(
     val isError by gameDetailsViewModel.showHoursErrorMessage.observeAsState(false)
 
     HourStatsCardContent(
-        storyHours = stats.gameplayMain,
-        mainExtraHours = stats.gameplayMainExtra,
-        completionistHours = stats.gameplayCompletionist,
+        hoursStats = stats,
         isLoadingStats = isLoading,
         isError = isError,
         onRefreshClick = { gameDetailsViewModel.getGameHours() }
@@ -238,9 +383,7 @@ fun HourStatsCard(
 
 @Composable
 fun HourStatsCardContent(
-    storyHours: Double,
-    mainExtraHours: Double,
-    completionistHours: Double,
+    hoursStats: GameplayHoursStats,
     isLoadingStats: Boolean,
     isError: Boolean,
     modifier: Modifier = Modifier,
@@ -257,9 +400,9 @@ fun HourStatsCardContent(
             .background(color = Color.White)
     ) {
         HourStats(
-            storyHours = storyHours,
-            mainExtraHours = mainExtraHours,
-            completionistHours = completionistHours,
+            storyHours = hoursStats.gameplayMain,
+            mainExtraHours = hoursStats.gameplayMainExtra,
+            completionistHours = hoursStats.gameplayCompletionist,
             isLoadingStats = isLoadingStats,
             isError = isError,
             onRefreshClick = onRefreshClick
@@ -267,7 +410,6 @@ fun HourStatsCardContent(
     }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun GameRatingsCard(
     gameDetailsViewModel: GameDetailsViewModel = viewModel()
@@ -275,23 +417,13 @@ fun GameRatingsCard(
     val selectedGame by gameDetailsViewModel.selectedGame.observeAsState(Game())
 
     GameRatingsCardContent(
-        userRating = selectedGame.userRating,
-        userRatingCount = selectedGame.userRatingCount,
-        criticsRating = selectedGame.criticsRating,
-        criticsRatingCount = selectedGame.criticsRatingCount,
-        totalRating = selectedGame.totalRating,
-        totalRatingCount = selectedGame.totalRatingCount
+        game = selectedGame
     )
 }
 
 @Composable
 fun GameRatingsCardContent(
-    userRating: Double,
-    userRatingCount: Int,
-    criticsRating: Double,
-    criticsRatingCount: Int,
-    totalRating: Double,
-    totalRatingCount: Int,
+    game: Game,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -310,24 +442,58 @@ fun GameRatingsCardContent(
                 .fillMaxWidth()
                 .padding(vertical = 20.dp, horizontal = 10.dp)
         ) {
-            RatingChip("Users", userRating, userRatingCount)
-            RatingChip("Critics", criticsRating, criticsRatingCount)
-            RatingChip("Total", totalRating, totalRatingCount)
+            RatingChip("Users", game.userRating, game.userRatingCount)
+            RatingChip("Critics", game.criticsRating, game.criticsRatingCount)
+            RatingChip("Total", game.totalRating, game.totalRatingCount)
         }
+    }
+}
+
+@Preview
+@Composable
+fun GameDetailsPreview() {
+    val game = Game(
+        name = "The Legend of Zelda",
+        publisher = "Nintendo",
+        platform = "Nintendo Switch",
+        firstReleaseDate = 509366025,
+        userRating = 10.0,
+        userRatingCount = 10,
+        criticsRating = 50.0,
+        criticsRatingCount = 213,
+        totalRating = 90.0,
+        totalRatingCount = 223,
+        timesCompleted = 2
+    )
+    val stats = GameplayHoursStats(
+        gameplayMain = 50.0,
+        gameplayMainExtra = 97.0,
+        gameplayCompletionist = 88.0
+    )
+    AppTheme {
+        GameDetailsScreen(
+            game = game,
+            hoursStats = stats,
+            isLoadingStats = false,
+            isStatsError = false
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun HourStatsPreview() {
+    val stats = GameplayHoursStats(
+        gameplayMain = 50.0,
+        gameplayMainExtra = 97.0,
+        gameplayCompletionist = 88.0
+    )
     AppTheme {
         Column(
             modifier = Modifier.padding(10.dp)
         ) {
             HourStatsCardContent(
-                storyHours = 50.0,
-                mainExtraHours = 97.0,
-                completionistHours = 188.0,
+                hoursStats = stats,
                 isLoadingStats = false,
                 isError = false
             )
@@ -338,17 +504,20 @@ fun HourStatsPreview() {
 @Preview(showBackground = true)
 @Composable
 fun GameRatingsPreview() {
+    val game = Game(
+        userRating = 10.0,
+        userRatingCount = 10,
+        criticsRating = 50.0,
+        criticsRatingCount = 213,
+        totalRating = 90.0,
+        totalRatingCount = 223
+    )
     AppTheme {
         Column(
             modifier = Modifier.padding(10.dp)
         ) {
             GameRatingsCardContent(
-                userRating = 10.0,
-                userRatingCount = 10,
-                criticsRating = 50.0,
-                criticsRatingCount = 213,
-                totalRating = 90.0,
-                totalRatingCount = 223
+                game = game
             )
         }
     }
