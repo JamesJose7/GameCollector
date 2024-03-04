@@ -30,6 +30,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -205,13 +206,15 @@ fun GameDetailsScreen(
 ) {
     val game by gameDetailsViewModel.selectedGame.observeAsState(Game())
     val stats by gameDetailsViewModel.gameHoursStats.observeAsState(GameplayHoursStats())
-    val isLoading by gameDetailsViewModel.loadingGameHours.observeAsState(true)
+    val isLoadingHourStats by gameDetailsViewModel.loadingGameHours.observeAsState(true)
+    val isLoadingCompletionUpdate by gameDetailsViewModel.loadingCompletionUpdate.observeAsState(false)
     val isError by gameDetailsViewModel.showHoursErrorMessage.observeAsState(false)
 
     GameDetailsScreen(
         game = game,
         hoursStats = stats,
-        isLoadingStats = isLoading,
+        isLoadingStats = isLoadingHourStats,
+        isLoadingCompletionUpdate = isLoadingCompletionUpdate,
         isStatsError = isError,
         onRefreshClick = { gameDetailsViewModel.getGameHours() },
         onGameCompletedClick = { gameDetailsViewModel.updateGameCompletion() }
@@ -224,6 +227,7 @@ fun GameDetailsScreen(
     onGameCompletedClick: () -> Unit = {},
     hoursStats: GameplayHoursStats,
     isLoadingStats: Boolean,
+    isLoadingCompletionUpdate: Boolean,
     isStatsError: Boolean,
     onRefreshClick: () -> Unit = {}
 ) {
@@ -304,6 +308,7 @@ fun GameDetailsScreen(
 
         CompletedButton(
             game = game,
+            isLoadingCompletionUpdate = isLoadingCompletionUpdate,
             onGameCompletedClick = {
                 onGameCompletedClick()
                 isCompletedButtonClicked = true
@@ -353,6 +358,7 @@ fun GameDetailsScreen(
 fun CompletedButton(
     modifier: Modifier = Modifier,
     game: Game,
+    isLoadingCompletionUpdate: Boolean,
     onGameCompletedClick: () -> Unit = {}
 ) {
     val isComplete = game.timesCompleted > 0
@@ -362,24 +368,39 @@ fun CompletedButton(
     val elevation = if (isComplete) { 10.dp } else { 1.dp }
 
     ElevatedButton(
-        onClick = { onGameCompletedClick() },
+        onClick = {
+            if (!isLoadingCompletionUpdate) {
+                onGameCompletedClick()
+            }
+        },
         shape = RoundedCornerShape(size = 10.dp),
         colors = ButtonDefaults.elevatedButtonColors(
             containerColor = colorResource(id = backgroundColor),
             contentColor = colorResource(id = rippleColor)
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = elevation),
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .height(50.dp)
     ) {
-        Text(
-            text = stringResource(id = buttonTitle),
-            fontSize = 20.sp,
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-        )
+        if (isLoadingCompletionUpdate) {
+            CircularProgressIndicator(
+                color = Color.White,
+                strokeWidth = 2.dp,
+                modifier = Modifier
+                    .size(25.dp)
+            )
+        } else {
+            Text(
+                text = stringResource(id = buttonTitle),
+                fontSize = 20.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            )
+        }
     }
 }
 
@@ -479,6 +500,7 @@ fun GameDetailsPreview() {
             game = game,
             hoursStats = stats,
             isLoadingStats = false,
+            isLoadingCompletionUpdate = false,
             isStatsError = false
         )
     }
