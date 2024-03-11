@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.jeeps.gamecollector.remaster.ui.games.edit
 
 import android.content.Intent
@@ -23,6 +25,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
@@ -36,6 +40,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +58,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.compose.AppTheme
@@ -67,6 +73,7 @@ import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatfo
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.SELECTED_GAME
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.SELECTED_GAME_POSITION
 import com.jeeps.gamecollector.remaster.utils.extensions.compressImage
+import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import com.squareup.picasso.Picasso
@@ -106,6 +113,8 @@ class AddGameActivity : BaseActivity() {
         bindFormFields()
 
         bindImageUploadEvent()
+
+        content.screenCompose.setComposable { AddGameScreen(viewModel) }
     }
 
     private fun getIntentData() {
@@ -276,6 +285,29 @@ class AddGameActivity : BaseActivity() {
 
 @Composable
 fun AddGameScreen(
+    addGameViewModel: AddGameViewModel = viewModel()
+) {
+    val game by addGameViewModel.selectedGame.observeAsState(Game())
+
+    AddGameScreen(
+        name = game.name,
+        shortName = game.shortName,
+        platform = game.platform,
+        publisher = game.publisher,
+        isPhysical = game.isPhysical,
+        timesCompleted = game.timesCompleted,
+        coverImageUri = game.imageUri,
+        onNameChange = { addGameViewModel.setGameName(it) },
+        onShortNameChange = { addGameViewModel.setGameShortName(it) },
+        onPublisherChange = { addGameViewModel.setGamePublisher(it) },
+        onIsPhysicalChange = { addGameViewModel.setGameFormat(it) },
+        onTimesCompletedChange = { addGameViewModel.setTimesCompleted(it) },
+        onCoverImageChange = { addGameViewModel.setGameImageUri(it) }
+    )
+}
+
+@Composable
+fun AddGameScreen(
     modifier: Modifier = Modifier,
     name: String,
     shortName: String,
@@ -283,7 +315,7 @@ fun AddGameScreen(
     publisher: String,
     isPhysical: Boolean,
     timesCompleted: Int,
-    coverImageUri: Uri? = null,
+    coverImageUri: String = "",
     onNameChange: (String) -> Unit = { },
     onShortNameChange: (String) -> Unit = { },
     onPlatformChange: (String) -> Unit = { },
@@ -292,7 +324,8 @@ fun AddGameScreen(
     onTimesCompletedChange: (Int) -> Unit = { },
     onCoverImageChange: (Uri?) -> Unit = { },
 ) {
-    var selectedCover by rememberSaveable { mutableStateOf(coverImageUri) }
+    val parsedImageUri = if (coverImageUri.isNotEmpty()) Uri.parse(coverImageUri) else null
+    var selectedCover by rememberSaveable { mutableStateOf(parsedImageUri) }
     val pickMedia = rememberLauncherForActivityResult(contract = PickVisualMedia()) { uri ->
         selectedCover = uri
         onCoverImageChange(uri)
@@ -302,12 +335,12 @@ fun AddGameScreen(
         modifier = modifier
             .fillMaxSize()
             .background(color = Color.White)
+            .verticalScroll(rememberScrollState())
     ) {
         Box {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(selectedCover)
-                    .placeholder(R.drawable.ic_add_image)
                     .fallback(R.drawable.ic_add_image)
                     .build(),
                 contentScale = ContentScale.Fit,
@@ -364,6 +397,7 @@ fun AddGameScreen(
                     value = platform,
                     onValueChange = onPlatformChange,
                     label = { Text(text = "Platform") },
+                    enabled = false,
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.size(10.dp))

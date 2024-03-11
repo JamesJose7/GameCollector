@@ -58,28 +58,40 @@ class AddGameViewModel @Inject constructor(
 
     fun setTimesCompleted(value: Int) {
         timesCompleted = value
-        _selectedGame.value?.timesCompleted = value
+        _selectedGame.value?.copy(timesCompleted = value)?.let {
+            _selectedGame.postValue(it)
+        }
     }
 
     fun setGameFormat(isPhysical: Boolean) {
-        _selectedGame.value?.isPhysical = isPhysical
+        _selectedGame.value?.copy(isPhysical = isPhysical)?.let {
+            _selectedGame.postValue(it)
+        }
     }
 
     fun setGameName(name: String) {
-        _selectedGame.value?.name = name
+        _selectedGame.value?.copy(name = name)?.let {
+            _selectedGame.postValue(it)
+        }
     }
 
     fun setGameShortName(shortName: String) {
-        _selectedGame.value?.shortName = shortName
+        _selectedGame.value?.copy(shortName = shortName)?.let {
+            _selectedGame.postValue(it)
+        }
     }
 
     fun setGamePublisher(publisher: String) {
-        _selectedGame.value?.publisher = publisher
+        _selectedGame.value?.copy(publisher = publisher)?.let {
+            _selectedGame.postValue(it)
+        }
     }
 
     fun setGameImageUri(uri: Uri?) {
         currentImageUri = uri
-        _selectedGame.value?.imageUri = uri?.toString() ?: ""
+        _selectedGame.value?.copy(imageUri = uri?.toString() ?: "")?.let {
+            _selectedGame.postValue(it)
+        }
     }
 
     fun initializeDefaultGame() {

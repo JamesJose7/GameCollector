@@ -9,6 +9,17 @@
     tools:context=".remaster.ui.games.edit.AddGameActivity"
     tools:showIn="@layout/activity_add_game">
 
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/screen_compose"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:composableName="com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivityKt.AddGameScreenPreview"
+        />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
     <ImageView
         android:id="@+id/game_cover"
@@ -226,5 +237,6 @@
         </LinearLayout>
 
     </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
