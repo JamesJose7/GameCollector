@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -225,6 +227,8 @@ fun AddGameScreen(
         selectedCover = uri
         onCoverImageChange(uri)
     }
+    val digitalTextBackground = if (!isPhysical) MaterialTheme.colorScheme.primaryContainer else Color.White
+    val physicalTextBackground = if (isPhysical) MaterialTheme.colorScheme.primaryContainer else Color.White
 
     Column(
         modifier = modifier
@@ -311,7 +315,16 @@ fun AddGameScreen(
                     .fillMaxWidth()
                     .padding(top = 10.dp)
             ) {
-                Text(text = "Digital", modifier = Modifier.clickable { onIsPhysicalChange(false) })
+                Text(
+                    text = "Digital",
+                    modifier = Modifier
+                        .background(digitalTextBackground, RoundedCornerShape(size = 50.dp))
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { onIsPhysicalChange(false) }
+                )
                 Switch(
                     checked = isPhysical,
                     onCheckedChange = onIsPhysicalChange,
@@ -327,7 +340,7 @@ fun AddGameScreen(
                     } else {
                         {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_digital),
+                                painter = painterResource(id = R.drawable.cloud),
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(SwitchDefaults.IconSize),
@@ -344,7 +357,16 @@ fun AddGameScreen(
                     ),
                     modifier = Modifier.padding(horizontal = 20.dp)
                 )
-                Text(text = "Physical", modifier = Modifier.clickable { onIsPhysicalChange(true) })
+                Text(
+                    text = "Physical",
+                    modifier = Modifier
+                        .background(physicalTextBackground, RoundedCornerShape(size = 50.dp))
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { onIsPhysicalChange(true) }
+                )
             }
 
             Column {
