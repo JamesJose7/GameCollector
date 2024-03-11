@@ -81,7 +81,9 @@ fun AppTheme(
     val colors = if (!useDarkTheme) {
         LightColors
     } else {
-        DarkColors
+        LightColors
+        // TODO: Support Dark theme when the entire app is converted to compose
+        // DarkColors
     }
 
     MaterialTheme(
