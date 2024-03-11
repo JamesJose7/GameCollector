@@ -88,6 +88,7 @@ class AddGameViewModel @Inject constructor(
     }
 
     fun setGameImageUri(uri: Uri?) {
+        coverDeleted = uri == null
         currentImageUri = uri
         _selectedGame.value?.copy(imageUri = uri?.toString() ?: "")?.let {
             _selectedGame.postValue(it)
