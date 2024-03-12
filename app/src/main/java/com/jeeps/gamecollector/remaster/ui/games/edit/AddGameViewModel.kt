@@ -18,6 +18,9 @@ import com.jeeps.gamecollector.remaster.utils.getCurrentTimeInUtcString
 import com.jeeps.gamecollector.remaster.utils.IgdbUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -35,9 +38,8 @@ class AddGameViewModel @Inject constructor(
 
     private var timesCompleted: Int = 0
 
-    private val _selectedGame = MutableLiveData<Game>()
-    val selectedGame: LiveData<Game>
-        get() = _selectedGame
+    private val _selectedGame = MutableStateFlow(Game())
+    val selectedGame: StateFlow<Game> = _selectedGame.asStateFlow()
 
     private val _isImageReadyToUpload = MutableLiveData<Event<Boolean>>()
     val isImageReadyToUpload: LiveData<Event<Boolean>>
@@ -58,41 +60,29 @@ class AddGameViewModel @Inject constructor(
 
     fun setTimesCompleted(value: Int) {
         timesCompleted = value
-        _selectedGame.value?.copy(timesCompleted = value)?.let {
-            _selectedGame.postValue(it)
-        }
+        _selectedGame.value = _selectedGame.value.copy(timesCompleted = value)
     }
 
     fun setGameFormat(isPhysical: Boolean) {
-        _selectedGame.value?.copy(isPhysical = isPhysical)?.let {
-            _selectedGame.postValue(it)
-        }
+        _selectedGame.value = _selectedGame.value.copy(isPhysical = isPhysical)
     }
 
     fun setGameName(name: String) {
-        _selectedGame.value?.copy(name = name)?.let {
-            _selectedGame.postValue(it)
-        }
+        _selectedGame.value = _selectedGame.value.copy(name = name)
     }
 
     fun setGameShortName(shortName: String) {
-        _selectedGame.value?.copy(shortName = shortName)?.let {
-            _selectedGame.postValue(it)
-        }
+        _selectedGame.value = _selectedGame.value.copy(shortName = shortName)
     }
 
     fun setGamePublisher(publisher: String) {
-        _selectedGame.value?.copy(publisher = publisher)?.let {
-            _selectedGame.postValue(it)
-        }
+        _selectedGame.value = _selectedGame.value.copy(publisher = publisher)
     }
 
     fun setGameImageUri(uri: Uri?) {
         coverDeleted = uri == null
         currentImageUri = uri
-        _selectedGame.value?.copy(imageUri = uri?.toString() ?: "")?.let {
-            _selectedGame.postValue(it)
-        }
+        _selectedGame.value = _selectedGame.value.copy(imageUri = uri?.toString() ?: "")
     }
 
     fun initializeDefaultGame() {
@@ -112,7 +102,7 @@ class AddGameViewModel @Inject constructor(
     }
 
     fun saveGame() {
-        selectedGame.value?.let { game ->
+        selectedGame.value.let { game ->
             val isEdit = game.id.isNotEmpty()
             when {
                 !isEdit && currentImageUri == null -> {
