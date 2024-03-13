@@ -50,7 +50,7 @@ class AddGameViewModel @Inject constructor(
     var platformId: String? = null
 
     var currentImageUri: Uri? = null
-    var coverDeleted: Boolean = false
+    private var coverDeleted: Boolean = false
 
     private var pendingMessage: String = ""
 
@@ -160,7 +160,7 @@ class AddGameViewModel @Inject constructor(
             startLoading()
             val igdbGames =
                 handleNetworkResponse(igdbRepository.searchGames(IgdbUtils.getSearchGamesQuery(game.name)))
-            val selectedGame = igdbGames.findMostSimilarGame(_selectedGame.value?.name ?: "")
+            val selectedGame = igdbGames.findMostSimilarGame(_selectedGame.value.name)
 
             if (selectedGame == null) {
                 continueSavingGame(isEdit, game)
@@ -173,7 +173,7 @@ class AddGameViewModel @Inject constructor(
                         val gameCovers = response.body
                         if (gameCovers.isNotEmpty()) {
                             gameCovers[0].getBigCoverUrl().let { coverUrl ->
-                                _selectedGame.value?.imageUri = coverUrl
+                                _selectedGame.value.imageUri = coverUrl
                                 currentImageUri = null
                             }
                         }
@@ -205,7 +205,7 @@ class AddGameViewModel @Inject constructor(
 
                 handleNetworkResponse(
                     gamesRepository
-                        .uploadGameCover(token, selectedGame.value?.id ?: "", body)
+                        .uploadGameCover(token, selectedGame.value.id, body)
                 ) {
                     postServerMessage(pendingMessage)
                 }

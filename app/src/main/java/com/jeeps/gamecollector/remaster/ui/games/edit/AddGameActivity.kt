@@ -115,7 +115,7 @@ class AddGameActivity : BaseActivity() {
     }
 
     private fun checkIfGameIsBeingEdited() {
-        if (viewModel.selectedGame.value != null) {
+        if (viewModel.selectedGame.value.id.isNotEmpty()) {
             supportActionBar?.title = "Edit Game"
             binding.fab.setImageResource(R.drawable.edit)
         } else {
