@@ -223,9 +223,11 @@ fun AddGameScreen(
 ) {
     val parsedImageUri = if (coverImageUri.isNotEmpty()) Uri.parse(coverImageUri) else null
     var selectedCover by rememberSaveable { mutableStateOf(parsedImageUri) }
-    val pickMedia = rememberLauncherForActivityResult(contract = PickVisualMedia()) { uri ->
-        selectedCover = uri
-        onCoverImageChange(uri)
+    val pickMedia = rememberLauncherForActivityResult(contract = PickVisualMedia()) {
+        it?.let { uri ->
+            selectedCover = uri
+            onCoverImageChange(uri)
+        }
     }
     val digitalTextBackground = if (!isPhysical) MaterialTheme.colorScheme.primaryContainer else Color.White
     val physicalTextBackground = if (isPhysical) MaterialTheme.colorScheme.primaryContainer else Color.White
