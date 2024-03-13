@@ -68,7 +68,7 @@ public class AddGameActivityOld extends AppCompatActivity {
     RadioButton radioPhysical;
     NumberPicker mNumberPicker;
     @BindView(R.id.fab) FloatingActionButton fab;
-    @BindView(R.id.add_game_progressbar) ProgressBar progressBar;
+    ProgressBar progressBar;
 
     private SharedPreferences sharedPreferences;
     private CurrentUser currentUser;

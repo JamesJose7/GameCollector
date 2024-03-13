@@ -5,7 +5,6 @@ package com.jeeps.gamecollector.remaster.ui.games.edit
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -25,10 +24,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -99,8 +102,6 @@ class AddGameActivity : BaseActivity() {
 
         checkIfGameIsBeingEdited()
         bindAlerts()
-        bindLoading()
-        bindFab()
 
         bindImageUploadEvent()
 
@@ -117,31 +118,8 @@ class AddGameActivity : BaseActivity() {
     private fun checkIfGameIsBeingEdited() {
         if (viewModel.selectedGame.value.id.isNotEmpty()) {
             supportActionBar?.title = "Edit Game"
-            binding.fab.setImageResource(R.drawable.edit)
         } else {
             viewModel.initializeDefaultGame()
-        }
-    }
-
-    private fun bindFab() {
-        binding.fab.setOnClickListener {
-            viewModel.saveGame()
-        }
-    }
-
-    private fun bindLoading() {
-        viewModel.isLoading.observe(this) { isLoading ->
-            toggleProgressbar(isLoading)
-        }
-    }
-
-    private fun toggleProgressbar(isLoading: Boolean) {
-        if (isLoading) {
-            binding.addGameProgressbar.visibility = View.VISIBLE
-            binding.fab.visibility = View.INVISIBLE
-        } else {
-            binding.addGameProgressbar.visibility = View.INVISIBLE
-            binding.fab.visibility = View.VISIBLE
         }
     }
 
@@ -185,6 +163,7 @@ fun AddGameScreen(
     addGameViewModel: AddGameViewModel = viewModel()
 ) {
     val game by addGameViewModel.selectedGame.collectAsState()
+    val isLoading by addGameViewModel.isLoading.observeAsState(false)
 
     AddGameScreen(
         name = game.name,
@@ -194,12 +173,15 @@ fun AddGameScreen(
         isPhysical = game.isPhysical,
         timesCompleted = game.timesCompleted,
         coverImageUri = game.imageUri,
+        isEdit = game.id.isNotEmpty(),
+        isSavingGame = isLoading,
         onNameChange = { addGameViewModel.setGameName(it) },
         onShortNameChange = { addGameViewModel.setGameShortName(it) },
         onPublisherChange = { addGameViewModel.setGamePublisher(it) },
         onIsPhysicalChange = { addGameViewModel.setGameFormat(it) },
         onTimesCompletedChange = { addGameViewModel.setTimesCompleted(it) },
-        onCoverImageChange = { addGameViewModel.setGameImageUri(it) }
+        onCoverImageChange = { addGameViewModel.setGameImageUri(it) },
+        onSaveGame = { addGameViewModel.saveGame() }
     )
 }
 
@@ -213,6 +195,8 @@ fun AddGameScreen(
     isPhysical: Boolean,
     timesCompleted: Int,
     coverImageUri: String = "",
+    isEdit: Boolean,
+    isSavingGame: Boolean,
     onNameChange: (String) -> Unit = { },
     onShortNameChange: (String) -> Unit = { },
     onPlatformChange: (String) -> Unit = { },
@@ -220,31 +204,70 @@ fun AddGameScreen(
     onIsPhysicalChange: (Boolean) -> Unit = { },
     onTimesCompletedChange: (Int) -> Unit = { },
     onCoverImageChange: (Uri?) -> Unit = { },
+    onSaveGame: () -> Unit = { }
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(color = Color.White)
-    ) {
-        CoverImageSelector(
-            coverImageUri = coverImageUri,
-            onCoverImageChange = onCoverImageChange
-        )
+    Box {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .background(color = Color.White)
+        ) {
+            CoverImageSelector(
+                coverImageUri = coverImageUri,
+                onCoverImageChange = onCoverImageChange
+            )
 
-        EditGameForm(
-            name = name,
-            shortName = shortName,
-            platform = platform,
-            publisher = publisher,
-            isPhysical = isPhysical,
-            timesCompleted = timesCompleted,
-            onNameChange = onNameChange,
-            onShortNameChange = onShortNameChange,
-            onPlatformChange = onPlatformChange,
-            onPublisherChange = onPublisherChange,
-            onIsPhysicalChange = onIsPhysicalChange,
-            onTimesCompletedChange = onTimesCompletedChange
-        )
+            EditGameForm(
+                name = name,
+                shortName = shortName,
+                platform = platform,
+                publisher = publisher,
+                isPhysical = isPhysical,
+                timesCompleted = timesCompleted,
+                onNameChange = onNameChange,
+                onShortNameChange = onShortNameChange,
+                onPlatformChange = onPlatformChange,
+                onPublisherChange = onPublisherChange,
+                onIsPhysicalChange = onIsPhysicalChange,
+                onTimesCompletedChange = onTimesCompletedChange
+            )
+        }
+
+        if (isSavingGame) {
+            CircularProgressIndicator(
+                color = colorResource(id = R.color.colorAccent),
+                strokeWidth = 6.dp,
+                modifier = Modifier
+                    .size(90.dp)
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+            )
+        } else {
+            FloatingActionButton(
+                onClick = onSaveGame,
+                shape = CircleShape,
+                containerColor = colorResource(id = R.color.colorAccent),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.BottomEnd)
+            ) {
+                if (isEdit) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.edit),
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(id = R.drawable.checked),
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -449,6 +472,8 @@ fun AddGameScreenPreview() {
             platform = "",
             publisher = "",
             isPhysical = isPhysical,
+            isEdit = false,
+            isSavingGame = false,
             timesCompleted = timesCompleted,
             onIsPhysicalChange = { isPhysical = it },
             onTimesCompletedChange = { timesCompleted = it}
