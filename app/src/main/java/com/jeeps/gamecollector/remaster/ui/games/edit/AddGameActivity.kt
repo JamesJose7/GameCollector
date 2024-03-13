@@ -221,6 +221,38 @@ fun AddGameScreen(
     onTimesCompletedChange: (Int) -> Unit = { },
     onCoverImageChange: (Uri?) -> Unit = { },
 ) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(color = Color.White)
+    ) {
+        CoverImageSelector(
+            coverImageUri = coverImageUri,
+            onCoverImageChange = onCoverImageChange
+        )
+
+        EditGameForm(
+            name = name,
+            shortName = shortName,
+            platform = platform,
+            publisher = publisher,
+            isPhysical = isPhysical,
+            timesCompleted = timesCompleted,
+            onNameChange = onNameChange,
+            onShortNameChange = onShortNameChange,
+            onPlatformChange = onPlatformChange,
+            onPublisherChange = onPublisherChange,
+            onIsPhysicalChange = onIsPhysicalChange,
+            onTimesCompletedChange = onTimesCompletedChange
+        )
+    }
+}
+
+@Composable
+fun CoverImageSelector(
+    coverImageUri: String = "",
+    onCoverImageChange: (Uri?) -> Unit = { },
+) {
     val parsedImageUri = if (coverImageUri.isNotEmpty()) Uri.parse(coverImageUri) else null
     var selectedCover by rememberSaveable { mutableStateOf(parsedImageUri) }
     val pickMedia = rememberLauncherForActivityResult(contract = PickVisualMedia()) {
@@ -229,163 +261,179 @@ fun AddGameScreen(
             onCoverImageChange(uri)
         }
     }
+
+    Box {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(selectedCover)
+                .fallback(R.drawable.ic_add_image)
+                .build(),
+            contentScale = ContentScale.Fit,
+            contentDescription = "Game cover",
+            modifier = Modifier
+                .height(200.dp)
+                .fillMaxWidth()
+                .background(color = Color(0xFFCCCCCC))
+                .clickable {
+                    pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
+                }
+        )
+        IconButton(
+            onClick = {
+                selectedCover = null
+                onCoverImageChange(null)
+            },
+            modifier = Modifier.align(Alignment.TopEnd)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+    Text(
+        text = stringResource(id = R.string.cover_disclaimer),
+        color = colorResource(id = R.color.textSecondaryColor),
+        modifier = Modifier.padding(horizontal = 10.dp)
+    )
+}
+
+@Composable
+fun EditGameForm(
+    name: String,
+    shortName: String,
+    platform: String,
+    publisher: String,
+    isPhysical: Boolean,
+    timesCompleted: Int,
+    onNameChange: (String) -> Unit = { },
+    onShortNameChange: (String) -> Unit = { },
+    onPlatformChange: (String) -> Unit = { },
+    onPublisherChange: (String) -> Unit = { },
+    onIsPhysicalChange: (Boolean) -> Unit = { },
+    onTimesCompletedChange: (Int) -> Unit = { },
+) {
     val digitalTextBackground = if (!isPhysical) MaterialTheme.colorScheme.primaryContainer else Color.White
     val physicalTextBackground = if (isPhysical) MaterialTheme.colorScheme.primaryContainer else Color.White
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(color = Color.White)
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier
+            .padding(all = 10.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Box {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(selectedCover)
-                    .fallback(R.drawable.ic_add_image)
-                    .build(),
-                contentScale = ContentScale.Fit,
-                contentDescription = "Game cover",
-                modifier = Modifier
-                    .height(200.dp)
-                    .fillMaxWidth()
-                    .background(color = Color(0xFFCCCCCC))
-                    .clickable {
-                        pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
-                    }
-            )
-            IconButton(
-                onClick = {
-                    selectedCover = null
-                    onCoverImageChange(null)
-                },
-                modifier = Modifier.align(Alignment.TopEnd)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp),
-                )
-            }
-        }
-        Text(
-            text = stringResource(id = R.string.cover_disclaimer),
-            color = colorResource(id = R.color.textSecondaryColor),
-            modifier = Modifier.padding(horizontal = 10.dp)
+        OutlinedTextField(
+            value = name,
+            onValueChange = onNameChange,
+            label = { Text(text = "Name") },
+            modifier = Modifier.fillMaxWidth()
         )
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.padding(all = 10.dp)
+        OutlinedTextField(
+            value = shortName,
+            onValueChange = onShortNameChange,
+            label = { Text(text = "Short Name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             OutlinedTextField(
-                value = name,
-                onValueChange = onNameChange,
-                label = { Text(text = "Name") },
-                modifier = Modifier.fillMaxWidth()
+                value = platform,
+                onValueChange = onPlatformChange,
+                label = { Text(text = "Platform") },
+                enabled = false,
+                modifier = Modifier.weight(1f)
             )
+            Spacer(modifier = Modifier.size(10.dp))
             OutlinedTextField(
-                value = shortName,
-                onValueChange = onShortNameChange,
-                label = { Text(text = "Short Name") },
-                modifier = Modifier.fillMaxWidth()
+                value = publisher,
+                onValueChange = onPublisherChange,
+                label = { Text(text = "Publisher") },
+                modifier = Modifier.weight(1f)
             )
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                OutlinedTextField(
-                    value = platform,
-                    onValueChange = onPlatformChange,
-                    label = { Text(text = "Platform") },
-                    enabled = false,
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(modifier = Modifier.size(10.dp))
-                OutlinedTextField(
-                    value = publisher,
-                    onValueChange = onPublisherChange,
-                    label = { Text(text = "Publisher") },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp)
-            ) {
-                Text(
-                    text = "Digital",
-                    modifier = Modifier
-                        .background(digitalTextBackground, RoundedCornerShape(size = 50.dp))
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) { onIsPhysicalChange(false) }
-                )
-                Switch(
-                    checked = isPhysical,
-                    onCheckedChange = onIsPhysicalChange,
-                    thumbContent = if (isPhysical) {
-                        {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_physical),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(SwitchDefaults.IconSize),
-                            )
-                        }
-                    } else {
-                        {
-                            Icon(
-                                painter = painterResource(id = R.drawable.cloud),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(SwitchDefaults.IconSize),
-                            )
-                        }
-                    },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.colorScheme.surface,
-                        checkedTrackColor = MaterialTheme.colorScheme.primary,
-                        checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        uncheckedThumbColor = MaterialTheme.colorScheme.surface,
-                        uncheckedTrackColor = MaterialTheme.colorScheme.secondary,
-                        uncheckedBorderColor = MaterialTheme.colorScheme.secondary,
-                    ),
-                    modifier = Modifier.padding(horizontal = 20.dp)
-                )
-                Text(
-                    text = "Physical",
-                    modifier = Modifier
-                        .background(physicalTextBackground, RoundedCornerShape(size = 50.dp))
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) { onIsPhysicalChange(true) }
-                )
-            }
-
-            Column {
-                Slider(
-                    value = timesCompleted.toFloat(),
-                    onValueChange = { onTimesCompletedChange(it.roundToInt()) },
-                    colors = SliderDefaults.colors(
-                        thumbColor = MaterialTheme.colorScheme.secondary,
-                        activeTrackColor = MaterialTheme.colorScheme.secondary,
-                        inactiveTrackColor = MaterialTheme.colorScheme.secondaryContainer,
-                    ),
-                    steps = 5,
-                    valueRange = 0f..5f
-                )
-                Text(text = "Times completed: $timesCompleted")
-            }
         }
+
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp)
+        ) {
+            Text(
+                text = "Digital",
+                modifier = Modifier
+                    .background(digitalTextBackground, RoundedCornerShape(size = 50.dp))
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { onIsPhysicalChange(false) }
+            )
+            Switch(
+                checked = isPhysical,
+                onCheckedChange = onIsPhysicalChange,
+                thumbContent = if (isPhysical) {
+                    {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_physical),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(SwitchDefaults.IconSize),
+                        )
+                    }
+                } else {
+                    {
+                        Icon(
+                            painter = painterResource(id = R.drawable.cloud),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(SwitchDefaults.IconSize),
+                        )
+                    }
+                },
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = MaterialTheme.colorScheme.surface,
+                    checkedTrackColor = MaterialTheme.colorScheme.primary,
+                    checkedBorderColor = MaterialTheme.colorScheme.primary,
+                    uncheckedThumbColor = MaterialTheme.colorScheme.surface,
+                    uncheckedTrackColor = MaterialTheme.colorScheme.secondary,
+                    uncheckedBorderColor = MaterialTheme.colorScheme.secondary,
+                ),
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
+            Text(
+                text = "Physical",
+                modifier = Modifier
+                    .background(physicalTextBackground, RoundedCornerShape(size = 50.dp))
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { onIsPhysicalChange(true) }
+            )
+        }
+
+        Column {
+            Slider(
+                value = timesCompleted.toFloat(),
+                onValueChange = { onTimesCompletedChange(it.roundToInt()) },
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.secondary,
+                    activeTrackColor = MaterialTheme.colorScheme.secondary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+                ),
+                steps = 5,
+                valueRange = 0f..5f
+            )
+            Text(text = "Times completed: $timesCompleted")
+        }
+
+        Spacer(modifier = Modifier
+            .height(50.dp)
+            .fillMaxWidth())
     }
 }
 
