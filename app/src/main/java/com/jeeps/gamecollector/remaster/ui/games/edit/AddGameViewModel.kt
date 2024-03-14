@@ -43,10 +43,6 @@ class AddGameViewModel @Inject constructor(
     private val _selectedGame = MutableStateFlow(Game())
     val selectedGame: StateFlow<Game> = _selectedGame.asStateFlow()
 
-    private val _isImageReadyToUpload = MutableLiveData<Event<Boolean>>()
-    val isImageReadyToUpload: LiveData<Event<Boolean>>
-        get() = _isImageReadyToUpload
-
     var selectedGamePosition: Int = -1
     var platformName: String? = null
     var platformId: String? = null

@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.snackbar.Snackbar
-import com.jeeps.gamecollector.deprecated.utils.FileUtils
 import java.io.File
 import kotlin.math.roundToInt
 
@@ -39,13 +38,6 @@ fun AppCompatActivity.showToast(
     length: Int = Toast.LENGTH_SHORT
 ) {
     Toast.makeText(this, message, length).show()
-}
-
-fun AppCompatActivity.compressImage(
-    newFileName: String,
-    fileUri: Uri
-): File? {
-    return FileUtils.compressImage(this, newFileName, fileUri)
 }
 
 fun AppCompatActivity.dpToPx(dp: Float): Int {

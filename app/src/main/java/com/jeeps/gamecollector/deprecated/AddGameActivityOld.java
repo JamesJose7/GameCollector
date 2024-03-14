@@ -33,7 +33,6 @@ import com.jeeps.gamecollector.deprecated.services.api.ApiClient;
 import com.jeeps.gamecollector.deprecated.services.api.GameService;
 import com.jeeps.gamecollector.deprecated.services.igdb.IgdbApiClient;
 import com.jeeps.gamecollector.deprecated.services.igdb.IgdbService;
-import com.jeeps.gamecollector.deprecated.utils.FileUtils;
 import com.jeeps.gamecollector.remaster.utils.IgdbUtils;
 import com.jeeps.gamecollector.deprecated.utils.UserUtils;
 import com.squareup.picasso.Picasso;
@@ -366,14 +365,14 @@ public class AddGameActivityOld extends AppCompatActivity {
         result.putExtra(PlatformLibraryActivity.SELECTED_GAME_POSITION, selectedGamePosition);
         setResult(RESULT_OK, result);
         if (currImageURI != null) {
-            try {
-                uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
-                                game.getId());
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.e(TAG, "There was an error uploading the image");
-                finish();
-            }
+//            try {
+//                uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
+//                                game.getId());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                Log.e(TAG, "There was an error uploading the image");
+//                finish();
+//            }
         } else
             finish();
     }
