@@ -73,7 +73,6 @@ import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatfo
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM_NAME
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.SELECTED_GAME
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.SELECTED_GAME_POSITION
-import com.jeeps.gamecollector.remaster.utils.extensions.compressImage
 import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
@@ -103,8 +102,6 @@ class AddGameActivity : BaseActivity() {
 
         checkIfGameIsBeingEdited()
         bindAlerts()
-
-        bindImageUploadEvent()
 
         content.screenCompose.setComposable { AddGameScreen(viewModel) }
     }
@@ -144,18 +141,6 @@ class AddGameActivity : BaseActivity() {
         }
         setResult(RESULT_OK, intent)
         finish()
-    }
-
-    private fun bindImageUploadEvent() {
-        viewModel.isImageReadyToUpload.observe(this) { event ->
-            event?.getContentIfNotHandled()?.let { isReadyToUpload ->
-                if (isReadyToUpload) {
-                    viewModel.uploadCoverImage(
-                        viewModel.currentImageUri?.let { compressImage("temp.png", it) }
-                    )
-                }
-            }
-        }
     }
 }
 

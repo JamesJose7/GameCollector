@@ -16,6 +16,7 @@ import com.jeeps.gamecollector.remaster.utils.Event
 import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import com.jeeps.gamecollector.remaster.utils.getCurrentTimeInUtcString
 import com.jeeps.gamecollector.remaster.utils.IgdbUtils
+import com.jeeps.gamecollector.remaster.utils.ImageCompressor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,8 @@ import javax.inject.Inject
 class AddGameViewModel @Inject constructor(
     private val authenticationRepository: AuthenticationRepository,
     private val gamesRepository: GamesRepository,
-    private val igdbRepository: IgdbRepository
+    private val igdbRepository: IgdbRepository,
+    private val imageCompressor: ImageCompressor
 ) : BaseViewModel() {
 
     private var timesCompleted: Int = 0
@@ -129,7 +131,9 @@ class AddGameViewModel @Inject constructor(
                 if (currentImageUri != null) {
                     setSelectedGame(it)
                     pendingMessage = "Game created successfully"
-                    _isImageReadyToUpload.value = Event(true)
+                    currentImageUri?.let { uri ->
+                        uploadCoverImage(imageCompressor.compressImage(uri))
+                    }
                 } else {
                     postServerMessage("Game created successfully")
                     stopLoading()
@@ -146,7 +150,9 @@ class AddGameViewModel @Inject constructor(
             handleNetworkResponse(gamesRepository.editGame(token, game.id, game)) {
                 if (currentImageUri != null) {
                     pendingMessage = "Game edited successfully"
-                    _isImageReadyToUpload.value = Event(true)
+                    currentImageUri?.let { uri ->
+                        uploadCoverImage(imageCompressor.compressImage(uri))
+                    }
                 } else {
                     postServerMessage("Game edited successfully")
                     stopLoading()
@@ -193,7 +199,7 @@ class AddGameViewModel @Inject constructor(
         if (isEdit) editGame(game) else saveNewGame(game)
     }
 
-    fun uploadCoverImage(imageFile: File?) {
+    private fun uploadCoverImage(imageFile: File?) {
         viewModelScope.launch {
             startLoading()
             imageFile?.let { image ->
