@@ -77,6 +77,7 @@ import com.jeeps.gamecollector.remaster.utils.extensions.compressImage
 import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
+import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.math.roundToInt
@@ -280,6 +281,8 @@ fun CoverImageSelector(
     var selectedCover by rememberSaveable { mutableStateOf(parsedImageUri) }
     val pickMedia = rememberLauncherForActivityResult(contract = PickVisualMedia()) {
         it?.let { uri ->
+            // TODO: Remove once other images no longer rely on Picasso
+            Picasso.get().invalidate(coverImageUri)
             selectedCover = uri
             onCoverImageChange(uri)
         }
