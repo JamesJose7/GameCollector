@@ -73,6 +73,7 @@ import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatfo
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM_NAME
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.SELECTED_GAME
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.SELECTED_GAME_POSITION
+import com.jeeps.gamecollector.remaster.utils.extensions.serializable
 import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
@@ -109,7 +110,7 @@ class AddGameActivity : BaseActivity() {
     private fun getIntentData() {
         viewModel.platformId = intent.getStringExtra(CURRENT_PLATFORM)
         viewModel.platformName = intent.getStringExtra(CURRENT_PLATFORM_NAME)
-        (intent.getSerializableExtra(SELECTED_GAME) as? Game)?.let { viewModel.setSelectedGame(it) }
+        intent.serializable<Game>(SELECTED_GAME)?.let { viewModel.setSelectedGame(it) }
         viewModel.selectedGamePosition = intent.getIntExtra(SELECTED_GAME_POSITION, -1)
     }
 

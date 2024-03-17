@@ -14,6 +14,7 @@ import com.jeeps.gamecollector.databinding.ContentAddPlatformBinding
 import com.jeeps.gamecollector.deprecated.utils.PlatformColors
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
+import com.jeeps.gamecollector.remaster.utils.extensions.serializable
 import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
@@ -42,7 +43,7 @@ class AddPlatformActivity : BaseActivity() {
         content = binding.content
 
         // Get platform if being edited
-        val platform = intent?.getSerializableExtra(EDITED_PLATFORM) as? Platform
+        val platform = intent?.serializable<Platform>(EDITED_PLATFORM)
         platform?.let {
             viewModel.setPlatform(it)
             viewModel.isEdit = true
