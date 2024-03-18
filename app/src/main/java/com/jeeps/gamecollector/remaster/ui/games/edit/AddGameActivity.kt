@@ -100,7 +100,6 @@ class AddGameActivity : BaseActivity() {
 
         getIntentData()
 
-        checkIfGameIsBeingEdited()
         bindAlerts()
 
         binding.screenCompose.setComposable {
@@ -113,12 +112,7 @@ class AddGameActivity : BaseActivity() {
         viewModel.platformName = intent.getStringExtra(CURRENT_PLATFORM_NAME)
         intent.serializable<Game>(SELECTED_GAME)?.let { viewModel.setSelectedGame(it) }
         viewModel.selectedGamePosition = intent.getIntExtra(SELECTED_GAME_POSITION, -1)
-    }
-
-    private fun checkIfGameIsBeingEdited() {
-        if (viewModel.selectedGame.value.id.isEmpty()) {
-            viewModel.initializeDefaultGame()
-        }
+        viewModel.checkIfGameIsBeingEdited()
     }
 
     private fun bindAlerts() {

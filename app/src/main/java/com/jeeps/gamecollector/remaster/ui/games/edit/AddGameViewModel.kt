@@ -83,7 +83,13 @@ class AddGameViewModel @Inject constructor(
         _selectedGame.value = _selectedGame.value.copy(imageUri = uri?.toString() ?: "")
     }
 
-    fun initializeDefaultGame() {
+    fun checkIfGameIsBeingEdited() {
+        if (selectedGame.value.id.isEmpty()) {
+            initializeDefaultGame()
+        }
+    }
+
+    private fun initializeDefaultGame() {
         val game = Game(
             "",
             true,
