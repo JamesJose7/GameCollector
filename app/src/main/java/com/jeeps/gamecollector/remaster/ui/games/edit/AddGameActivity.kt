@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class)
 
 package com.jeeps.gamecollector.remaster.ui.games.edit
 
@@ -28,18 +28,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,7 +70,6 @@ import coil.request.ImageRequest
 import com.example.compose.AppTheme
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityAddGameBinding
-import com.jeeps.gamecollector.databinding.ContentAddGameBinding
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.ADD_GAME_RESULT_MESSAGE
@@ -87,24 +91,21 @@ import kotlin.math.roundToInt
 class AddGameActivity : BaseActivity() {
 
     private val binding by viewBinding(ActivityAddGameBinding::inflate)
-    private lateinit var content: ContentAddGameBinding
 
     private val viewModel: AddGameViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
-        content = binding.content
-        supportActionBar?.title = "Add New Game"
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         getIntentData()
 
         checkIfGameIsBeingEdited()
         bindAlerts()
 
-        content.screenCompose.setComposable { AddGameScreen(viewModel) }
+        binding.screenCompose.setComposable {
+            AddGameScreen(viewModel) { onBackPressedDispatcher.onBackPressed() }
+        }
     }
 
     private fun getIntentData() {
@@ -115,9 +116,7 @@ class AddGameActivity : BaseActivity() {
     }
 
     private fun checkIfGameIsBeingEdited() {
-        if (viewModel.selectedGame.value.id.isNotEmpty()) {
-            supportActionBar?.title = "Edit Game"
-        } else {
+        if (viewModel.selectedGame.value.id.isEmpty()) {
             viewModel.initializeDefaultGame()
         }
     }
@@ -147,7 +146,8 @@ class AddGameActivity : BaseActivity() {
 
 @Composable
 fun AddGameScreen(
-    addGameViewModel: AddGameViewModel = viewModel()
+    addGameViewModel: AddGameViewModel = viewModel(),
+    onBackPressed: () -> Unit = {}
 ) {
     val game by addGameViewModel.selectedGame.collectAsState()
     val isLoading by addGameViewModel.isLoading.observeAsState(false)
@@ -168,7 +168,8 @@ fun AddGameScreen(
         onIsPhysicalChange = { addGameViewModel.setGameFormat(it) },
         onTimesCompletedChange = { addGameViewModel.setTimesCompleted(it) },
         onCoverImageChange = { addGameViewModel.setGameImageUri(it) },
-        onSaveGame = { addGameViewModel.saveGame() }
+        onSaveGame = { addGameViewModel.saveGame() },
+        onBackPressed = onBackPressed
     )
 }
 
@@ -191,68 +192,91 @@ fun AddGameScreen(
     onIsPhysicalChange: (Boolean) -> Unit = { },
     onTimesCompletedChange: (Int) -> Unit = { },
     onCoverImageChange: (Uri?) -> Unit = { },
-    onSaveGame: () -> Unit = { }
+    onSaveGame: () -> Unit = { },
+    onBackPressed: () -> Unit = { }
 ) {
-    Box {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .background(color = Color.White)
-        ) {
-            CoverImageSelector(
-                coverImageUri = coverImageUri,
-                onCoverImageChange = onCoverImageChange
-            )
 
-            EditGameForm(
-                name = name,
-                shortName = shortName,
-                platform = platform,
-                publisher = publisher,
-                isPhysical = isPhysical,
-                timesCompleted = timesCompleted,
-                onNameChange = onNameChange,
-                onShortNameChange = onShortNameChange,
-                onPlatformChange = onPlatformChange,
-                onPublisherChange = onPublisherChange,
-                onIsPhysicalChange = onIsPhysicalChange,
-                onTimesCompletedChange = onTimesCompletedChange
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = Color.White,
+                ),
+                title = {
+                    val actionBarTitle = if (isEdit) "Edit Game" else "Add New Game"
+                    Text(text = actionBarTitle)
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackPressed) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Localized description",
+                            tint = Color.White
+                        )
+                    }
+                },
             )
-        }
-
-        if (isSavingGame) {
-            CircularProgressIndicator(
-                color = colorResource(id = R.color.colorAccent),
-                strokeWidth = 6.dp,
-                modifier = Modifier
-                    .size(90.dp)
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp)
-            )
-        } else {
-            FloatingActionButton(
-                onClick = onSaveGame,
-                shape = CircleShape,
-                containerColor = colorResource(id = R.color.colorAccent),
-                modifier = Modifier
-                    .padding(16.dp)
-                    .align(Alignment.BottomEnd)
-            ) {
-                if (isEdit) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.edit),
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(id = R.drawable.checked),
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
+        },
+        floatingActionButton = {
+            if (!isSavingGame) {
+                FloatingActionButton(
+                    onClick = onSaveGame,
+                    shape = CircleShape,
+                    containerColor = colorResource(id = R.color.colorAccent)
+                ) {
+                    if (isEdit) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.edit),
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(id = R.drawable.checked),
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
+            } else {
+                CircularProgressIndicator(
+                    color = colorResource(id = R.color.colorAccent),
+                    strokeWidth = 5.dp,
+                    modifier = Modifier
+                        .size(50.dp)
+                )
+            }
+        }
+    ) { innerPadding ->
+        Box {
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(color = Color.White)
+                    .padding(innerPadding)
+            ) {
+                CoverImageSelector(
+                    coverImageUri = coverImageUri,
+                    onCoverImageChange = onCoverImageChange
+                )
+
+                EditGameForm(
+                    name = name,
+                    shortName = shortName,
+                    platform = platform,
+                    publisher = publisher,
+                    isPhysical = isPhysical,
+                    timesCompleted = timesCompleted,
+                    onNameChange = onNameChange,
+                    onShortNameChange = onShortNameChange,
+                    onPlatformChange = onPlatformChange,
+                    onPublisherChange = onPublisherChange,
+                    onIsPhysicalChange = onIsPhysicalChange,
+                    onTimesCompletedChange = onTimesCompletedChange
+                )
             }
         }
     }
