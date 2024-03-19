@@ -332,7 +332,8 @@ fun StatCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(horizontal = 10.dp, vertical = 20.dp)
+                .padding(horizontal = 10.dp)
+                .padding(top = 10.dp, bottom = 20.dp)
         )
     }
 }
