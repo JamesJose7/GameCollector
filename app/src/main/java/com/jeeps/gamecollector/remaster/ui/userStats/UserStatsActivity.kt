@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.jeeps.gamecollector.remaster.ui.userStats
 
 import android.os.Bundle
@@ -18,6 +20,8 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.compose.AppTheme
 import com.google.android.material.snackbar.Snackbar
@@ -37,7 +42,9 @@ import com.jeeps.gamecollector.remaster.data.model.data.user.UserStats
 import com.jeeps.gamecollector.remaster.ui.adapters.PlatformStatsAdapter
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.composables.CircularGraph
+import com.jeeps.gamecollector.remaster.utils.extensions.completionPercent
 import com.jeeps.gamecollector.remaster.utils.extensions.completionPercentage
+import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
 import com.jeeps.gamecollector.remaster.utils.extensions.totalGames
 import com.jeeps.gamecollector.remaster.utils.extensions.value
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
@@ -68,6 +75,8 @@ class UserStatsActivity : BaseActivity() {
         initializeCharts()
         initializePlatformsRv()
         initializeObservers()
+
+        binding.screenCompose.setComposable { UserStatsScreen(viewModel) }
     }
 
     private fun initializeCharts() {
@@ -93,11 +102,11 @@ class UserStatsActivity : BaseActivity() {
             content.statsProgressBar.visibility = if (it.value()) View.VISIBLE else View.GONE
         }
 
-        viewModel.userStats.observe(this) {
-            it?.let {
-                bindUserStats(it)
-            }
-        }
+//        viewModel.userStats.observe(this) {
+//            it?.let {
+//                bindUserStats(it)
+//            }
+//        }
     }
 
     private fun bindUserStats(userStats: UserStats) {
@@ -135,6 +144,17 @@ class UserStatsActivity : BaseActivity() {
 
 @Composable
 fun UserStatsScreen(
+    userStatsViewModel: UserStatsViewModel = viewModel()
+) {
+    val userStats by userStatsViewModel.userStats.collectAsState()
+
+    UserStatsScreen(userStats = userStats)
+
+}
+
+@Composable
+fun UserStatsScreen(
+    userStats: UserStats
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -150,7 +170,7 @@ fun UserStatsScreen(
                 style = MaterialTheme.typography.headlineLarge,
             )
             CircularGraph(
-                percentage = 1f,
+                percentage = userStats.completionPercent(),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
             )
@@ -158,13 +178,13 @@ fun UserStatsScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 StatChip(
-                    value = "100",
+                    value = "${userStats.totalGames()}",
                     label = "Total",
                     modifier = Modifier
                         .weight(50f)
                 )
                 StatChip(
-                    value = "33",
+                    value = "${userStats.completedGamesTotal}",
                     label = "Completed",
                     modifier = Modifier
                         .weight(50f)
@@ -174,20 +194,20 @@ fun UserStatsScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 StatChip(
-                    value = "55",
+                    value = "${userStats.physicalTotal}",
                     label = "Physical",
                     modifier = Modifier
                         .weight(50f)
                 )
                 StatChip(
-                    value = "45",
+                    value = "${userStats.digitalTotal}",
                     label = "Digital",
                     modifier = Modifier
                         .weight(50f)
                 )
             }
             StatChip(
-                value = "The legend of Zelda",
+                value = userStats.lastGameCompleted,
                 label = "Last Game Completed",
                 valueFontSize = 20.sp
             )
@@ -256,7 +276,17 @@ fun StatCard(
 @Preview
 @Composable
 private fun UserStatsScreenPreview() {
+    val userStats = UserStats(
+        physicalTotal = 44,
+        digitalTotal = 20,
+        completedGamesTotal = 44,
+        lastGameCompleted = "The Legend of Zelda",
+        platformStats = listOf(
+
+        )
+    )
+
     AppTheme {
-        UserStatsScreen()
+        UserStatsScreen(userStats)
     }
 }

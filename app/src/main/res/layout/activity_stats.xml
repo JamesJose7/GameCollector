@@ -23,6 +23,15 @@
 
     <include
         android:id="@+id/content"
+        android:visibility="invisible"
         layout="@layout/content_stats"/>
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/screen_compose"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        tools:composableName="com.jeeps.gamecollector.remaster.ui.userStats.UserStatsActivityKt.UserStatsScreenPreview"
+        />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

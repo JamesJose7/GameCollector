@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.compose.AppTheme
+import kotlin.math.roundToInt
 
 @Composable
 fun CircularGraph(
@@ -43,6 +44,8 @@ fun CircularGraph(
         animationSpec = animationSpec
     )
 
+    val percentageText = (percentage * 100).roundToInt()
+
     Box(
         modifier = modifier
     ) {
@@ -54,7 +57,7 @@ fun CircularGraph(
             modifier = Modifier.size(size)
         )
         Text(
-            text = "100%",
+            text = "${percentageText}%",
             fontSize = 30.sp,
             color = MaterialTheme.colorScheme.onTertiaryContainer,
             modifier = Modifier
