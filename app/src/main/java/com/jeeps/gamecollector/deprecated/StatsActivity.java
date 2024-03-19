@@ -43,20 +43,20 @@ public class StatsActivity extends AppCompatActivity {
     private static final String LIBRARY_URL = "https://gamecollector-59155.firebaseio.com/library.json";
     private static final String TAG = StatsActivity.class.getSimpleName();
 
-    @BindView(R.id.overall_completion_chart) DonutChartView overallCompletionChart;
-    @BindView(R.id.overall_completion_percentage) TextView overallCompletionPercentage;
-    @BindView(R.id.overall_total) TextView overallTotal;
-    @BindView(R.id.overall_completed) TextView overallCompleted;
-    @BindView(R.id.overall_total_physical) TextView overallTotalPhysical;
-    @BindView(R.id.overall_total_digital) TextView overallTotalDigital;
-    @BindView(R.id.overall_last_game_completed) TextView overallLastGameCompleted;
+    DonutChartView overallCompletionChart;
+    TextView overallCompletionPercentage;
+    TextView overallTotal;
+    TextView overallCompleted;
+    TextView overallTotalPhysical;
+    TextView overallTotalDigital;
+    TextView overallLastGameCompleted;
 
-    @BindView(R.id.card_stats_container) RelativeLayout cardStatsContainer;
-    @BindView(R.id.overall_card) CardView overallCard;
-    @BindView(R.id.platforms_card) CardView platformsCard;
-    @BindView(R.id.stats_progress_bar) ProgressBar statsProgressBar;
+    RelativeLayout cardStatsContainer;
+    CardView overallCard;
+    CardView platformsCard;
+    ProgressBar statsProgressBar;
 
-    @BindView(R.id.platform_stats_recyclerview) RecyclerView platformsRecyclerView;
+    RecyclerView platformsRecyclerView;
 
     private CurrentUser currentUser;
     private Context context;
