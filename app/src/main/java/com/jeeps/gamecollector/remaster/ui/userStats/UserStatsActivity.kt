@@ -9,11 +9,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -156,63 +159,124 @@ fun UserStatsScreen(
 fun UserStatsScreen(
     userStats: UserStats
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(all = 10.dp),
         modifier = Modifier
             .background(Color.White)
-            .padding(all = 10.dp)
             .fillMaxSize()
     ) {
-        StatCard {
-            Text(
-                text = "Overall",
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.headlineLarge,
-            )
-            CircularGraph(
-                percentage = userStats.completionPercent(),
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-            )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                StatChip(
-                    value = "${userStats.totalGames()}",
-                    label = "Total",
-                    modifier = Modifier
-                        .weight(50f)
+        item {
+            StatCard {
+                Text(
+                    text = "Overall",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.headlineLarge,
                 )
-                StatChip(
-                    value = "${userStats.completedGamesTotal}",
-                    label = "Completed",
+                CircularGraph(
+                    percentage = userStats.completionPercent(),
                     modifier = Modifier
-                        .weight(50f)
+                        .align(Alignment.CenterHorizontally)
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    StatChip(
+                        value = "${userStats.totalGames()}",
+                        label = "Total",
+                        modifier = Modifier
+                            .weight(50f)
+                    )
+                    StatChip(
+                        value = "${userStats.completedGamesTotal}",
+                        label = "Completed",
+                        modifier = Modifier
+                            .weight(50f)
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    StatChip(
+                        value = "${userStats.physicalTotal}",
+                        label = "Physical",
+                        modifier = Modifier
+                            .weight(50f)
+                    )
+                    StatChip(
+                        value = "${userStats.digitalTotal}",
+                        label = "Digital",
+                        modifier = Modifier
+                            .weight(50f)
+                    )
+                }
+                StatChip(
+                    value = userStats.lastGameCompleted,
+                    label = "Last Game Completed",
+                    valueFontSize = 20.sp
                 )
             }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                StatChip(
-                    value = "${userStats.physicalTotal}",
-                    label = "Physical",
-                    modifier = Modifier
-                        .weight(50f)
-                )
-                StatChip(
-                    value = "${userStats.digitalTotal}",
-                    label = "Digital",
-                    modifier = Modifier
-                        .weight(50f)
-                )
-            }
-            StatChip(
-                value = userStats.lastGameCompleted,
-                label = "Last Game Completed",
-                valueFontSize = 20.sp
-            )
-
         }
+
+        items(userStats.platformStats) { platform ->
+            PlatformStatsCard(platformStats = platform)
+        }
+    }
+}
+
+@Composable
+fun PlatformStatsCard(
+    platformStats: PlatformStats
+) {
+    StatCard {
+        Text(
+            text = platformStats.platformName,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.headlineLarge,
+        )
+        CircularGraph(
+            percentage = platformStats.completionPercent(),
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            StatChip(
+                value = "${platformStats.totalGames()}",
+                label = "Total",
+                modifier = Modifier
+                    .weight(50f)
+            )
+            StatChip(
+                value = "${platformStats.completedGamesTotal}",
+                label = "Completed",
+                modifier = Modifier
+                    .weight(50f)
+            )
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            StatChip(
+                value = "${platformStats.physicalTotal}",
+                label = "Physical",
+                modifier = Modifier
+                    .weight(50f)
+            )
+            StatChip(
+                value = "${platformStats.digitalTotal}",
+                label = "Digital",
+                modifier = Modifier
+                    .weight(50f)
+            )
+        }
+        StatChip(
+            value = platformStats.lastGameCompleted,
+            label = "Last Game Completed",
+            valueFontSize = 20.sp
+        )
+
     }
 }
 
@@ -282,7 +346,20 @@ private fun UserStatsScreenPreview() {
         completedGamesTotal = 44,
         lastGameCompleted = "The Legend of Zelda",
         platformStats = listOf(
-
+            PlatformStats(
+                platformName = "Switch",
+                physicalTotal = 20,
+                digitalTotal = 10,
+                completedGamesTotal = 15,
+                lastGameCompleted = "Metroid"
+            ),
+            PlatformStats(
+                platformName = "Wii",
+                physicalTotal = 44,
+                digitalTotal = 12,
+                completedGamesTotal = 23,
+                lastGameCompleted = "Mario"
+            )
         )
     )
 
