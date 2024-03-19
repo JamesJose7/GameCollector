@@ -32,6 +32,7 @@ fun CircularGraph(
     percentage: Float,
     strokeWidth: Dp = 12.dp,
     strokeColor: Color = MaterialTheme.colorScheme.tertiary,
+    backgroundColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
     size: Dp = 120.dp,
     animationSpec: AnimationSpec<Float> = tween(
         durationMillis = 600,
@@ -49,6 +50,13 @@ fun CircularGraph(
     Box(
         modifier = modifier
     ) {
+        CircularProgressIndicator(
+            progress = { 1f },
+            strokeCap = StrokeCap.Round,
+            strokeWidth = strokeWidth,
+            color = backgroundColor,
+            modifier = Modifier.size(size)
+        )
         CircularProgressIndicator(
             progress = { barProgress },
             strokeCap = StrokeCap.Round,
