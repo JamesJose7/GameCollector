@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class)
 
 package com.jeeps.gamecollector.remaster.ui.userStats
 
@@ -19,8 +19,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -57,9 +61,6 @@ class UserStatsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.title = "Statistics"
-
 
         binding.screenCompose.setComposable { UserStatsScreen(viewModel) }
     }
@@ -79,67 +80,82 @@ fun UserStatsScreen(
 fun UserStatsScreen(
     userStats: UserStats
 ) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(all = 10.dp),
-        modifier = Modifier
-            .background(Color.White)
-            .fillMaxSize()
-    ) {
-        item {
-            StatCard {
-                Text(
-                    text = "Overall",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.headlineLarge,
-                )
-                CircularGraph(
-                    percentage = userStats.completionPercent(),
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    StatChip(
-                        value = "${userStats.totalGames()}",
-                        label = "Total",
-                        modifier = Modifier
-                            .weight(50f)
-                    )
-                    StatChip(
-                        value = "${userStats.completedGamesTotal}",
-                        label = "Completed",
-                        modifier = Modifier
-                            .weight(50f)
-                    )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = Color.White,
+                ),
+                title = {
+                    Text(text = "Statistics")
                 }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    StatChip(
-                        value = "${userStats.physicalTotal}",
-                        label = "Physical",
-                        modifier = Modifier
-                            .weight(50f)
-                    )
-                    StatChip(
-                        value = "${userStats.digitalTotal}",
-                        label = "Digital",
-                        modifier = Modifier
-                            .weight(50f)
-                    )
-                }
-                StatChip(
-                    value = userStats.lastGameCompleted,
-                    label = "Last Game Completed",
-                    valueFontSize = 20.sp
-                )
-            }
+            )
         }
+    ) { innerPadding ->
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(all = 10.dp),
+            modifier = Modifier
+                .padding(innerPadding)
+                .background(Color.White)
+                .fillMaxSize()
+        ) {
+            item {
+                StatCard {
+                    Text(
+                        text = "Overall",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.headlineLarge,
+                    )
+                    CircularGraph(
+                        percentage = userStats.completionPercent(),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        StatChip(
+                            value = "${userStats.totalGames()}",
+                            label = "Total",
+                            modifier = Modifier
+                                .weight(50f)
+                        )
+                        StatChip(
+                            value = "${userStats.completedGamesTotal}",
+                            label = "Completed",
+                            modifier = Modifier
+                                .weight(50f)
+                        )
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        StatChip(
+                            value = "${userStats.physicalTotal}",
+                            label = "Physical",
+                            modifier = Modifier
+                                .weight(50f)
+                        )
+                        StatChip(
+                            value = "${userStats.digitalTotal}",
+                            label = "Digital",
+                            modifier = Modifier
+                                .weight(50f)
+                        )
+                    }
+                    StatChip(
+                        value = userStats.lastGameCompleted,
+                        label = "Last Game Completed",
+                        valueFontSize = 20.sp
+                    )
+                }
+            }
 
-        items(userStats.platformStats) { platform ->
-            PlatformStatsCard(platformStats = platform)
+            items(userStats.platformStats) { platform ->
+                PlatformStatsCard(platformStats = platform)
+            }
         }
     }
 }
