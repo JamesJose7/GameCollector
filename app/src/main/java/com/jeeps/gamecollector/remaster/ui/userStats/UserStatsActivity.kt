@@ -6,17 +6,17 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -93,70 +93,79 @@ fun UserStatsScreen(
             )
         }
     ) { innerPadding ->
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(all = 10.dp),
+        Box(
             modifier = Modifier
-                .padding(innerPadding)
                 .background(Color.White)
-                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            item {
-                StatCard {
-                    Text(
-                        text = "Overall",
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.headlineLarge,
-                    )
-                    CircularGraph(
-                        percentage = userStats.completionPercent(),
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        StatChip(
-                            value = "${userStats.totalGames()}",
-                            label = "Total",
-                            modifier = Modifier
-                                .weight(50f)
-                        )
-                        StatChip(
-                            value = "${userStats.completedGamesTotal}",
-                            label = "Completed",
-                            modifier = Modifier
-                                .weight(50f)
-                        )
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        StatChip(
-                            value = "${userStats.physicalTotal}",
-                            label = "Physical",
-                            modifier = Modifier
-                                .weight(50f)
-                        )
-                        StatChip(
-                            value = "${userStats.digitalTotal}",
-                            label = "Digital",
-                            modifier = Modifier
-                                .weight(50f)
-                        )
-                    }
-                    StatChip(
-                        value = userStats.lastGameCompleted,
-                        label = "Last Game Completed",
-                        valueFontSize = 20.sp
-                    )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(all = 10.dp)
+            ) {
+                UserStatsCard(userStats = userStats)
+                userStats.platformStats.forEach { platform ->
+                    PlatformStatsCard(platformStats = platform)
                 }
             }
-
-            items(userStats.platformStats) { platform ->
-                PlatformStatsCard(platformStats = platform)
-            }
         }
+    }
+}
+
+@Composable
+fun UserStatsCard(
+    userStats: UserStats
+) {
+    StatCard {
+        Text(
+            text = "Overall",
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.headlineLarge,
+        )
+        CircularGraph(
+            percentage = userStats.completionPercent(),
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            StatChip(
+                value = "${userStats.totalGames()}",
+                label = "Total",
+                modifier = Modifier
+                    .weight(50f)
+            )
+            StatChip(
+                value = "${userStats.completedGamesTotal}",
+                label = "Completed",
+                modifier = Modifier
+                    .weight(50f)
+            )
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            StatChip(
+                value = "${userStats.physicalTotal}",
+                label = "Physical",
+                modifier = Modifier
+                    .weight(50f)
+            )
+            StatChip(
+                value = "${userStats.digitalTotal}",
+                label = "Digital",
+                modifier = Modifier
+                    .weight(50f)
+            )
+        }
+        StatChip(
+            value = userStats.lastGameCompleted,
+            label = "Last Game Completed",
+            valueFontSize = 20.sp
+        )
     }
 }
 
