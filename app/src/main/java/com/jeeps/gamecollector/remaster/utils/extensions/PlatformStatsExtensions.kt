@@ -14,3 +14,11 @@ fun PlatformStats.completionPercentage(): Int {
         0
     }
 }
+
+fun PlatformStats.completionPercent(): Float {
+    return if (totalGames() > 0) {
+        (completedGamesTotal.toFloat() / totalGames().toFloat())
+    } else {
+        0f
+    }
+}

@@ -28,7 +28,6 @@ import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
 import com.jeeps.gamecollector.deprecated.services.api.ApiClient;
 import com.jeeps.gamecollector.deprecated.services.api.PlatformService;
 import com.jeeps.gamecollector.deprecated.utils.PlatformColors;
-import com.jeeps.gamecollector.deprecated.utils.FileUtils;
 import com.jeeps.gamecollector.deprecated.utils.UserUtils;
 import com.squareup.picasso.Picasso;
 
@@ -199,12 +198,12 @@ public class AddPlatformActivityOld extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         if (isImageEdited) {
                             // Upload image cover
-                            try {
-                                uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
-                                        platform.getId());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+//                            try {
+//                                uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
+//                                        platform.getId());
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
                         } else
                             returnAddedPlatform();
                     } else {
@@ -229,12 +228,12 @@ public class AddPlatformActivityOld extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         platform = response.body();
                         // Upload image cover
-                        try {
-                            uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
-                                    platform.getId());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+//                        try {
+//                            uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
+//                                    platform.getId());
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
                     } else {
                         Log.e(TAG, "Authentication error when posting platform");
                         Toast.makeText(context, "Authentication error when creating the platform", Toast.LENGTH_SHORT).show();

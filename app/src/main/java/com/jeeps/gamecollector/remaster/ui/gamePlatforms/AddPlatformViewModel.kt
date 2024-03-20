@@ -9,6 +9,7 @@ import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.PlatformsRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.utils.Event
+import com.jeeps.gamecollector.remaster.utils.ImageCompressor
 import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AddPlatformViewModel @Inject constructor(
     private val platformsRepository: PlatformsRepository,
-    private val authenticationRepository: AuthenticationRepository
+    private val authenticationRepository: AuthenticationRepository,
+    private val imageCompressor: ImageCompressor
 ) : BaseViewModel() {
 
     var isEdit: Boolean = false
@@ -34,10 +36,6 @@ class AddPlatformViewModel @Inject constructor(
     private val _platform = MutableLiveData(Platform())
     val platform: LiveData<Platform>
         get() = _platform
-
-    private val _isPlatformSaved = MutableLiveData<Event<Boolean>>()
-    val isPlatformSaved: LiveData<Event<Boolean>>
-        get() = _isPlatformSaved
 
     private val _isImageUploaded = MutableLiveData<Event<Boolean>>()
     val isImageUploaded: LiveData<Event<Boolean>>
@@ -85,7 +83,13 @@ class AddPlatformViewModel @Inject constructor(
             currentPlatform.imageUri = currentImageUri.toString()
             handleNetworkResponse(platformsRepository.savePlatform(token, currentPlatform)) { newPlatform ->
                 currentPlatform.id = newPlatform.id
-                _isPlatformSaved.postValue(Event(true))
+                if (isImageEdited) {
+                    currentImageUri?.let { uri ->
+                        uploadImageCover(imageCompressor.compressImage(uri))
+                    }
+                } else {
+                    skipImageUpload()
+                }
             }
         }
     }
@@ -94,12 +98,18 @@ class AddPlatformViewModel @Inject constructor(
         val token = authenticationRepository.getUserToken()
         _platform.value?.let {
             handleNetworkResponse(platformsRepository.editPlatform(token, it)) {
-                _isPlatformSaved.postValue(Event(true))
+                if (isImageEdited) {
+                    currentImageUri?.let { uri ->
+                        uploadImageCover(imageCompressor.compressImage(uri))
+                    }
+                } else {
+                    skipImageUpload()
+                }
             }
         }
     }
 
-    fun uploadImageCover(compressedImage: File?) {
+    private fun uploadImageCover(compressedImage: File?) {
         viewModelScope.launch {
             compressedImage?.let { file ->
                 val token = authenticationRepository.getUserToken()

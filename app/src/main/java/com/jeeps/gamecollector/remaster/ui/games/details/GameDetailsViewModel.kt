@@ -60,6 +60,10 @@ class GameDetailsViewModel @Inject constructor(
     val loadingGameHours: LiveData<Boolean>
         get() = _loadingGameHours
 
+    private val _loadingCompletionUpdate = MutableLiveData(false)
+    val loadingCompletionUpdate: LiveData<Boolean>
+        get() = _loadingCompletionUpdate
+
     var selectedGamePosition: Int = -1
     var platformName: String? = null
     var platformId: String? = null
@@ -95,6 +99,7 @@ class GameDetailsViewModel @Inject constructor(
 
     fun updateGameCompletion() {
         viewModelScope.launch {
+            _loadingCompletionUpdate.postValue(true)
             val token = authenticationRepository.getUserToken()
             selectedGame.value?.id?.let { gameId ->
                 handleNetworkResponse(gamesRepository.toggleGameCompletion(token, gameId)) {
@@ -104,10 +109,13 @@ class GameDetailsViewModel @Inject constructor(
                         else "Marked as incomplete"
                     postServerMessage(message)
 
-                    _selectedGame.value?.timesCompleted = if (isCompleted) 1 else 0
-                    _selectedGame.postValue(_selectedGame.value)
+                    val timesCompleted = if (isCompleted) 1 else 0
+                    _selectedGame.value?.copy(timesCompleted = timesCompleted)?.let { game ->
+                        _selectedGame.postValue(game)
+                    }
                 }
             }
+            _loadingCompletionUpdate.postValue(false)
         }
     }
 
