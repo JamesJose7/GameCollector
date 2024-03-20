@@ -294,7 +294,7 @@ fun GameDetailsScreen(
             }
         }
 
-        if (isComplete && isCompletedButtonClicked) {
+        if ((isComplete && isCompletedButtonClicked) && !isLoadingCompletionUpdate) {
             FireworksAnimation(
                 animationReps = 2,
                 modifier = Modifier
