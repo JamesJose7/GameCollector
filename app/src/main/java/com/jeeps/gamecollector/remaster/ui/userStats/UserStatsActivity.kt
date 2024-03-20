@@ -76,6 +76,7 @@ fun UserStatsScreen(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserStatsScreen(
     userStats: UserStats
