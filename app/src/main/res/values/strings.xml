@@ -32,6 +32,7 @@
     <string name="no_hours_stats_error">No stats found for this game. Try renaming it.</string>
     <string name="hours_stats">Hours stats</string>
     <string name="completed">Completed</string>
+    <string name="unfinished">Unfinished</string>
     <string name="game_cover">Game cover</string>
     <string name="add_platform">Add platform</string>
     <string name="platform_cover">Platform cover</string>

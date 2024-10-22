@@ -11,13 +11,13 @@ import androidx.core.widget.doOnTextChanged
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityAddPlatformBinding
 import com.jeeps.gamecollector.databinding.ContentAddPlatformBinding
+import com.jeeps.gamecollector.deprecated.utils.PlatformColors
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
-import com.jeeps.gamecollector.remaster.utils.extensions.compressImage
+import com.jeeps.gamecollector.remaster.utils.extensions.serializable
 import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
-import com.jeeps.gamecollector.deprecated.utils.PlatformColors
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,7 +43,7 @@ class AddPlatformActivity : BaseActivity() {
         content = binding.content
 
         // Get platform if being edited
-        val platform = intent?.getSerializableExtra(EDITED_PLATFORM) as? Platform
+        val platform = intent?.serializable<Platform>(EDITED_PLATFORM)
         platform?.let {
             viewModel.setPlatform(it)
             viewModel.isEdit = true
@@ -148,18 +148,6 @@ class AddPlatformActivity : BaseActivity() {
     }
 
     private fun handleServiceEvents() {
-        viewModel.isPlatformSaved.observe(this) { event ->
-            event.getContentIfNotHandled()?.let { isPlatformSaved ->
-                if (isPlatformSaved && viewModel.isImageEdited) {
-                    val compressedImage =
-                        viewModel.currentImageUri?.let { compressImage("temp.png", it) }
-                    viewModel.uploadImageCover(compressedImage)
-                } else {
-                    viewModel.skipImageUpload()
-                }
-            }
-        }
-
         viewModel.isImageUploaded.observe(this) { event ->
             event.getContentIfNotHandled()?.let { isImageUploaded ->
                 if (isImageUploaded) {

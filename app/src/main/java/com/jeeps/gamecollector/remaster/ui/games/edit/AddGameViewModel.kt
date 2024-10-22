@@ -16,8 +16,12 @@ import com.jeeps.gamecollector.remaster.utils.Event
 import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import com.jeeps.gamecollector.remaster.utils.getCurrentTimeInUtcString
 import com.jeeps.gamecollector.remaster.utils.IgdbUtils
+import com.jeeps.gamecollector.remaster.utils.ImageCompressor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -30,25 +34,21 @@ import javax.inject.Inject
 class AddGameViewModel @Inject constructor(
     private val authenticationRepository: AuthenticationRepository,
     private val gamesRepository: GamesRepository,
-    private val igdbRepository: IgdbRepository
+    private val igdbRepository: IgdbRepository,
+    private val imageCompressor: ImageCompressor
 ) : BaseViewModel() {
 
     private var timesCompleted: Int = 0
 
-    private val _selectedGame = MutableLiveData<Game>()
-    val selectedGame: LiveData<Game>
-        get() = _selectedGame
-
-    private val _isImageReadyToUpload = MutableLiveData<Event<Boolean>>()
-    val isImageReadyToUpload: LiveData<Event<Boolean>>
-        get() = _isImageReadyToUpload
+    private val _selectedGame = MutableStateFlow(Game())
+    val selectedGame: StateFlow<Game> = _selectedGame.asStateFlow()
 
     var selectedGamePosition: Int = -1
     var platformName: String? = null
     var platformId: String? = null
 
     var currentImageUri: Uri? = null
-    var coverDeleted: Boolean = false
+    private var coverDeleted: Boolean = false
 
     private var pendingMessage: String = ""
 
@@ -58,31 +58,38 @@ class AddGameViewModel @Inject constructor(
 
     fun setTimesCompleted(value: Int) {
         timesCompleted = value
-        _selectedGame.value?.timesCompleted = value
+        _selectedGame.value = _selectedGame.value.copy(timesCompleted = value)
     }
 
     fun setGameFormat(isPhysical: Boolean) {
-        _selectedGame.value?.isPhysical = isPhysical
+        _selectedGame.value = _selectedGame.value.copy(isPhysical = isPhysical)
     }
 
     fun setGameName(name: String) {
-        _selectedGame.value?.name = name
+        _selectedGame.value = _selectedGame.value.copy(name = name)
     }
 
     fun setGameShortName(shortName: String) {
-        _selectedGame.value?.shortName = shortName
+        _selectedGame.value = _selectedGame.value.copy(shortName = shortName)
     }
 
     fun setGamePublisher(publisher: String) {
-        _selectedGame.value?.publisher = publisher
+        _selectedGame.value = _selectedGame.value.copy(publisher = publisher)
     }
 
     fun setGameImageUri(uri: Uri?) {
+        coverDeleted = uri == null
         currentImageUri = uri
-        _selectedGame.value?.imageUri = uri?.toString() ?: ""
+        _selectedGame.value = _selectedGame.value.copy(imageUri = uri?.toString() ?: "")
     }
 
-    fun initializeDefaultGame() {
+    fun checkIfGameIsBeingEdited() {
+        if (selectedGame.value.id.isEmpty()) {
+            initializeDefaultGame()
+        }
+    }
+
+    private fun initializeDefaultGame() {
         val game = Game(
             "",
             true,
@@ -99,7 +106,7 @@ class AddGameViewModel @Inject constructor(
     }
 
     fun saveGame() {
-        selectedGame.value?.let { game ->
+        selectedGame.value.let { game ->
             val isEdit = game.id.isNotEmpty()
             when {
                 !isEdit && currentImageUri == null -> {
@@ -126,7 +133,9 @@ class AddGameViewModel @Inject constructor(
                 if (currentImageUri != null) {
                     setSelectedGame(it)
                     pendingMessage = "Game created successfully"
-                    _isImageReadyToUpload.value = Event(true)
+                    currentImageUri?.let { uri ->
+                        uploadCoverImage(imageCompressor.compressImage(uri))
+                    }
                 } else {
                     postServerMessage("Game created successfully")
                     stopLoading()
@@ -143,7 +152,9 @@ class AddGameViewModel @Inject constructor(
             handleNetworkResponse(gamesRepository.editGame(token, game.id, game)) {
                 if (currentImageUri != null) {
                     pendingMessage = "Game edited successfully"
-                    _isImageReadyToUpload.value = Event(true)
+                    currentImageUri?.let { uri ->
+                        uploadCoverImage(imageCompressor.compressImage(uri))
+                    }
                 } else {
                     postServerMessage("Game edited successfully")
                     stopLoading()
@@ -157,7 +168,7 @@ class AddGameViewModel @Inject constructor(
             startLoading()
             val igdbGames =
                 handleNetworkResponse(igdbRepository.searchGames(IgdbUtils.getSearchGamesQuery(game.name)))
-            val selectedGame = igdbGames.findMostSimilarGame(_selectedGame.value?.name ?: "")
+            val selectedGame = igdbGames.findMostSimilarGame(_selectedGame.value.name)
 
             if (selectedGame == null) {
                 continueSavingGame(isEdit, game)
@@ -170,7 +181,7 @@ class AddGameViewModel @Inject constructor(
                         val gameCovers = response.body
                         if (gameCovers.isNotEmpty()) {
                             gameCovers[0].getBigCoverUrl().let { coverUrl ->
-                                _selectedGame.value?.imageUri = coverUrl
+                                _selectedGame.value.imageUri = coverUrl
                                 currentImageUri = null
                             }
                         }
@@ -190,7 +201,7 @@ class AddGameViewModel @Inject constructor(
         if (isEdit) editGame(game) else saveNewGame(game)
     }
 
-    fun uploadCoverImage(imageFile: File?) {
+    private fun uploadCoverImage(imageFile: File?) {
         viewModelScope.launch {
             startLoading()
             imageFile?.let { image ->
@@ -202,7 +213,7 @@ class AddGameViewModel @Inject constructor(
 
                 handleNetworkResponse(
                     gamesRepository
-                        .uploadGameCover(token, selectedGame.value?.id ?: "", body)
+                        .uploadGameCover(token, selectedGame.value.id, body)
                 ) {
                     postServerMessage(pendingMessage)
                 }

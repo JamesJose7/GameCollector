@@ -33,7 +33,6 @@ import com.jeeps.gamecollector.deprecated.services.api.ApiClient;
 import com.jeeps.gamecollector.deprecated.services.api.GameService;
 import com.jeeps.gamecollector.deprecated.services.igdb.IgdbApiClient;
 import com.jeeps.gamecollector.deprecated.services.igdb.IgdbService;
-import com.jeeps.gamecollector.deprecated.utils.FileUtils;
 import com.jeeps.gamecollector.remaster.utils.IgdbUtils;
 import com.jeeps.gamecollector.deprecated.utils.UserUtils;
 import com.squareup.picasso.Picasso;
@@ -59,16 +58,16 @@ public class AddGameActivityOld extends AppCompatActivity {
     private static final String TAG = "ADD_GAME_ACTIVITY";
 
     @BindView(R.id.game_cover) ImageView gameCover;
-    @BindView(R.id.game_name_edit) EditText nameEdit;
-    @BindView(R.id.game_shortname_edit) EditText shortNameEdit;
-    @BindView(R.id.platform_game_edit) EditText platformEdit;
-    @BindView(R.id.game_publisher_edit) EditText publisherEdit;
-    @BindView(R.id.radio_group) RadioGroup mRadioGroup;
-    @BindView(R.id.radio_digital) RadioButton mRadioDigital;
-    @BindView(R.id.radio_physical) RadioButton radioPhysical;
-    @BindView(R.id.times_completed_selector) NumberPicker mNumberPicker;
+    EditText nameEdit;
+    EditText shortNameEdit;
+    EditText platformEdit;
+    EditText publisherEdit;
+    RadioGroup mRadioGroup;
+    RadioButton mRadioDigital;
+    RadioButton radioPhysical;
+    NumberPicker mNumberPicker;
     @BindView(R.id.fab) FloatingActionButton fab;
-    @BindView(R.id.add_game_progressbar) ProgressBar progressBar;
+    ProgressBar progressBar;
 
     private SharedPreferences sharedPreferences;
     private CurrentUser currentUser;
@@ -366,14 +365,14 @@ public class AddGameActivityOld extends AppCompatActivity {
         result.putExtra(PlatformLibraryActivity.SELECTED_GAME_POSITION, selectedGamePosition);
         setResult(RESULT_OK, result);
         if (currImageURI != null) {
-            try {
-                uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
-                                game.getId());
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.e(TAG, "There was an error uploading the image");
-                finish();
-            }
+//            try {
+//                uploadImageCover(FileUtils.compressImage(context, "temp.png", currImageURI),
+//                                game.getId());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                Log.e(TAG, "There was an error uploading the image");
+//                finish();
+//            }
         } else
             finish();
     }
@@ -439,7 +438,7 @@ public class AddGameActivityOld extends AppCompatActivity {
         });
     }
 
-    @OnClick(R.id.remove_cover_button)
+//    @OnClick(R.id.remove_cover_button)
     protected void removeGameCoverButton(View v) {
         removeCover();
     }

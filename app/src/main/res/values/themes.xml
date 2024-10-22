@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light">
         <item name="android:windowContentTransitions">true</item>
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -9,6 +9,10 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:fontFamily">@font/varela_round</item>
         <item name="android:windowBackground">@android:color/white</item>
+
+        <!-- Affects FAB colors -->
+        <item name="colorSecondary">@color/colorAccent</item>
+        <item name="colorOnSecondary">@android:color/white</item>
 
         <!-- Components -->
         <item name="bottomSheetDialogTheme">@style/BaseBottomSheetDialogTheme</item>
@@ -40,7 +44,7 @@
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="android:textColorSecondary">@android:color/white</item>
-        <item name="android:windowBackground">@mipmap/bg_login</item>
+        <item name="android:windowBackground">@drawable/login_cover_art</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:textColorHint">@android:color/white</item>

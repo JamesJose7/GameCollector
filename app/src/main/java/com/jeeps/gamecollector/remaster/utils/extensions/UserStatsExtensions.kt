@@ -14,3 +14,11 @@ fun UserStats.completionPercentage(): Int {
         0
     }
 }
+
+fun UserStats.completionPercent(): Float {
+    return if (totalGames() > 0) {
+        (completedGamesTotal.toFloat() / totalGames().toFloat())
+    } else {
+        0f
+    }
+}
