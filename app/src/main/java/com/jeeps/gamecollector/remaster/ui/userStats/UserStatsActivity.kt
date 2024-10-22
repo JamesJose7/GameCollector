@@ -244,7 +244,7 @@ fun StatChip(
     ) {
         Text(
             text = value,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = valueFontSize,
             textAlign = TextAlign.Center,
             modifier = Modifier
@@ -252,7 +252,7 @@ fun StatChip(
         )
         Text(
             text = label,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier
