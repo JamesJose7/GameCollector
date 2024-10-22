@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.db.williamchart.view.DonutChartView;
-import com.github.ybq.android.spinkit.style.DoubleBounce;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.jeeps.gamecollector.R;
@@ -87,8 +86,8 @@ public class StatsActivity extends AppCompatActivity {
         currentUser = UserUtils.getCurrentUser(context, sharedPreferences);
 
         //Progress bar animation
-        DoubleBounce doubleBounce = new DoubleBounce();
-        statsProgressBar.setIndeterminateDrawable(doubleBounce);
+//        DoubleBounce doubleBounce = new DoubleBounce();
+//        statsProgressBar.setIndeterminateDrawable(doubleBounce);
 
         // Configure recycler view
         layoutManager = new LinearLayoutManager(context) {
