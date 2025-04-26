@@ -189,7 +189,7 @@ private fun HourStat(
         Text(
             text = label,
             color = colorResource(id = R.color.textColorPrimary),
-            fontSize = 17.sp,
+            fontSize = 15.sp,
             modifier = Modifier
                 .weight(40f)
                 .padding(start = 4.dp)
@@ -198,7 +198,7 @@ private fun HourStat(
             text = stringResource(id = R.string.hours_template, hours.roundToInt()),
 //            color = colorResource(id = ColorsUtils.getColorByHoursRange(hours)),
             color = colorResource(id = R.color.textColorPrimary),
-            fontSize = 17.sp,
+            fontSize = 15.sp,
             textAlign = TextAlign.Right,
             modifier = Modifier
                 .weight(60f)
@@ -248,6 +248,7 @@ private fun ErrorMessage(
     Text(
         text = stringResource(id = R.string.no_hours_stats_error),
         color = colorResource(id = R.color.textSecondaryColor),
+        fontSize = 15.sp,
         modifier = modifier.fillMaxWidth()
     )
 }

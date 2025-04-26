@@ -54,7 +54,7 @@ private fun Title(
 ) {
     Text(
         text = text,
-        fontSize = 20.sp,
+        fontSize = 16.sp,
         textAlign = TextAlign.Center,
         modifier = modifier
     )

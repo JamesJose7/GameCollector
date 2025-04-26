@@ -340,7 +340,8 @@ fun GameDetailsScreen(
                     .padding(top = 10.dp)
             )
             GameRatingsCardContent(
-                game = game, modifier = Modifier
+                game = game,
+                modifier = Modifier
                     .padding(all = 10.dp)
             )
         }
@@ -404,7 +405,7 @@ fun SectionTitle(
 ) {
     Text(
         text = text,
-        fontSize = 20.sp,
+        fontSize = 18.sp,
         color = colorResource(id = R.color.textColorPrimary),
         modifier = modifier.fillMaxWidth()
     )
@@ -454,19 +455,24 @@ fun GameRatingsCardContent(
             .fillMaxWidth()
             .background(color = Color.White)
     ) {
-        SectionTitle(
-            text = stringResource(id = R.string.ratings_title),
-            modifier = modifier
-        )
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 20.dp, horizontal = 10.dp)
+                .padding(vertical = 8.dp, horizontal = 12.dp)
         ) {
-            RatingChip("Users", game.userRating, game.userRatingCount)
-            RatingChip("Critics", game.criticsRating, game.criticsRatingCount)
-            RatingChip("Total", game.totalRating, game.totalRatingCount)
+            SectionTitle(
+                text = stringResource(id = R.string.ratings_title),
+                modifier = Modifier
+                    .padding(bottom = 4.dp)
+            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                RatingChip("Users", game.userRating, game.userRatingCount)
+                RatingChip("Critics", game.criticsRating, game.criticsRatingCount)
+                RatingChip("Total", game.totalRating, game.totalRatingCount)
+            }
         }
     }
 }
