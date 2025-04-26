@@ -33,6 +33,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -239,7 +240,7 @@ fun GameDetailsScreen(
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
-            .background(color = Color.White)
+            .background(color = MaterialTheme.colorScheme.surface)
             .verticalScroll(rememberScrollState())
     ) {
         val (header, completedButton, lottieAnimation, details) = createRefs()
@@ -329,10 +330,6 @@ fun GameDetailsScreen(
                     top.linkTo(completedButton.bottom)
                 }
         ) {
-            SectionTitle(text = stringResource(id = R.string.hours_stats),
-                modifier
-                    .padding(horizontal = 10.dp)
-                    .padding(top = 20.dp))
             HourStatsCardContent(
                 hoursStats = hoursStats,
                 isLoadingStats = isLoadingStats,
@@ -341,11 +338,6 @@ fun GameDetailsScreen(
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
                     .padding(top = 10.dp)
-            )
-            SectionTitle(text = stringResource(id = R.string.ratings_title),
-                modifier
-                    .padding(horizontal = 10.dp)
-                    .padding(top = 20.dp)
             )
             GameRatingsCardContent(
                 game = game, modifier = Modifier
@@ -431,7 +423,7 @@ fun HourStatsCardContent(
         colors = CardDefaults.cardColors(
             containerColor = Color.White,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
         modifier = modifier
             .fillMaxWidth()
             .background(color = Color.White)
@@ -457,11 +449,15 @@ fun GameRatingsCardContent(
         colors = CardDefaults.cardColors(
             containerColor = Color.White,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
         modifier = modifier
             .fillMaxWidth()
             .background(color = Color.White)
     ) {
+        SectionTitle(
+            text = stringResource(id = R.string.ratings_title),
+            modifier = modifier
+        )
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier

@@ -6,10 +6,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.KeyboardDoubleArrowUp
+import androidx.compose.material.icons.filled.LinearScale
+import androidx.compose.material.icons.filled.Minimize
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,8 +37,12 @@ import androidx.compose.ui.unit.sp
 import com.example.compose.AppTheme
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.deprecated.utils.ColorsUtils
+import com.jeeps.gamecollector.remaster.ui.games.details.SectionTitle
 import kotlin.math.roundToInt
 
+private const val RANGE_LOW = 16.0
+private const val RANGE_MED = 30.0
+private const val RANGE_HIGH = 60.0
 
 @Composable
 fun HourStats(
@@ -49,11 +64,39 @@ fun HourStats(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 20.dp, horizontal = 10.dp)
+                .padding(vertical = 8.dp, horizontal = 12.dp)
         ) {
-            HourStat(label = stringResource(id = R.string.main_story_label), hours = storyHours, modifier = Modifier.padding(bottom = 5.dp))
-            HourStat(label = stringResource(id = R.string.main_extra_label), hours = mainExtraHours, modifier = Modifier.padding(bottom = 5.dp))
-            HourStat(label = stringResource(id = R.string.completionist_label), hours = completionistHours)
+            SectionTitle(
+                text = stringResource(id = R.string.hours_stats),
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+            )
+            HoursBarBreakdown(
+                storyHours = storyHours,
+                mainExtraHours = mainExtraHours,
+                completionistHours = completionistHours,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+
+            HourStat(
+                label = stringResource(id = R.string.main_story_label),
+                hours = storyHours,
+                legendColor = colorResource(R.color.rating_range_80),
+                modifier = Modifier.padding(bottom = 5.dp)
+            )
+            HourStat(
+                label = stringResource(id = R.string.main_extra_label),
+                hours = mainExtraHours,
+                legendColor = colorResource(R.color.rating_range_40),
+                modifier = Modifier.padding(bottom = 5.dp)
+            )
+            HourStat(
+                label = stringResource(id = R.string.completionist_label),
+                hours = completionistHours,
+                legendColor = colorResource(R.color.rating_range_0)
+            )
 
             if (isError) {
                 ErrorMessage(modifier = Modifier.padding(top = 10.dp))
@@ -84,27 +127,117 @@ fun HourStats(
 }
 
 @Composable
+fun HoursBarBreakdown(
+    modifier: Modifier = Modifier,
+    storyHours: Double,
+    mainExtraHours: Double,
+    completionistHours: Double
+) {
+    val hoursTotal = storyHours + mainExtraHours + completionistHours
+    val storyPercentage = (storyHours / hoursTotal).coerceIn(0.0, 1.0)
+    val mainExtraPercentage = ((mainExtraHours / hoursTotal) + storyPercentage).coerceIn(0.0, 1.0)
+
+    Box(
+        modifier = modifier
+            .background(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), shape = CircleShape)
+            .height(8.dp)
+            .fillMaxWidth()
+    ) {
+        if (hoursTotal > 0) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .background(color = colorResource(R.color.rating_range_0), shape = CircleShape)
+                    .fillMaxWidth()
+            )
+        }
+        if (mainExtraHours > 0) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .background(color = colorResource(R.color.rating_range_40), shape = CircleShape)
+                    .fillMaxWidth(mainExtraPercentage.toFloat())
+            )
+        }
+        if (storyPercentage > 0) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .background(color = colorResource(R.color.rating_range_80), shape = CircleShape)
+                    .fillMaxWidth(storyPercentage.toFloat())
+            )
+        }
+    }
+}
+
+@Composable
 private fun HourStat(
     label: String,
     hours: Double,
+    legendColor: Color,
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .background(color = legendColor, shape = CircleShape)
+        )
         Text(
             text = label,
             color = colorResource(id = R.color.textColorPrimary),
             fontSize = 17.sp,
-            modifier = Modifier.weight(40f)
+            modifier = Modifier
+                .weight(40f)
+                .padding(start = 4.dp)
         )
         Text(
             text = stringResource(id = R.string.hours_template, hours.roundToInt()),
-            color = colorResource(id = ColorsUtils.getColorByHoursRange(hours)),
+//            color = colorResource(id = ColorsUtils.getColorByHoursRange(hours)),
+            color = colorResource(id = R.color.textColorPrimary),
             fontSize = 17.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.weight(60f)
+            textAlign = TextAlign.Right,
+            modifier = Modifier
+                .weight(60f)
+                .padding(end = 4.dp)
         )
+        when {
+            hours < RANGE_LOW -> {
+                Icon(
+                    imageVector = Icons.Default.Remove,
+                    contentDescription = null,
+                    tint = colorResource(id = ColorsUtils.getColorByHoursRange(hours)),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            hours in RANGE_LOW..<RANGE_MED -> {
+                Icon(
+                    imageVector = Icons.Filled.KeyboardArrowUp,
+                    contentDescription = null,
+                    tint = colorResource(id = ColorsUtils.getColorByHoursRange(hours)),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            hours in RANGE_MED..<RANGE_HIGH -> {
+                Icon(
+                    imageVector = Icons.Filled.KeyboardDoubleArrowUp,
+                    contentDescription = null,
+                    tint = colorResource(id = ColorsUtils.getColorByHoursRange(hours)),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            hours >= RANGE_HIGH -> {
+                Icon(
+                    painter = painterResource(R.drawable.arrow_triple),
+                    contentDescription = null,
+                    tint = colorResource(id = ColorsUtils.getColorByHoursRange(hours)),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
     }
 }
 
@@ -124,9 +257,23 @@ private fun ErrorMessage(
 fun HourStatsPreview() {
     AppTheme {
         HourStats(
-            storyHours = 50.0,
-            mainExtraHours = 97.0,
+            storyHours = 20.0,
+            mainExtraHours = 50.0,
             completionistHours = 188.0,
+            isLoadingStats = false,
+            isError = false
+        )
+    }
+}
+
+@Preview()
+@Composable
+fun HourStatsNoDataPreview() {
+    AppTheme {
+        HourStats(
+            storyHours = 0.0,
+            mainExtraHours = 0.0,
+            completionistHours = 0.0,
             isLoadingStats = false,
             isError = false
         )
