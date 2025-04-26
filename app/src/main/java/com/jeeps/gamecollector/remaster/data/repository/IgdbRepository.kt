@@ -5,6 +5,7 @@ import com.jeeps.gamecollector.remaster.data.api.ApiIgdb
 import com.jeeps.gamecollector.remaster.data.model.ErrorResponse
 import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameCoverIG
 import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameIG
+import com.jeeps.gamecollector.remaster.data.model.data.igdb.GenreIg
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -22,6 +23,12 @@ class IgdbRepository @Inject constructor(
     suspend fun getGameCoverById(gameId: String): NetworkResponse<List<GameCoverIG>, ErrorResponse> {
         return withContext(NonCancellable) {
             apiIgdb.getImageCoverById(gameId)
+        }
+    }
+
+    suspend fun getGenresByIds(gameId: String): NetworkResponse<List<GenreIg>, ErrorResponse> {
+        return withContext(NonCancellable) {
+            apiIgdb.getGenresByIds(gameId)
         }
     }
 }

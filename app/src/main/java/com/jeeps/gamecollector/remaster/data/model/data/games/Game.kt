@@ -3,6 +3,7 @@ package com.jeeps.gamecollector.remaster.data.model.data.games
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameIG
+import com.jeeps.gamecollector.remaster.data.model.data.igdb.GenreIg
 import java.io.Serializable
 import java.time.DateTimeException
 import java.time.Instant
@@ -45,6 +46,7 @@ data class Game(
     var totalRating: Double = 0.0,
     var totalRatingCount: Int = 0,
     var genres: List<Int> = emptyList(),
+    var genresNames: List<String> = emptyList(),
     var storyline: String = "",
     var summary: String = "",
     var url: String = "",
@@ -67,7 +69,7 @@ data class Game(
     }
 }
 
-fun Game.addAdditionalGameDetails(gameIG: GameIG) {
+fun Game.addAdditionalGameDetails(gameIG: GameIG, genresIg: List<String> = emptyList()) {
     firstReleaseDate = gameIG.firstReleaseDate ?: 0
     ageRatings = gameIG.ageRatings ?: emptyList()
     criticsRating = gameIG.criticsRating ?: 0.0
@@ -77,6 +79,7 @@ fun Game.addAdditionalGameDetails(gameIG: GameIG) {
     totalRating = gameIG.totalRating ?: 0.0
     totalRatingCount = gameIG.totalRatingCount ?: 0
     genres = gameIG.genres ?: emptyList()
+    genresNames = genresIg
     storyline = gameIG.storyline ?: ""
     summary = gameIG.summary ?: ""
     url = gameIG.url ?: ""

@@ -13,6 +13,7 @@ import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats
 import com.jeeps.gamecollector.remaster.data.model.data.games.addAdditionalGameDetails
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.data.model.data.igdb.findMostSimilarGame
+import com.jeeps.gamecollector.remaster.data.model.data.igdb.toNames
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.data.repository.IgdbRepository
@@ -164,13 +165,17 @@ class GameDetailsViewModel @Inject constructor(
     }
 
     private fun updateGameDetails() = _selectedGame.value?.let { game ->
-        if (game.url.isNotEmpty()) return@let
+        if (game.url.isNotEmpty() && game.genresNames.isNotEmpty()) return@let
 
         viewModelScope.launch {
             val igdbGames =
                 handleNetworkResponse(igdbRepository.searchGames(IgdbUtils.getSearchGamesQuery(game.name)))
             igdbGames.findMostSimilarGame(game.name)?.let { gameIG ->
-                game.addAdditionalGameDetails(gameIG)
+                val genres = gameIG.genres
+                    ?.let { handleNetworkResponse(igdbRepository.getGenresByIds(IgdbUtils.getGameGenresQuery(it))) }
+                    ?: emptyList()
+
+                game.addAdditionalGameDetails(gameIG, genres.toNames())
 
                 val token = authenticationRepository.getUserToken()
                 handleNetworkResponse(gamesRepository.editGame(token, game.id, game)) {

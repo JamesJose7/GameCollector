@@ -8,6 +8,7 @@ import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.addAdditionalGameDetails
 import com.jeeps.gamecollector.remaster.data.model.data.igdb.findMostSimilarGame
+import com.jeeps.gamecollector.remaster.data.model.data.igdb.toNames
 import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.data.repository.IgdbRepository
@@ -173,7 +174,11 @@ class AddGameViewModel @Inject constructor(
             if (selectedGame == null) {
                 continueSavingGame(isEdit, game)
             } else {
-                game.addAdditionalGameDetails(selectedGame)
+                val genres = selectedGame.genres
+                    ?.let { handleNetworkResponse(igdbRepository.getGenresByIds(IgdbUtils.getGameGenresQuery(it))) }
+                    ?: emptyList()
+
+                game.addAdditionalGameDetails(selectedGame, genres.toNames())
                 // Get image cover
                 when (val response = igdbRepository
                     .getGameCoverById(IgdbUtils.getCoverImageQuery(selectedGame.cover))) {

@@ -15,6 +15,8 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +27,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
@@ -222,6 +225,7 @@ fun GameDetailsScreen(
         onGameCompletedClick = { gameDetailsViewModel.updateGameCompletion() }
     )
 }
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun GameDetailsScreen(
     modifier: Modifier = Modifier,
@@ -278,20 +282,26 @@ fun GameDetailsScreen(
                 )
                 HorizontalDivider(
                     thickness = 0.5.dp,
-                    color = Color(0x555e5e5e),
-                    modifier = Modifier.padding(bottom = 5.dp)
+                    color = Color(0x555e5e5e)
                 )
                 Text(
                     text = stringResource(id = R.string.released_in),
                     fontSize = 11.sp,
                     color = colorResource(id = R.color.textSecondaryColor),
-                    modifier = Modifier.padding(top = 10.dp)
+                    modifier = Modifier.padding(top = 4.dp)
                 )
                 Text(
                     text = game.releaseDateFormatted(),
                     fontSize = 17.sp,
                     color = colorResource(id = R.color.textSecondaryColor)
                 )
+                if (game.genresNames.isNotEmpty()) {
+                    GenresChips(
+                        genres = game.genresNames,
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                    )
+                }
             }
         }
 
@@ -343,6 +353,30 @@ fun GameDetailsScreen(
                 game = game,
                 modifier = Modifier
                     .padding(all = 10.dp)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun GenresChips(
+    modifier: Modifier = Modifier,
+    genres: List<String>
+) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier
+    ) {
+        genres.map { genre ->
+            Text(
+                text = genre,
+                fontSize = 11.sp,
+                color = colorResource(R.color.textSecondaryColor),
+                modifier = Modifier
+                    .background(color = MaterialTheme.colorScheme.surfaceVariant, shape = CircleShape)
+                    .padding(horizontal = 8.dp)
             )
         }
     }
@@ -491,7 +525,8 @@ fun GameDetailsPreview() {
         criticsRatingCount = 213,
         totalRating = 90.0,
         totalRatingCount = 223,
-        timesCompleted = 2
+        timesCompleted = 2,
+        genresNames = listOf("RPG", "FPS", "MOBA")
     )
     val stats = GameplayHoursStats(
         gameplayMain = 50.0,
