@@ -38,6 +38,7 @@ import com.example.compose.AppTheme
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.deprecated.utils.ColorsUtils
 import com.jeeps.gamecollector.remaster.ui.games.details.SectionTitle
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 private const val RANGE_LOW = 16.0
@@ -133,9 +134,10 @@ fun HoursBarBreakdown(
     mainExtraHours: Double,
     completionistHours: Double
 ) {
-    val hoursTotal = storyHours + mainExtraHours + completionistHours
+    val hoursTotal = max(max(storyHours, mainExtraHours), completionistHours)
     val storyPercentage = (storyHours / hoursTotal).coerceIn(0.0, 1.0)
-    val mainExtraPercentage = ((mainExtraHours / hoursTotal) + storyPercentage).coerceIn(0.0, 1.0)
+    val mainExtraPercentage = (mainExtraHours / hoursTotal).coerceIn(0.0, 1.0)
+    val completionistPercentage = (completionistHours / hoursTotal).coerceIn(0.0, 1.0)
 
     Box(
         modifier = modifier
@@ -148,7 +150,7 @@ fun HoursBarBreakdown(
                 modifier = Modifier
                     .fillMaxHeight()
                     .background(color = colorResource(R.color.rating_range_0), shape = CircleShape)
-                    .fillMaxWidth()
+                    .fillMaxWidth(completionistPercentage.toFloat())
             )
         }
         if (mainExtraHours > 0) {
