@@ -2,6 +2,7 @@ package com.jeeps.gamecollector.remaster.ui.composables
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -68,8 +69,14 @@ fun CompletionTimeline(modifier: Modifier = Modifier) {
     var horizontalPaddingPx by remember { mutableFloatStateOf(0f) }
     val horizontalPadding = with(density) { horizontalPaddingPx.toDp() }
 
+    // Snap to center
+    val flingBehavior = rememberSnapFlingBehavior(
+        lazyListState = listState
+    )
+
     LazyRow(
         state = listState,
+        flingBehavior = flingBehavior,
         contentPadding = PaddingValues(horizontal = horizontalPadding),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
