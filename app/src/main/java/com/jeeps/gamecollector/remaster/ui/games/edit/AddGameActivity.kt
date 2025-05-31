@@ -29,8 +29,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -43,8 +46,10 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -84,6 +89,11 @@ import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 @ExperimentalCoroutinesApi
@@ -153,6 +163,7 @@ fun AddGameScreen(
         publisher = game.publisher,
         isPhysical = game.isPhysical,
         timesCompleted = game.timesCompleted,
+        completionDate = game.completionDate,
         coverImageUri = game.imageUri,
         isEdit = game.id.isNotEmpty(),
         isSavingGame = isLoading,
@@ -161,6 +172,7 @@ fun AddGameScreen(
         onPublisherChange = { addGameViewModel.setGamePublisher(it) },
         onIsPhysicalChange = { addGameViewModel.setGameFormat(it) },
         onTimesCompletedChange = { addGameViewModel.setTimesCompleted(it) },
+        onCompletionDateChange = { addGameViewModel.setCompletionDate(it) },
         onCoverImageChange = { addGameViewModel.setGameImageUri(it) },
         onSaveGame = { addGameViewModel.saveGame() },
         onBackPressed = onBackPressed
@@ -176,6 +188,7 @@ fun AddGameScreen(
     publisher: String,
     isPhysical: Boolean,
     timesCompleted: Int,
+    completionDate: String,
     coverImageUri: String = "",
     isEdit: Boolean,
     isSavingGame: Boolean,
@@ -185,6 +198,7 @@ fun AddGameScreen(
     onPublisherChange: (String) -> Unit = { },
     onIsPhysicalChange: (Boolean) -> Unit = { },
     onTimesCompletedChange: (Int) -> Unit = { },
+    onCompletionDateChange: (String) -> Unit = { },
     onCoverImageChange: (Uri?) -> Unit = { },
     onSaveGame: () -> Unit = { },
     onBackPressed: () -> Unit = { }
@@ -264,12 +278,14 @@ fun AddGameScreen(
                     publisher = publisher,
                     isPhysical = isPhysical,
                     timesCompleted = timesCompleted,
+                    completionDate = completionDate,
                     onNameChange = onNameChange,
                     onShortNameChange = onShortNameChange,
                     onPlatformChange = onPlatformChange,
                     onPublisherChange = onPublisherChange,
                     onIsPhysicalChange = onIsPhysicalChange,
-                    onTimesCompletedChange = onTimesCompletedChange
+                    onTimesCompletedChange = onTimesCompletedChange,
+                    onCompletionDateChange = onCompletionDateChange
                 )
             }
         }
@@ -338,12 +354,14 @@ fun EditGameForm(
     publisher: String,
     isPhysical: Boolean,
     timesCompleted: Int,
+    completionDate: String,
     onNameChange: (String) -> Unit = { },
     onShortNameChange: (String) -> Unit = { },
     onPlatformChange: (String) -> Unit = { },
     onPublisherChange: (String) -> Unit = { },
     onIsPhysicalChange: (Boolean) -> Unit = { },
     onTimesCompletedChange: (Int) -> Unit = { },
+    onCompletionDateChange: (String) -> Unit = { },
 ) {
     val digitalTextBackground = if (!isPhysical) MaterialTheme.colorScheme.primaryContainer else Color.White
     val physicalTextBackground = if (isPhysical) MaterialTheme.colorScheme.primaryContainer else Color.White
@@ -461,9 +479,117 @@ fun EditGameForm(
             Text(text = "Times completed: $timesCompleted")
         }
 
+        DatePickerField(
+            label = "Completion date",
+            initialDate = completionDate,
+            onDateSelected = { onCompletionDateChange(it) }
+        )
+
         Spacer(modifier = Modifier
             .height(50.dp)
             .fillMaxWidth())
+    }
+}
+
+@Composable
+fun DatePickerField(
+    label: String = "Select date",
+    initialDate: String? = null,
+    onDateSelected: (String) -> Unit
+) {
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    // Date formatters
+    val isoFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        .withZone(ZoneOffset.UTC)
+
+    // State for selected date
+    var selectedDate by remember {
+        mutableStateOf(
+            initialDate?.let {
+                try {
+                    Instant.parse(it).atZone(ZoneId.systemDefault()).toLocalDate()
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        )
+    }
+
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                showDatePicker = true
+            }
+    ) {
+        OutlinedTextField(
+            value = selectedDate?.toString() ?: "",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                IconButton(onClick = { showDatePicker = true }) {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = "Select date"
+                    )
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+    }
+
+    if (showDatePicker) {
+        DatePickerModal(
+            onDateSelected = {
+                selectedDate = it
+                it?.let { date ->
+                    // Convert to ISO string with time at 00:00:00.000Z
+                    val instant = date.atStartOfDay().toInstant(ZoneOffset.UTC)
+                    onDateSelected(isoFormatter.format(instant))
+                }
+            },
+            onDismiss = {
+                showDatePicker = false
+            }
+        )
+    }
+}
+
+@Composable
+fun DatePickerModal(
+    onDateSelected: (LocalDate?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState()
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                val localDate = datePickerState.selectedDateMillis?.let {
+                    Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()
+                }
+                onDateSelected(localDate)
+                onDismiss()
+            }) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    ) {
+        DatePicker(state = datePickerState)
     }
 }
 
@@ -482,6 +608,7 @@ fun AddGameScreenPreview() {
             isEdit = false,
             isSavingGame = false,
             timesCompleted = timesCompleted,
+            completionDate = "",
             onIsPhysicalChange = { isPhysical = it },
             onTimesCompletedChange = { timesCompleted = it}
         )

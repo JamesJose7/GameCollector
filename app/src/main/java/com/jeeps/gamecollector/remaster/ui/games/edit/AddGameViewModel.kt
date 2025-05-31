@@ -62,6 +62,10 @@ class AddGameViewModel @Inject constructor(
         _selectedGame.value = _selectedGame.value.copy(timesCompleted = value)
     }
 
+    fun setCompletionDate(value: String) {
+        _selectedGame.value = _selectedGame.value.copy(completionDate = value)
+    }
+
     fun setGameFormat(isPhysical: Boolean) {
         _selectedGame.value = _selectedGame.value.copy(isPhysical = isPhysical)
     }
