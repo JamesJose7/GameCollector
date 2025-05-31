@@ -38,6 +38,7 @@
     <string name="platform_cover">Platform cover</string>
     <string name="edit_game">Edit game</string>
     <string name="ratings_title">Ratings</string>
+    <string name="timeline_title">Finished games</string>
     <string name="released_in">Released in</string>
     <string name="content_description_refresh_icon">Refresh icon</string>
 </resources>

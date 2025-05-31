@@ -67,7 +67,15 @@ class GameDetailsViewModel @Inject constructor(
 
     var selectedGamePosition: Int = -1
     var platformName: String? = null
-    var platformId: String? = null
+    var platformId: String = ""
+        set(value) {
+            field = value
+            getUserGames()
+        }
+
+    private val _games = MutableLiveData<List<Game>>()
+    val games: LiveData<List<Game>>
+        get() = _games
 
     fun setSelectedGame(game: Game) {
         _selectedGame.value = game
@@ -185,4 +193,28 @@ class GameDetailsViewModel @Inject constructor(
         }
     }
 
+    private fun getUserGames() {
+        val user = authenticationRepository.getUser() ?: return
+
+        viewModelScope.launch {
+            gamesRepository.getUserGamesByPlatform(
+                user.username,
+                platformId
+            ).collect { state ->
+                when (state) {
+                    is State.Loading -> startLoading()
+                    is State.Success -> {
+                        stopLoading()
+                        state.data.let { result ->
+                            result.let { _games.value = it }
+                        }
+                    }
+                    is State.Failed -> {
+                        stopLoading()
+                        handleError(ErrorType.SERVER_ERROR, state.e)
+                    }
+                }
+            }
+        }
+    }
 }

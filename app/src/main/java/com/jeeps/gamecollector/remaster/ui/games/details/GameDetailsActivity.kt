@@ -15,7 +15,6 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -63,6 +62,7 @@ import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.releaseDateFormatted
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
+import com.jeeps.gamecollector.remaster.ui.composables.CompletionTimeline
 import com.jeeps.gamecollector.remaster.ui.composables.FireworksAnimation
 import com.jeeps.gamecollector.remaster.ui.composables.HourStats
 import com.jeeps.gamecollector.remaster.ui.composables.RatingChip
@@ -119,7 +119,7 @@ class GameDetailsActivity : BaseActivity() {
     }
 
     private fun getIntentData() {
-        viewModel.platformId = intent.getStringExtra(CURRENT_PLATFORM)
+        viewModel.platformId = intent.getStringExtra(CURRENT_PLATFORM).orEmpty()
         viewModel.platformName = intent.getStringExtra(CURRENT_PLATFORM_NAME)
         viewModel.setSelectedGame(intent.serializable<Game>(SELECTED_GAME)!!)
         viewModel.selectedGamePosition = intent.getIntExtra(SELECTED_GAME_POSITION, -1)
@@ -210,6 +210,7 @@ fun GameDetailsScreen(
     gameDetailsViewModel: GameDetailsViewModel = viewModel()
 ) {
     val game by gameDetailsViewModel.selectedGame.observeAsState(Game())
+    val platformGames by gameDetailsViewModel.games.observeAsState(emptyList())
     val stats by gameDetailsViewModel.gameHoursStats.observeAsState(GameplayHoursStats())
     val isLoadingHourStats by gameDetailsViewModel.loadingGameHours.observeAsState(true)
     val isLoadingCompletionUpdate by gameDetailsViewModel.loadingCompletionUpdate.observeAsState(false)
@@ -217,6 +218,7 @@ fun GameDetailsScreen(
 
     GameDetailsScreen(
         game = game,
+        platformGames = platformGames,
         hoursStats = stats,
         isLoadingStats = isLoadingHourStats,
         isLoadingCompletionUpdate = isLoadingCompletionUpdate,
@@ -225,11 +227,11 @@ fun GameDetailsScreen(
         onGameCompletedClick = { gameDetailsViewModel.updateGameCompletion() }
     )
 }
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun GameDetailsScreen(
     modifier: Modifier = Modifier,
     game: Game,
+    platformGames: List<Game>,
     onGameCompletedClick: () -> Unit = {},
     hoursStats: GameplayHoursStats,
     isLoadingStats: Boolean,
@@ -246,6 +248,7 @@ fun GameDetailsScreen(
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surface)
             .verticalScroll(rememberScrollState())
+            .padding(bottom = 80.dp)
     ) {
         val (header, completedButton, lottieAnimation, details) = createRefs()
         val middleGuideline = createGuidelineFromStart(0.4f)
@@ -354,11 +357,18 @@ fun GameDetailsScreen(
                 modifier = Modifier
                     .padding(all = 10.dp)
             )
+            if (platformGames.isNotEmpty() && game.timesCompleted > 0) {
+                GameTimelineCardContent(
+                    games = platformGames,
+                    selectedGame = game,
+                    modifier = Modifier
+                        .padding(all = 10.dp)
+                )
+            }
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun GenresChips(
     modifier: Modifier = Modifier,
@@ -375,7 +385,10 @@ fun GenresChips(
                 fontSize = 11.sp,
                 color = colorResource(R.color.textSecondaryColor),
                 modifier = Modifier
-                    .background(color = MaterialTheme.colorScheme.surfaceVariant, shape = CircleShape)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = CircleShape
+                    )
                     .padding(horizontal = 8.dp)
             )
         }
@@ -511,6 +524,42 @@ fun GameRatingsCardContent(
     }
 }
 
+@Composable
+fun GameTimelineCardContent(
+    games: List<Game>,
+    selectedGame: Game,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .background(color = Color.White)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+        ) {
+            SectionTitle(
+                text = stringResource(id = R.string.timeline_title),
+                modifier = Modifier
+                    .padding(bottom = 4.dp)
+                    .padding(horizontal = 12.dp)
+            )
+            CompletionTimeline(
+                games = games,
+                selectedGame = selectedGame,
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+            )
+        }
+    }
+}
+
 @Preview
 @Composable
 fun GameDetailsPreview() {
@@ -526,7 +575,8 @@ fun GameDetailsPreview() {
         totalRating = 90.0,
         totalRatingCount = 223,
         timesCompleted = 2,
-        genresNames = listOf("RPG", "FPS", "MOBA")
+        genresNames = listOf("RPG", "FPS", "MOBA"),
+        completionDate = "2023-10-22T02:32:04.808Z"
     )
     val stats = GameplayHoursStats(
         gameplayMain = 50.0,
@@ -536,6 +586,7 @@ fun GameDetailsPreview() {
     AppTheme {
         GameDetailsScreen(
             game = game,
+            platformGames = listOf(game),
             hoursStats = stats,
             isLoadingStats = false,
             isLoadingCompletionUpdate = false,
