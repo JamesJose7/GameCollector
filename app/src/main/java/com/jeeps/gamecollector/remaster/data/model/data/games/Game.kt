@@ -3,10 +3,10 @@ package com.jeeps.gamecollector.remaster.data.model.data.games
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameIG
-import com.jeeps.gamecollector.remaster.data.model.data.igdb.GenreIg
 import java.io.Serializable
 import java.time.DateTimeException
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -34,6 +34,7 @@ data class Game(
     var publisherId: String = "",
     var publisher: String = "",
     var timesCompleted: Int = 0,
+    var completionDate: String = "",
     var gameHoursStats: GameHoursStats = GameHoursStats(),
 
     // AdditionalDetails
@@ -67,6 +68,19 @@ data class Game(
         this.publisherId = publisherId
         this.publisher = publisher
     }
+
+    val completionDateParsed: LocalDate?
+        get() = completionDate.ifEmpty { null }?.let {
+            Instant.parse(it)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+        }
+
+    val completionDateFormatted: String
+        get() {
+            val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            return completionDateParsed?.format(formatter).orEmpty()
+        }
 }
 
 fun Game.addAdditionalGameDetails(gameIG: GameIG, genresIg: List<String> = emptyList()) {
