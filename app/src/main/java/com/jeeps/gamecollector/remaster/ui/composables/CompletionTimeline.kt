@@ -99,7 +99,7 @@ fun CompletionTimeline(
             }
     }
 
-    LaunchedEffect(games, selectedGame) {
+    LaunchedEffect(selectedGame, gameItems) {
         selectedGame?.let {
             val index = gameItems.indexOfFirst { it is GameTimelineItem.GameItem && it.game.id == selectedGame.id }
             if (index != -1) {
