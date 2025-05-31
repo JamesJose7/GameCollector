@@ -29,6 +29,7 @@ import com.jeeps.gamecollector.deprecated.utils.FormatUtils
 import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
+import kotlin.math.roundToInt
 
 /**
  * Created by jeeps on 12/25/2017.
@@ -164,7 +165,7 @@ class GameCardAdapter(
         private fun formatHourStat(sortStatTv: TextView, gameplayMainExtra: Double) {
             sortStatTv.text = sortStatTv.context.getString(
                 R.string.hours_template,
-                FormatUtils.formatDecimal(gameplayMainExtra)
+                FormatUtils.formatDecimal(gameplayMainExtra.roundToInt().toDouble())
             )
             sortStatTv.setTextColor(
                 ColorsUtils.getColorByHoursRange(
