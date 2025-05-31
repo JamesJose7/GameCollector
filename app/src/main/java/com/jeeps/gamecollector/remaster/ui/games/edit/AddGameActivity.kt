@@ -499,22 +499,19 @@ fun DatePickerField(
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
 
-    // Date formatters
-    val isoFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-        .withZone(ZoneOffset.UTC)
-
-    // State for selected date
-    var selectedDate by remember {
-        mutableStateOf(
-            initialDate?.let {
-                try {
-                    Instant.parse(it).atZone(ZoneId.systemDefault()).toLocalDate()
-                } catch (e: Exception) {
-                    null
-                }
+    val displayedDateText = remember(initialDate) {
+        initialDate?.let {
+            try {
+                Instant.parse(it)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+            } catch (e: Exception) {
+                ""
             }
-        )
+        }.orEmpty()
     }
+
 
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -529,7 +526,7 @@ fun DatePickerField(
             }
     ) {
         OutlinedTextField(
-            value = selectedDate?.toString() ?: "",
+            value = displayedDateText,
             onValueChange = {},
             readOnly = true,
             label = { Text(label) },
@@ -549,11 +546,8 @@ fun DatePickerField(
     if (showDatePicker) {
         DatePickerModal(
             onDateSelected = {
-                selectedDate = it
-                it?.let { date ->
-                    // Convert to ISO string with time at 00:00:00.000Z
-                    val instant = date.atStartOfDay().toInstant(ZoneOffset.UTC)
-                    onDateSelected(isoFormatter.format(instant))
+                it?.let { instant ->
+                    onDateSelected(instant.toString())
                 }
             },
             onDismiss = {
@@ -565,7 +559,7 @@ fun DatePickerField(
 
 @Composable
 fun DatePickerModal(
-    onDateSelected: (LocalDate?) -> Unit,
+    onDateSelected: (Instant?) -> Unit,
     onDismiss: () -> Unit
 ) {
     val datePickerState = rememberDatePickerState()
@@ -574,10 +568,18 @@ fun DatePickerModal(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = {
-                val localDate = datePickerState.selectedDateMillis?.let {
-                    Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()
+                val userZone = ZoneId.systemDefault()
+                val selectedUtcMillis = datePickerState.selectedDateMillis
+
+                // Convert UTC millis to LocalDate *as UTC*, ignoring local zone
+                val selectedUtcDate = selectedUtcMillis?.let {
+                    Instant.ofEpochMilli(it).atZone(ZoneId.of("UTC")).toLocalDate()
                 }
-                onDateSelected(localDate)
+
+                // Reinterpret that LocalDate as being in local timezone
+                val correctedInstant = selectedUtcDate?.atStartOfDay(userZone)?.toInstant()
+
+                onDateSelected(correctedInstant)
                 onDismiss()
             }) {
                 Text("OK")
