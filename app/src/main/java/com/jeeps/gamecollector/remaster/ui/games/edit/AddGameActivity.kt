@@ -497,29 +497,24 @@ fun DatePickerField(
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
 
-    val currentDateMillis = remember(initialDate) {
+    val dateTime = remember(initialDate) {
         initialDate?.let {
             try {
                 Instant.parse(it)
                     .atZone(ZoneId.systemDefault())
-                    .toInstant()
-                    .toEpochMilli()
             } catch (e: Exception) {
                 null
             }
         }
     }
-    val displayedDateText = remember(initialDate) {
-        initialDate?.let {
-            try {
-                Instant.parse(it)
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate()
-                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-            } catch (e: Exception) {
-                ""
-            }
-        }.orEmpty()
+    val currentDateMillis = remember(dateTime) {
+        dateTime?.toInstant()?.toEpochMilli()
+    }
+    val displayedDateText = remember(dateTime) {
+        dateTime
+            ?.toLocalDate()
+            ?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+            .orEmpty()
     }
 
     val interactionSource = remember { MutableInteractionSource() }
