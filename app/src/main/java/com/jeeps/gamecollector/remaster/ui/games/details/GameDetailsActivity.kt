@@ -7,17 +7,18 @@ import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.transition.Fade
+import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.overscroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,13 +40,19 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -54,6 +62,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.compose.AppTheme
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityGameDetailsBinding
@@ -81,6 +90,9 @@ import com.jeeps.gamecollector.remaster.utils.extensions.withExclusions
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
@@ -136,7 +148,18 @@ class GameDetailsActivity : BaseActivity() {
             }
         }
 
-        content.screenCompose.setComposable { GameDetailsScreen(viewModel) }
+        content.screenCompose.setComposable {
+            GameDetailsScreen(
+                viewModel,
+                onScroll = { hasScrolled ->
+                    content.gameCover.visibility = if (hasScrolled) {
+                        View.INVISIBLE
+                    } else {
+                        View.VISIBLE
+                    }
+                }
+            )
+        }
     }
 
     private fun bindFab() {
@@ -205,9 +228,11 @@ class GameDetailsActivity : BaseActivity() {
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GameDetailsScreen(
-    gameDetailsViewModel: GameDetailsViewModel = viewModel()
+    gameDetailsViewModel: GameDetailsViewModel = viewModel(),
+    onScroll: (hasScrolled: Boolean) -> Unit
 ) {
     val game by gameDetailsViewModel.selectedGame.observeAsState(Game())
     val platformGames by gameDetailsViewModel.games.observeAsState(emptyList())
@@ -224,7 +249,8 @@ fun GameDetailsScreen(
         isLoadingCompletionUpdate = isLoadingCompletionUpdate,
         isStatsError = isError,
         onRefreshClick = { gameDetailsViewModel.getGameHours() },
-        onGameCompletedClick = { gameDetailsViewModel.updateGameCompletion() }
+        onGameCompletedClick = { gameDetailsViewModel.updateGameCompletion() },
+        onScroll = onScroll
     )
 }
 @Composable
@@ -237,17 +263,38 @@ fun GameDetailsScreen(
     isLoadingStats: Boolean,
     isLoadingCompletionUpdate: Boolean,
     isStatsError: Boolean,
-    onRefreshClick: () -> Unit = {}
+    onRefreshClick: () -> Unit = {},
+    onScroll: (hasScrolled: Boolean) -> Unit = {}
 ) {
     var isCompletedButtonClicked by rememberSaveable { mutableStateOf(false) }
     val title = game.shortName.ifEmpty { game.name }
     val isComplete = game.timesCompleted > 0
 
+    val scrollState = rememberScrollState()
+    val hasScrolled = scrollState.value > 0
+    var alpha by remember { mutableFloatStateOf(0f) }
+    var fadeOutJob by remember { mutableStateOf<Job?>(null) }
+
+    LaunchedEffect(hasScrolled) {
+        onScroll(hasScrolled)
+        // Delay the fade out effect to prevent image from blinking when switching to the ImageView
+        if (hasScrolled) {
+            fadeOutJob?.cancel()
+            alpha = 1f
+        } else {
+            fadeOutJob = launch {
+                delay(100)
+                alpha = 0f
+            }
+        }
+    }
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surface)
-            .verticalScroll(rememberScrollState())
+            // Temporarily disable scroll effect until I remove the View image from content_game_details.xml
+            .verticalScroll(scrollState, overscrollEffect = null)
             .padding(bottom = 80.dp)
     ) {
         val (header, completedButton, lottieAnimation, details) = createRefs()
@@ -260,13 +307,21 @@ fun GameDetailsScreen(
                     top.linkTo(parent.top, margin = 10.dp)
                 }
         ) {
-            Spacer(modifier = Modifier
-                .width(150.dp)
-                .height(200.dp))
+            AsyncImage(
+                model = game.imageUri,
+                contentDescription = stringResource(id = R.string.game_cover),
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .width(150.dp)
+                    .height(200.dp)
+                    .alpha(alpha)
+                    .shadow(elevation = 5.dp)
+            )
             Column(
                 modifier = Modifier
                     .height(200.dp)
                     .padding(start = 10.dp)
+                    .overscroll(null)
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(text = title, fontSize = 19.sp, color = colorResource(id = R.color.textColorPrimary), modifier = Modifier.padding(bottom = 1.dp))
