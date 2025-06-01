@@ -46,6 +46,7 @@ import coil.compose.AsyncImage
 import com.example.compose.AppTheme
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.Period
 import java.time.YearMonth
@@ -100,9 +101,10 @@ fun CompletionTimeline(
     }
 
     LaunchedEffect(selectedGame, gameItems) {
-        selectedGame?.let {
+        if (gameItems.isNotEmpty() && selectedGame != null) {
             val index = gameItems.indexOfFirst { it is GameTimelineItem.GameItem && it.game.id == selectedGame.id }
             if (index != -1) {
+                delay(100)
                 listState.animateScrollToItem(index)
             }
         }
