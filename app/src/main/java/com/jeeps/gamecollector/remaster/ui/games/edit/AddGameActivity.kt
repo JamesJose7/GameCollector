@@ -90,9 +90,7 @@ import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
@@ -499,6 +497,18 @@ fun DatePickerField(
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
 
+    val currentDateMillis = remember(initialDate) {
+        initialDate?.let {
+            try {
+                Instant.parse(it)
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli()
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
     val displayedDateText = remember(initialDate) {
         initialDate?.let {
             try {
@@ -511,7 +521,6 @@ fun DatePickerField(
             }
         }.orEmpty()
     }
-
 
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -545,6 +554,7 @@ fun DatePickerField(
 
     if (showDatePicker) {
         DatePickerModal(
+            selectedDate = currentDateMillis,
             onDateSelected = {
                 it?.let { instant ->
                     onDateSelected(instant.toString())
@@ -559,10 +569,11 @@ fun DatePickerField(
 
 @Composable
 fun DatePickerModal(
+    selectedDate: Long?,
     onDateSelected: (Instant?) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val datePickerState = rememberDatePickerState()
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = selectedDate)
 
     DatePickerDialog(
         onDismissRequest = onDismiss,
