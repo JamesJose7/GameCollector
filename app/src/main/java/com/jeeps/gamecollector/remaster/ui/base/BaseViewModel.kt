@@ -4,10 +4,17 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.utils.Event
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 open class BaseViewModel : ViewModel() {
+
+    private val messageEventChannel = Channel<MessageEvent>()
+    val messageEventsChannelFlow = messageEventChannel.receiveAsFlow()
 
     val TAG = javaClass.simpleName
 
@@ -16,10 +23,13 @@ open class BaseViewModel : ViewModel() {
         get() = _isLoading
 
     private val _errorMessage = MutableLiveData<String>()
+    @Deprecated("Use messageEventChannelFlow instead")
     val errorMessage: LiveData<String>
         get() = _errorMessage
 
+    // TODO: Change this to a type safe class instead of strings
     private val _serverMessage = MutableLiveData<Event<String>>()
+    @Deprecated("Use messageEventChannelFlow instead")
     val serverMessage: LiveData<Event<String>>
         get() = _serverMessage
 
@@ -35,6 +45,9 @@ open class BaseViewModel : ViewModel() {
         // TODO: Create additional method that infers error type based on throwable
         e?.message?.let { Log.e(TAG, it) }
         _errorMessage.postValue(errorType.message)
+        viewModelScope.launch {
+            messageEventChannel.send(MessageEvent.Error(errorType.message))
+        }
     }
 
     fun handleError(error: NetworkResponse.Error<*, *>) {
@@ -45,9 +58,20 @@ open class BaseViewModel : ViewModel() {
         }
         Log.e(TAG, message)
         _errorMessage.postValue(message)
+        viewModelScope.launch {
+            messageEventChannel.send(MessageEvent.Error(message))
+        }
     }
 
     fun postServerMessage(message: String) {
         _serverMessage.value = Event(message)
+        viewModelScope.launch {
+            messageEventChannel.send(MessageEvent.Success(message))
+        }
+    }
+
+    sealed class MessageEvent {
+        data class Error(val message: String) : MessageEvent()
+        data class Success(val message: String) : MessageEvent()
     }
 }

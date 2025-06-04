@@ -57,7 +57,7 @@ public class AddGameActivityOld extends AppCompatActivity {
 
     private static final String TAG = "ADD_GAME_ACTIVITY";
 
-    @BindView(R.id.game_cover) ImageView gameCover;
+    ImageView gameCover;
     EditText nameEdit;
     EditText shortNameEdit;
     EditText platformEdit;

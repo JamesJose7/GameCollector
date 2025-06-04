@@ -5,7 +5,6 @@ package com.jeeps.gamecollector.remaster.ui.games.edit
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
@@ -43,6 +42,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -57,6 +58,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -69,6 +71,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -77,6 +80,8 @@ import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityAddGameBinding
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
+import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
+import com.jeeps.gamecollector.remaster.ui.composables.ObserveAsEvents
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.ADD_GAME_RESULT_MESSAGE
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM_NAME
@@ -84,11 +89,11 @@ import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatfo
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.SELECTED_GAME_POSITION
 import com.jeeps.gamecollector.remaster.utils.extensions.serializable
 import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
-import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -108,10 +113,14 @@ class AddGameActivity : BaseActivity() {
 
         getIntentData()
 
-        bindAlerts()
-
         binding.screenCompose.setComposable {
-            AddGameScreen(viewModel) { onBackPressedDispatcher.onBackPressed() }
+            AddGameScreen(
+                viewModel = viewModel,
+                onBackPressed = { onBackPressedDispatcher.onBackPressed() },
+                onGameSaved = { message ->
+                    finishActivityWithResult(message)
+                }
+            )
         }
     }
 
@@ -121,20 +130,6 @@ class AddGameActivity : BaseActivity() {
         intent.serializable<Game>(SELECTED_GAME)?.let { viewModel.setSelectedGame(it) }
         viewModel.selectedGamePosition = intent.getIntExtra(SELECTED_GAME_POSITION, -1)
         viewModel.checkIfGameIsBeingEdited()
-    }
-
-    private fun bindAlerts() {
-        viewModel.errorMessage.observe(this) {
-            it?.let {
-                showToast(it, Toast.LENGTH_LONG)
-            }
-        }
-
-        viewModel.serverMessage.observe(this) { messageEvent ->
-            messageEvent?.getContentIfNotHandled()?.let {
-                finishActivityWithResult(it)
-            }
-        }
     }
 
     private fun finishActivityWithResult(message: String) {
@@ -148,13 +143,34 @@ class AddGameActivity : BaseActivity() {
 
 @Composable
 fun AddGameScreen(
-    addGameViewModel: AddGameViewModel = viewModel(),
-    onBackPressed: () -> Unit = {}
+    viewModel: AddGameViewModel = viewModel(),
+    onBackPressed: () -> Unit = {},
+    onGameSaved: (String) -> Unit = {}
 ) {
-    val game by addGameViewModel.selectedGame.collectAsState()
-    val isLoading by addGameViewModel.isLoading.observeAsState(false)
+    val game by viewModel.selectedGame.collectAsState()
+    val isLoading by viewModel.isLoading.observeAsState(false)
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    fun showSnackbarMessage(message: String) {
+        scope.launch {
+            snackbarHostState.showSnackbar(message = message)
+        }
+    }
+
+    ObserveAsEvents(viewModel.messageEventsChannelFlow) { event ->
+        when (event) {
+            is BaseViewModel.MessageEvent.Error -> {
+                showSnackbarMessage(event.message)
+            }
+            is BaseViewModel.MessageEvent.Success -> {
+                onGameSaved(event.message)
+            }
+        }
+    }
 
     AddGameScreen(
+        snackbarHostState = snackbarHostState,
         name = game.name,
         shortName = game.shortName,
         platform = game.platform,
@@ -165,14 +181,14 @@ fun AddGameScreen(
         coverImageUri = game.imageUri,
         isEdit = game.id.isNotEmpty(),
         isSavingGame = isLoading,
-        onNameChange = { addGameViewModel.setGameName(it) },
-        onShortNameChange = { addGameViewModel.setGameShortName(it) },
-        onPublisherChange = { addGameViewModel.setGamePublisher(it) },
-        onIsPhysicalChange = { addGameViewModel.setGameFormat(it) },
-        onTimesCompletedChange = { addGameViewModel.setTimesCompleted(it) },
-        onCompletionDateChange = { addGameViewModel.setCompletionDate(it) },
-        onCoverImageChange = { addGameViewModel.setGameImageUri(it) },
-        onSaveGame = { addGameViewModel.saveGame() },
+        onNameChange = { viewModel.setGameName(it) },
+        onShortNameChange = { viewModel.setGameShortName(it) },
+        onPublisherChange = { viewModel.setGamePublisher(it) },
+        onIsPhysicalChange = { viewModel.setGameFormat(it) },
+        onTimesCompletedChange = { viewModel.setTimesCompleted(it) },
+        onCompletionDateChange = { viewModel.setCompletionDate(it) },
+        onCoverImageChange = { viewModel.setGameImageUri(it) },
+        onSaveGame = { viewModel.saveGame() },
         onBackPressed = onBackPressed
     )
 }
@@ -180,6 +196,7 @@ fun AddGameScreen(
 @Composable
 fun AddGameScreen(
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState,
     name: String,
     shortName: String,
     platform: String,
@@ -203,6 +220,9 @@ fun AddGameScreen(
 ) {
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -268,6 +288,11 @@ fun AddGameScreen(
                     coverImageUri = coverImageUri,
                     onCoverImageChange = onCoverImageChange
                 )
+                Text(
+                    text = stringResource(id = R.string.cover_disclaimer),
+                    color = colorResource(id = R.color.textSecondaryColor),
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                )
 
                 EditGameForm(
                     name = name,
@@ -295,7 +320,7 @@ fun CoverImageSelector(
     coverImageUri: String = "",
     onCoverImageChange: (Uri?) -> Unit = { },
 ) {
-    val parsedImageUri = if (coverImageUri.isNotEmpty()) Uri.parse(coverImageUri) else null
+    val parsedImageUri = if (coverImageUri.isNotEmpty()) coverImageUri.toUri() else null
     var selectedCover by rememberSaveable { mutableStateOf(parsedImageUri) }
     val pickMedia = rememberLauncherForActivityResult(contract = PickVisualMedia()) {
         it?.let { uri ->
@@ -337,11 +362,6 @@ fun CoverImageSelector(
             )
         }
     }
-    Text(
-        text = stringResource(id = R.string.cover_disclaimer),
-        color = colorResource(id = R.color.textSecondaryColor),
-        modifier = Modifier.padding(horizontal = 10.dp)
-    )
 }
 
 @Composable
@@ -608,6 +628,7 @@ fun AddGameScreenPreview() {
     var timesCompleted by remember { mutableIntStateOf(0) }
     AppTheme {
         AddGameScreen(
+            snackbarHostState = SnackbarHostState(),
             name = "",
             shortName = "",
             platform = "",
