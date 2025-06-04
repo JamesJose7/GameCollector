@@ -57,8 +57,8 @@ public class MainLibraryActivity extends AppCompatActivity {
     public static final int ADD_PLATFORM_RESULT = 13;
     public static final int EDIT_PLATFORM_RESULT = 97;
 
-    @BindView(R.id.platforms_list) RecyclerView platformsRecyclerView;
-    @BindView(R.id.platforms_progress_bar) ProgressBar mProgressBar;
+    RecyclerView platformsRecyclerView;
+    ProgressBar mProgressBar;
     @BindView(R.id.fab) FloatingActionButton fab;
 
     private Context context;
@@ -74,8 +74,8 @@ public class MainLibraryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_library);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        Toolbar toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
         ButterKnife.bind(this);
 
         getSupportActionBar().setTitle("Platforms");
@@ -152,7 +152,7 @@ public class MainLibraryActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main_library, menu);
+//        getMenuInflater().inflate(R.menu.menu_main_library, menu);
         return true;
     }
 
@@ -164,13 +164,13 @@ public class MainLibraryActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_stats) {
-            Intent intent = new Intent(this, StatsActivity.class);
-            startActivity(intent);
-            return true;
-        } else if (id == R.id.action_logout) {
-            signOut();
-        }
+//        if (id == R.id.action_stats) {
+//            Intent intent = new Intent(this, StatsActivity.class);
+//            startActivity(intent);
+//            return true;
+//        } else if (id == R.id.action_logout) {
+//            signOut();
+//        }
 
         return super.onOptionsItemSelected(item);
     }
