@@ -41,4 +41,9 @@
     <string name="timeline_title">Finished games</string>
     <string name="released_in">Released in</string>
     <string name="content_description_refresh_icon">Refresh icon</string>
+
+    <string name="platform_color_normie_white">Normie White</string>
+    <string name="platform_color_switch_red">Switch Red</string>
+    <string name="platform_color_xbox_green">Xbox Green</string>
+    <string name="platform_color_playstation_blue">Playstation Blue</string>
 </resources>

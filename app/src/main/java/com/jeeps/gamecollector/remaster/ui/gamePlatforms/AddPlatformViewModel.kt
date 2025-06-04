@@ -14,6 +14,11 @@ import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -29,21 +34,15 @@ class AddPlatformViewModel @Inject constructor(
     private val imageCompressor: ImageCompressor
 ) : BaseViewModel() {
 
+    private val uiEventsChannel = Channel<UiEvent>()
+    val uiEventsChannelFlow = uiEventsChannel.receiveAsFlow()
+
     var isEdit: Boolean = false
-    var isImageEdited: Boolean = false
-    var currentImageUri: Uri? = null
+    private var isImageEdited: Boolean = false
+    private var currentImageUri: Uri? = null
 
-    private val _platform = MutableLiveData(Platform())
-    val platform: LiveData<Platform>
-        get() = _platform
-
-    private val _isImageUploaded = MutableLiveData<Event<Boolean>>()
-    val isImageUploaded: LiveData<Event<Boolean>>
-        get() = _isImageUploaded
-
-    private val _fieldErrorMessage = MutableLiveData<String>()
-    val fieldErrorMessage: LiveData<String>
-        get() = _fieldErrorMessage
+    private val _platform = MutableStateFlow(Platform())
+    val platform: StateFlow<Platform> = _platform.asStateFlow()
 
     fun setPlatform(platform: Platform) {
         _platform.value = platform
@@ -52,28 +51,29 @@ class AddPlatformViewModel @Inject constructor(
         Picasso.get().invalidate(platform.imageUri)
     }
 
-    fun imageHasBeenEdited() {
-//        if (isEdit)
-        isImageEdited = true
-    }
-
-    fun setPlatformColor(color: String?) {
-        color?.let {
-            _platform.value?.let { platform ->
-                platform.color = color
-            }
+    fun setPlatformImageUri(uri: Uri?) {
+        uri?.let {
+            isImageEdited = true
+            currentImageUri = uri
+            _platform.value = _platform.value.copy(imageUri = uri.toString())
         }
     }
 
+    fun setPlatformColor(color: String) {
+        _platform.value = _platform.value.copy(color = color)
+    }
+
     fun setPlatformName(name: String) {
-        _platform.value?.name = name
+        _platform.value = _platform.value.copy(name = name)
     }
 
     fun savePlatform() {
-        startLoading()
-        viewModelScope.launch {
-            if (isEdit) editPlatform()
-            else saveNewPlatform()
+        if (validateFields()) {
+            startLoading()
+            viewModelScope.launch {
+                if (isEdit) editPlatform()
+                else saveNewPlatform()
+            }
         }
     }
 
@@ -119,36 +119,47 @@ class AddPlatformViewModel @Inject constructor(
                     MultipartBody.Part.createFormData("image", file.name, requestFile)
 
                 handleNetworkResponse(platformsRepository.uploadPlatformCover(
-                    token, _platform.value?.id ?: "", body)) {
+                    token, _platform.value.id, body)) {
                     if (file.exists()) file.delete()
                 }
             }
 
-            _isImageUploaded.postValue(Event(true))
+            sendUiEvent(UiEvent.ImageFinishedUploading)
             stopLoading()
         }
     }
 
-    fun skipImageUpload() {
+    private fun skipImageUpload() {
         stopLoading()
-        _isImageUploaded.postValue(Event(true))
+        sendUiEvent(UiEvent.ImageFinishedUploading)
     }
 
-    fun validateFields(): Boolean {
+    private fun validateFields(): Boolean {
         return when {
             currentImageUri == null && !isEdit -> {
-                _fieldErrorMessage.value = "Please select an image"
+                sendUiEvent((UiEvent.ShowFieldError("Please select an image")))
                 false
             }
-            platform.value?.name.isNullOrEmpty() -> {
-                _fieldErrorMessage.value = "Please input a name"
+            platform.value.name.isEmpty() -> {
+                sendUiEvent((UiEvent.ShowFieldError("Please input a name")))
                 false
             }
-            platform.value?.color.isNullOrEmpty() -> {
-                _fieldErrorMessage.value = "Please select a color"
+            platform.value.color.isEmpty() -> {
+                sendUiEvent((UiEvent.ShowFieldError("Please select a color")))
                 false
             }
             else -> true
         }
+    }
+
+    private fun sendUiEvent(event: UiEvent) {
+        viewModelScope.launch {
+            uiEventsChannel.send(event)
+        }
+    }
+
+    sealed class UiEvent {
+        data class ShowFieldError(val message: String) : UiEvent()
+        data object ImageFinishedUploading : UiEvent()
     }
 }
