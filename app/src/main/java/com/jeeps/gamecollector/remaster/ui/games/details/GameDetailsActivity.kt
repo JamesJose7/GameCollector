@@ -2,18 +2,18 @@
 
 package com.jeeps.gamecollector.remaster.ui.games.details
 
-import android.animation.ArgbEvaluator
-import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.transition.Fade
-import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import androidx.activity.compose.LocalActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,42 +31,51 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.compose.AppTheme
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityGameDetailsBinding
-import com.jeeps.gamecollector.databinding.ContentGameDetailsBinding
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.releaseDateFormatted
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
@@ -87,28 +96,24 @@ import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
 import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import com.jeeps.gamecollector.remaster.utils.extensions.withExclusions
-import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class GameDetailsActivity : BaseActivity() {
 
     private val binding by viewBinding(ActivityGameDetailsBinding::inflate)
-    private lateinit var content: ContentGameDetailsBinding
 
     private val viewModel: GameDetailsViewModel by viewModels()
 
     private val editGameResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            it?.let { handleEditGameResult(it) }
+            handleEditGameResult(it)
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         // Setup exit transition
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
         window.enterTransition = Fade().withExclusions()
@@ -117,16 +122,10 @@ class GameDetailsActivity : BaseActivity() {
 
         super.onCreate(savedInstanceState)
         setContentView(binding.rootLayout)
-        setSupportActionBar(binding.toolbar)
-        content = binding.content.apply {
-            gameDetailsViewModel = viewModel
-            lifecycleOwner = this@GameDetailsActivity
-        }
 
         getIntentData()
 
         bindViews()
-        bindFab()
         bindAlerts()
     }
 
@@ -138,33 +137,16 @@ class GameDetailsActivity : BaseActivity() {
     }
 
     private fun bindViews() {
-        viewModel.selectedGame.observe(this) {
-            it?.let { game ->
-                game.currentSortStat = ""
-                if (game.imageUri.isNotEmpty())
-                    Picasso.get().load(game.imageUri).into(content.gameCover)
-
-                getCoverColors()
-            }
-        }
-
-        content.screenCompose.setComposable {
+        binding.screenCompose.setComposable {
             GameDetailsScreen(
                 viewModel,
-                onScroll = { hasScrolled ->
-                    content.gameCover.visibility = if (hasScrolled) {
-                        View.INVISIBLE
-                    } else {
-                        View.VISIBLE
-                    }
+                onBackPressed = {
+                    onBackPressedDispatcher.onBackPressed()
+                },
+                onEditGame = {
+                    editGame()
                 }
             )
-        }
-    }
-
-    private fun bindFab() {
-        binding.fab.setOnClickListener {
-            editGame()
         }
     }
 
@@ -201,38 +183,13 @@ class GameDetailsActivity : BaseActivity() {
             finish()
         }
     }
-
-    private fun getCoverColors() {
-        viewModel.getColorBasedOnCover()
-        viewModel.gameMainColor.observe(this) { color ->
-            color?.let { animateStatusBarColor(it) }
-        }
-    }
-
-    private fun animateStatusBarColor(colorTo: Int) {
-        if (!viewModel.toolbarAnimationStarted) {
-            viewModel.toolbarAnimationStarted = true
-            val colorFrom = ContextCompat.getColor(this, R.color.colorPrimary)
-            ObjectAnimator
-                .ofObject(
-                    binding.toolbar, "backgroundColor",
-                    ArgbEvaluator(),
-                    colorFrom,
-                    colorTo
-                )
-                .setDuration(300)
-                .start()
-            window.statusBarColor = colorTo
-        }
-    }
 }
 
-
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GameDetailsScreen(
     gameDetailsViewModel: GameDetailsViewModel = viewModel(),
-    onScroll: (hasScrolled: Boolean) -> Unit
+    onBackPressed: () -> Unit = {},
+    onEditGame: () -> Unit = {}
 ) {
     val game by gameDetailsViewModel.selectedGame.observeAsState(Game())
     val platformGames by gameDetailsViewModel.games.observeAsState(emptyList())
@@ -240,6 +197,30 @@ fun GameDetailsScreen(
     val isLoadingHourStats by gameDetailsViewModel.loadingGameHours.observeAsState(true)
     val isLoadingCompletionUpdate by gameDetailsViewModel.loadingCompletionUpdate.observeAsState(false)
     val isError by gameDetailsViewModel.showHoursErrorMessage.observeAsState(false)
+    val gameMainColor by gameDetailsViewModel.gameMainColor.observeAsState(MaterialTheme.colorScheme.primary)
+
+    val activity = LocalActivity.current
+    val window = activity?.window
+    val view = window?.decorView
+
+    val topBarColor by animateColorAsState(
+        targetValue = gameMainColor,
+        animationSpec = tween(durationMillis = 300)
+    )
+    val useDarkIcons = remember(gameMainColor) {
+        val luminance = ColorUtils.calculateLuminance(gameMainColor.toArgb())
+        luminance > 0.5
+    }
+    val topBarTextColor = remember(gameMainColor) {
+        val luminance = ColorUtils.calculateLuminance(gameMainColor.toArgb())
+        if (luminance < 0.5) Color.White else Color(0xFF212121)
+    }
+
+    SideEffect {
+        if (window != null && view != null) {
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = useDarkIcons
+        }
+    }
 
     GameDetailsScreen(
         game = game,
@@ -248,11 +229,16 @@ fun GameDetailsScreen(
         isLoadingStats = isLoadingHourStats,
         isLoadingCompletionUpdate = isLoadingCompletionUpdate,
         isStatsError = isError,
+        topBarColor = topBarColor,
+        topBarTextColor = topBarTextColor,
         onRefreshClick = { gameDetailsViewModel.getGameHours() },
         onGameCompletedClick = { gameDetailsViewModel.updateGameCompletion() },
-        onScroll = onScroll
+        onBackPressed = onBackPressed,
+        onEditGame = onEditGame
     )
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameDetailsScreen(
     modifier: Modifier = Modifier,
@@ -263,162 +249,186 @@ fun GameDetailsScreen(
     isLoadingStats: Boolean,
     isLoadingCompletionUpdate: Boolean,
     isStatsError: Boolean,
+    topBarColor: Color = MaterialTheme.colorScheme.primary,
+    topBarTextColor: Color = Color.White,
     onRefreshClick: () -> Unit = {},
-    onScroll: (hasScrolled: Boolean) -> Unit = {}
+    onBackPressed: () -> Unit = {},
+    onEditGame: () -> Unit = {}
 ) {
     var isCompletedButtonClicked by rememberSaveable { mutableStateOf(false) }
     val title = game.shortName.ifEmpty { game.name }
     val isComplete = game.timesCompleted > 0
-
     val scrollState = rememberScrollState()
-    val hasScrolled = scrollState.value > 0
-    var alpha by remember { mutableFloatStateOf(0f) }
-    var fadeOutJob by remember { mutableStateOf<Job?>(null) }
 
-    LaunchedEffect(hasScrolled) {
-        onScroll(hasScrolled)
-        // Delay the fade out effect to prevent image from blinking when switching to the ImageView
-        if (hasScrolled) {
-            fadeOutJob?.cancel()
-            alpha = 1f
-        } else {
-            fadeOutJob = launch {
-                delay(100)
-                alpha = 0f
-            }
-        }
-    }
-
-    ConstraintLayout(
-        modifier = modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.surface)
-            // Temporarily disable scroll effect until I remove the View image from content_game_details.xml
-            .verticalScroll(scrollState, overscrollEffect = null)
-            .padding(bottom = 80.dp)
-    ) {
-        val (header, completedButton, lottieAnimation, details) = createRefs()
-        val middleGuideline = createGuidelineFromStart(0.4f)
-
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 10.dp)
-                .constrainAs(header) {
-                    top.linkTo(parent.top, margin = 10.dp)
-                }
-        ) {
-            AsyncImage(
-                model = game.imageUri,
-                contentDescription = stringResource(id = R.string.game_cover),
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .width(150.dp)
-                    .height(200.dp)
-                    .alpha(alpha)
-                    .shadow(elevation = 5.dp)
-            )
-            Column(
-                modifier = Modifier
-                    .height(200.dp)
-                    .padding(start = 10.dp)
-                    .overscroll(null)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Text(text = title, fontSize = 19.sp, color = colorResource(id = R.color.textColorPrimary), modifier = Modifier.padding(bottom = 1.dp))
-                if (game.publisher.isNotEmpty()) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = topBarColor,
+                    titleContentColor = Color.White,
+                ),
+                title = {
                     Text(
-                        text = game.publisher,
-                        fontSize = 15.sp,
-                        color = colorResource(id = R.color.textSecondaryColor)
+                        text = stringResource(R.string.title_activity_game_details),
+                        color = topBarTextColor
                     )
-                }
-                Text(
-                    text = game.platform,
-                    fontSize = 17.sp,
-                    color = colorResource(id = R.color.textSecondaryColor),
-                    modifier = Modifier.padding(top = 10.dp, bottom = 5.dp)
-                )
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    color = Color(0x555e5e5e)
-                )
-                Text(
-                    text = stringResource(id = R.string.released_in),
-                    fontSize = 11.sp,
-                    color = colorResource(id = R.color.textSecondaryColor),
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-                Text(
-                    text = game.releaseDateFormatted(),
-                    fontSize = 17.sp,
-                    color = colorResource(id = R.color.textSecondaryColor)
-                )
-                if (game.genresNames.isNotEmpty()) {
-                    GenresChips(
-                        genres = game.genresNames,
-                        modifier = Modifier
-                            .padding(top = 4.dp)
-                    )
-                }
-            }
-        }
-
-        if ((isComplete && isCompletedButtonClicked) && !isLoadingCompletionUpdate) {
-            FireworksAnimation(
-                animationReps = 2,
-                modifier = Modifier
-                    .size(200.dp)
-                    .constrainAs(lottieAnimation) {
-                        bottom.linkTo(completedButton.top)
-                        start.linkTo(middleGuideline)
-                        end.linkTo(parent.end)
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackPressed) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Localized description",
+                            tint = topBarTextColor
+                        )
                     }
+                },
             )
-        }
-
-        CompletedButton(
-            game = game,
-            isLoadingCompletionUpdate = isLoadingCompletionUpdate,
-            onGameCompletedClick = {
-                onGameCompletedClick()
-                isCompletedButtonClicked = true
-            },
-            modifier = Modifier
-                .padding(horizontal = 10.dp)
-                .constrainAs(completedButton) {
-                    top.linkTo(header.bottom, margin = 16.dp)
-                }
-        )
-
-        Column(
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onEditGame,
+                shape = CircleShape,
+                containerColor = colorResource(id = R.color.colorAccent)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.edit),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }        }
+    ) { innerPadding ->
+        ConstraintLayout(
             modifier = modifier
-                .wrapContentHeight()
-                .fillMaxWidth()
-                .constrainAs(details) {
-                    top.linkTo(completedButton.bottom)
-                }
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.surface)
+                .verticalScroll(scrollState)
+                .padding(innerPadding)
+                .padding(bottom = 80.dp)
         ) {
-            HourStatsCardContent(
-                hoursStats = hoursStats,
-                isLoadingStats = isLoadingStats,
-                isError = isStatsError,
-                onRefreshClick = onRefreshClick,
+            val (header, completedButton, lottieAnimation, details) = createRefs()
+            val middleGuideline = createGuidelineFromStart(0.4f)
+
+            Row(
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
-                    .padding(top = 10.dp)
-            )
-            GameRatingsCardContent(
+                    .constrainAs(header) {
+                        top.linkTo(parent.top, margin = 10.dp)
+                    }
+            ) {
+                AsyncImage(
+                    model = game.imageUri,
+                    contentDescription = stringResource(id = R.string.game_cover),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(200.dp)
+                        .shadow(elevation = 5.dp)
+                        .background(color = Color.LightGray)
+                )
+                Column(
+                    modifier = Modifier
+                        .height(200.dp)
+                        .padding(start = 10.dp)
+                        .overscroll(null)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(text = title, fontSize = 19.sp, color = colorResource(id = R.color.textColorPrimary), modifier = Modifier.padding(bottom = 1.dp))
+                    if (game.publisher.isNotEmpty()) {
+                        Text(
+                            text = game.publisher,
+                            fontSize = 15.sp,
+                            color = colorResource(id = R.color.textSecondaryColor)
+                        )
+                    }
+                    Text(
+                        text = game.platform,
+                        fontSize = 17.sp,
+                        color = colorResource(id = R.color.textSecondaryColor),
+                        modifier = Modifier.padding(top = 10.dp, bottom = 5.dp)
+                    )
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        color = Color(0x555e5e5e)
+                    )
+                    Text(
+                        text = stringResource(id = R.string.released_in),
+                        fontSize = 11.sp,
+                        color = colorResource(id = R.color.textSecondaryColor),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                    Text(
+                        text = game.releaseDateFormatted(),
+                        fontSize = 17.sp,
+                        color = colorResource(id = R.color.textSecondaryColor)
+                    )
+                    if (game.genresNames.isNotEmpty()) {
+                        GenresChips(
+                            genres = game.genresNames,
+                            modifier = Modifier
+                                .padding(top = 4.dp)
+                        )
+                    }
+                }
+            }
+
+            if ((isComplete && isCompletedButtonClicked) && !isLoadingCompletionUpdate) {
+                FireworksAnimation(
+                    animationReps = 2,
+                    modifier = Modifier
+                        .size(200.dp)
+                        .constrainAs(lottieAnimation) {
+                            bottom.linkTo(completedButton.top)
+                            start.linkTo(middleGuideline)
+                            end.linkTo(parent.end)
+                        }
+                )
+            }
+
+            CompletedButton(
                 game = game,
+                isLoadingCompletionUpdate = isLoadingCompletionUpdate,
+                onGameCompletedClick = {
+                    onGameCompletedClick()
+                    isCompletedButtonClicked = true
+                },
                 modifier = Modifier
-                    .padding(all = 10.dp)
+                    .padding(horizontal = 10.dp)
+                    .constrainAs(completedButton) {
+                        top.linkTo(header.bottom, margin = 16.dp)
+                    }
             )
-            if (platformGames.isNotEmpty() && game.timesCompleted > 0) {
-                GameTimelineCardContent(
-                    games = platformGames,
-                    selectedGame = game,
+
+            Column(
+                modifier = modifier
+                    .wrapContentHeight()
+                    .fillMaxWidth()
+                    .constrainAs(details) {
+                        top.linkTo(completedButton.bottom)
+                    }
+            ) {
+                HourStatsCardContent(
+                    hoursStats = hoursStats,
+                    isLoadingStats = isLoadingStats,
+                    isError = isStatsError,
+                    onRefreshClick = onRefreshClick,
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .padding(top = 10.dp)
+                )
+                GameRatingsCardContent(
+                    game = game,
                     modifier = Modifier
                         .padding(all = 10.dp)
                 )
+                if (platformGames.isNotEmpty() && game.timesCompleted > 0) {
+                    GameTimelineCardContent(
+                        games = platformGames,
+                        selectedGame = game,
+                        modifier = Modifier
+                            .padding(all = 10.dp)
+                    )
+                }
             }
         }
     }

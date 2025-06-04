@@ -64,7 +64,6 @@ public class GameDetailsActivityOld extends AppCompatActivity {
 
     private static final String TAG = GameDetailsActivityOld.class.getSimpleName();
 
-    @BindView(R.id.game_cover)
     ImageView gameCoverView;
     TextView gameTitleText;
     TextView gamePublisherText;
