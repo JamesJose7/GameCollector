@@ -17,7 +17,9 @@ import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import com.jeeps.gamecollector.remaster.utils.extensions.value
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,7 +43,8 @@ class GamesFromPlatformViewModel @Inject constructor(
 
     private var dbGames = MutableLiveData<List<Game>>()
     private var currentOrder: Comparator<Game> = GameByNameComparator()
-    private var currentQuery: String = ""
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private val _currentFilterControls = MutableLiveData<FilterControls>()
     val currentFilterControls: LiveData<FilterControls>
@@ -63,7 +66,7 @@ class GamesFromPlatformViewModel @Inject constructor(
         _games.addSource(dbGames) { result ->
             result?.let { game ->
                 _games.value = sortGames(game, currentOrder)
-                val query = currentQuery.takeIf { it.isNotEmpty() }
+                val query = searchQuery.value.takeIf { it.isNotEmpty() }
                 query?.let { handleSearch(query) }
                 currentFilterControls.value?.let { filters ->
                     if (filters.isNotCleared()) {
@@ -148,7 +151,7 @@ class GamesFromPlatformViewModel @Inject constructor(
         _games.value = sortGames(it, comparator)
     }.also {
         currentOrder = comparator
-        if (currentQuery.isNotEmpty()) handleSearch(currentQuery)
+        if (searchQuery.value.isNotEmpty()) handleSearch(searchQuery.value)
         currentFilterControls.value?.let { filters ->
             if (filters.isNotCleared()) {
                 updateFilters(filters.getFilterData().filtersList)
@@ -190,7 +193,7 @@ class GamesFromPlatformViewModel @Inject constructor(
     }
 
     fun handleSearch(query: String) {
-        currentQuery = query
+        _searchQuery.value = query
         dbGames.value
             ?.sortedWith(currentOrder)
             ?.filter { game -> isGameNameSimilar(game, query) }

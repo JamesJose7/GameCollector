@@ -40,6 +40,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,7 +50,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -533,13 +537,18 @@ fun GamesFromPlatformScreen(
 ) {
     val games by viewModel.games.observeAsState(emptyList())
     val sortStat by viewModel.currentSortStat.observeAsState(SortStat.NONE)
+    val searchQuery by viewModel.searchQuery.collectAsState()
 
     GamesFromPlatformScreen(
         games = games,
         platformName = viewModel.platformName,
         sortStat = sortStat,
+        searchQuery = searchQuery,
         onBackPressed = onBackPressed,
-        onAdvancedFiltersClicked = onAdvancedFiltersClicked
+        onAdvancedFiltersClicked = onAdvancedFiltersClicked,
+        onSearchQueryChanged = {
+            viewModel.handleSearch(it)
+        }
     )
 }
 
@@ -549,11 +558,15 @@ fun GamesFromPlatformScreen(
     games: List<Game>,
     platformName: String,
     sortStat: SortStat,
+    searchQuery: String,
     onBackPressed: () -> Unit = {},
-    onAdvancedFiltersClicked: () -> Unit = {}
+    onAdvancedFiltersClicked: () -> Unit = {},
+    onSearchQueryChanged: (String) -> Unit = { }
 ) {
     val collapsingScaffoldState = rememberCollapsingToolbarScaffoldState()
     val platformCover = PlatformCovers.getPlatformCover(platformName)
+
+    var showSearch by remember { mutableStateOf(false) }
 
     Scaffold(
         floatingActionButton = {
@@ -576,8 +589,7 @@ fun GamesFromPlatformScreen(
             state = collapsingScaffoldState,
             scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
             modifier = Modifier
-                .fillMaxSize()
-            ,
+                .fillMaxSize(),
             toolbar = {
                 Box(
                     modifier = Modifier
@@ -610,7 +622,13 @@ fun GamesFromPlatformScreen(
                         .pin()
                 ) {
                     IconButton(
-                        onClick = onBackPressed,
+                        onClick = {
+                            if (showSearch) {
+                                showSearch = false
+                            } else {
+                                onBackPressed()
+                            }
+                        },
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -620,7 +638,7 @@ fun GamesFromPlatformScreen(
                                 .size(24.dp)
                         )
                     }
-                    if (collapsingScaffoldState.toolbarState.progress == 0f) {
+                    if (collapsingScaffoldState.toolbarState.progress == 0f && !showSearch) {
                         Text(
                             text = platformName,
                             color = Color.White,
@@ -628,14 +646,43 @@ fun GamesFromPlatformScreen(
                             modifier = Modifier.padding(horizontal = 12.dp)
                         )
                     }
-                    Spacer(
-                        modifier = Modifier.weight(1f)
-                    )
+                    if (showSearch) {
+                        TextField(
+                            value = searchQuery,
+                            onValueChange = onSearchQueryChanged,
+                            placeholder = {
+                                Text(
+                                    text = "Search...",
+                                    color = Color.White
+                                )
+                            },
+                            colors = TextFieldDefaults.colors(
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedTextColor = Color.White,
+                                focusedTextColor = Color.White,
+                                cursorColor = Color.White
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+                    } else {
+                        Spacer(
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                     IconButton(
-                        onClick = {}
+                        onClick = {
+                            // Clear search when closing
+                            if (showSearch) {
+                                onSearchQueryChanged("")
+                            }
+                            showSearch = !showSearch
+                        }
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Search,
+                            imageVector = if (showSearch) Icons.Filled.Close else Icons.Filled.Search,
                             contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier
@@ -841,7 +888,8 @@ private fun GamesFromPlatformScreenPreview() {
         GamesFromPlatformScreen(
             games = games,
             platformName = "Nintendo Switch",
-            sortStat = SortStat.HOURS_MAIN
+            sortStat = SortStat.HOURS_MAIN,
+            searchQuery = ""
         )
     }
 }
