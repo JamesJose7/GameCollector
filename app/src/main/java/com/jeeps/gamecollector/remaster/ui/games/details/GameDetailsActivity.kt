@@ -73,7 +73,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.example.compose.AppTheme
+import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityGameDetailsBinding
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
@@ -296,7 +296,8 @@ fun GameDetailsScreen(
                     tint = Color.White,
                     modifier = Modifier.size(20.dp)
                 )
-            }        }
+            }
+        }
     ) { innerPadding ->
         ConstraintLayout(
             modifier = modifier

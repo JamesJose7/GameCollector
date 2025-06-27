@@ -25,13 +25,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -40,20 +37,20 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.jeeps.gamecollector.R;
 import com.jeeps.gamecollector.deprecated.adapters.GameCardAdapter;
+import com.jeeps.gamecollector.deprecated.model.CurrentUser;
+import com.jeeps.gamecollector.deprecated.services.api.ApiClient;
+import com.jeeps.gamecollector.deprecated.services.api.GameService;
+import com.jeeps.gamecollector.deprecated.utils.PlatformCovers;
+import com.jeeps.gamecollector.deprecated.utils.UserUtils;
+import com.jeeps.gamecollector.deprecated.views.GridSpacingItemDecoration;
+import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
+import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat;
 import com.jeeps.gamecollector.remaster.utils.comparators.GameByHoursCompletionistComparator;
 import com.jeeps.gamecollector.remaster.utils.comparators.GameByHoursMainExtraComparator;
 import com.jeeps.gamecollector.remaster.utils.comparators.GameByHoursStoryComparator;
 import com.jeeps.gamecollector.remaster.utils.comparators.GameByNameComparator;
 import com.jeeps.gamecollector.remaster.utils.comparators.GameByPhysicalComparator;
 import com.jeeps.gamecollector.remaster.utils.comparators.GameByTimesPlayedComparator;
-import com.jeeps.gamecollector.deprecated.model.CurrentUser;
-import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
-import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat;
-import com.jeeps.gamecollector.deprecated.services.api.ApiClient;
-import com.jeeps.gamecollector.deprecated.services.api.GameService;
-import com.jeeps.gamecollector.deprecated.utils.PlatformCovers;
-import com.jeeps.gamecollector.deprecated.utils.UserUtils;
-import com.jeeps.gamecollector.deprecated.views.GridSpacingItemDecoration;
 import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
@@ -83,7 +80,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
     private static final String TAG = PlatformLibraryActivity.class.getSimpleName();
 
     @BindView(R.id.games_recycler_view) RecyclerView gamesRecyclerView;
-    @BindView(R.id.backdrop) ImageView backdrop;
+    ImageView backdrop;
     @BindView(R.id.games_progressbar) ProgressBar progressBar;
     @BindView(R.id.fab) FloatingActionButton fab;
 
@@ -108,8 +105,8 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_platform_library);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        Toolbar toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         context = this;
@@ -213,7 +210,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
      * Will show and hide the toolbar title on scroll
      */
     private void initCollapsingToolbar() {
-        final CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
+        /*final CollapsingToolbarLayout collapsingToolbar = findViewById(R.id.collapsing_toolbar);
         collapsingToolbar.setTitle(" ");
         AppBarLayout appBarLayout = findViewById(R.id.appbar);
         appBarLayout.setExpanded(true);
@@ -236,7 +233,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
                     isShow = false;
                 }
             }
-        });
+        });*/
     }
 
     @Override

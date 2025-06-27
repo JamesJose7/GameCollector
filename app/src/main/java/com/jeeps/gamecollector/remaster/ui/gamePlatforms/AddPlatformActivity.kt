@@ -45,7 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.compose.AppTheme
+import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityAddPlatformBinding
 import com.jeeps.gamecollector.deprecated.utils.PlatformColor
@@ -285,7 +285,7 @@ fun ColorRadioGroup(
 @Preview
 @Composable
 fun AddPlatformScreenPreview() {
-    AppTheme { 
+    AppTheme {
         AddPlatformScreen(
             snackbarHostState = SnackbarHostState(),
             isLoading = false,

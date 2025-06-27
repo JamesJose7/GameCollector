@@ -10,25 +10,79 @@ import android.view.MenuItem
 import android.view.View
 import android.view.Window
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.addListener
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.util.Pair
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.appbar.AppBarLayout
+import coil.compose.AsyncImage
+import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.deprecated.adapters.GameCardAdapter
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
+import com.jeeps.gamecollector.deprecated.utils.ColorsUtils
 import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
@@ -38,9 +92,15 @@ import com.jeeps.gamecollector.remaster.utils.comparators.*
 import com.jeeps.gamecollector.remaster.utils.extensions.*
 import com.jeeps.gamecollector.deprecated.utils.PlatformCovers
 import com.jeeps.gamecollector.deprecated.views.GridSpacingItemDecoration
-import com.squareup.picasso.Picasso
+import com.jeeps.gamecollector.remaster.data.model.data.games.Game
+import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats
+import com.jeeps.gamecollector.remaster.ui.composables.LoadingAnimation
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import me.onebone.toolbar.CollapsingToolbarScaffold
+import me.onebone.toolbar.ScrollStrategy
+import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
+import java.text.DecimalFormat
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
@@ -65,13 +125,14 @@ class GamesFromPlatformActivity : BaseActivity(),
     private lateinit var gamesAdapter: GameCardAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
         window.exitTransition = Fade().withExclusions()
         window.enterTransition = Fade().withExclusions()
 
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
+//        setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         content = binding.content
 
@@ -85,6 +146,28 @@ class GamesFromPlatformActivity : BaseActivity(),
 
         bindUserGames()
         bindFilterStats()
+
+        binding.screenCompose.setComposable {
+            GamesFromPlatformScreen(
+                viewModel = viewModel,
+                onBackPressed = {
+                    onBackPressedDispatcher.onBackPressed()
+                },
+                onAdvancedFiltersClicked = {
+                    // TODO: Replace with compose dialog
+                    val advancedFiltersDialog = AdvancedFiltersDialog(
+                        this,
+                        this,
+                        viewModel.currentFilterControls.value ?: FilterControls(),
+                        viewModel.currentSortControls,
+                        getInfoControlsFromSortStat(
+                            viewModel.currentSortStat.value
+                        )
+                    )
+                    advancedFiltersDialog.show()
+                }
+            )
+        }
     }
 
     override fun onPause() {
@@ -196,7 +279,7 @@ class GamesFromPlatformActivity : BaseActivity(),
     }
 
     private fun resetSearchView() {
-        searchView.setQuery("", false)
+//        searchView.setQuery("", false)
     }
 
     override fun updateFilterControls(filterControls: FilterControls) {
@@ -232,37 +315,37 @@ class GamesFromPlatformActivity : BaseActivity(),
 
     private fun displayPlatformCover() {
         //TODO: Should display the user's platform cover instead of default image
-        Picasso.get()
-            .load(PlatformCovers.getPlatformCover(viewModel.platformName))
-            .into(binding.backdrop)
+//        Picasso.get()
+//            .load(PlatformCovers.getPlatformCover(viewModel.platformName))
+//            .into(binding.backdrop)
     }
 
     private fun initCollapsingToolbar() {
-        val collapsingToolbar = binding.collapsingToolbar
-        val appBar = binding.appbar
-
-        collapsingToolbar.title = " "
-        appBar.setExpanded(true)
+//        val collapsingToolbar = binding.collapsingToolbar
+//        val appBar = binding.appbar
+//
+//        collapsingToolbar.title = " "
+//        appBar.setExpanded(true)
 
         // hiding & showing the title when toolbar expanded & collapsed
-        appBar.addOnOffsetChangedListener(object : AppBarLayout.OnOffsetChangedListener {
-            var isShowing = false
-            var scrollRange = -1
-
-            override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
-                if (scrollRange == -1) {
-                    scrollRange = appBarLayout?.totalScrollRange ?: -1
-                }
-                if (scrollRange + verticalOffset == 0) {
-                    collapsingToolbar.title = viewModel.platformName
-                    isShowing = true
-                } else if (isShowing) {
-                    collapsingToolbar.title = " "
-                    isShowing = false
-                }
-            }
-
-        })
+//        appBar.addOnOffsetChangedListener(object : AppBarLayout.OnOffsetChangedListener {
+//            var isShowing = false
+//            var scrollRange = -1
+//
+//            override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
+//                if (scrollRange == -1) {
+//                    scrollRange = appBarLayout?.totalScrollRange ?: -1
+//                }
+//                if (scrollRange + verticalOffset == 0) {
+//                    collapsingToolbar.title = viewModel.platformName
+//                    isShowing = true
+//                } else if (isShowing) {
+//                    collapsingToolbar.title = " "
+//                    isShowing = false
+//                }
+//            }
+//
+//        })
     }
 
     private fun initializeGamesAdapter() {
@@ -438,5 +521,359 @@ class GamesFromPlatformActivity : BaseActivity(),
         const val SELECTED_GAME = "SELECTED_GAME"
         const val SELECTED_GAME_POSITION = "SELECTED_GAME_POSITION"
         const val ADD_GAME_RESULT_MESSAGE = "ADD_GAME_RESULT_MESSAGE"
+    }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@Composable
+fun GamesFromPlatformScreen(
+    viewModel: GamesFromPlatformViewModel = viewModel(),
+    onBackPressed: () -> Unit,
+    onAdvancedFiltersClicked: () -> Unit
+) {
+    val games by viewModel.games.observeAsState(emptyList())
+    val sortStat by viewModel.currentSortStat.observeAsState(SortStat.NONE)
+
+    GamesFromPlatformScreen(
+        games = games,
+        platformName = viewModel.platformName,
+        sortStat = sortStat,
+        onBackPressed = onBackPressed,
+        onAdvancedFiltersClicked = onAdvancedFiltersClicked
+    )
+}
+
+@Composable
+fun GamesFromPlatformScreen(
+    modifier: Modifier = Modifier,
+    games: List<Game>,
+    platformName: String,
+    sortStat: SortStat,
+    onBackPressed: () -> Unit = {},
+    onAdvancedFiltersClicked: () -> Unit = {}
+) {
+    val collapsingScaffoldState = rememberCollapsingToolbarScaffoldState()
+    val platformCover = PlatformCovers.getPlatformCover(platformName)
+
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {  },
+                shape = CircleShape,
+                containerColor = colorResource(id = R.color.colorAccent)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.plus),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        },
+        contentWindowInsets = WindowInsets(left = 0.dp, top = 0.dp, right = 0.dp, bottom = 0.dp)
+    ) { innerPadding ->
+        CollapsingToolbarScaffold(
+            state = collapsingScaffoldState,
+            scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
+            modifier = Modifier
+                .fillMaxSize()
+            ,
+            toolbar = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .parallax(0.5f)
+                ) {
+                    Image(
+                        painter = painterResource(platformCover),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+
+                    Spacer(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 1 - collapsingScaffoldState.toolbarState.progress))
+                            .fillMaxSize()
+                    )
+                }
+
+                // Collapsed toolbar
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .height(56.dp)
+                        .fillMaxWidth()
+                        .pin()
+                ) {
+                    IconButton(
+                        onClick = onBackPressed,
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(24.dp)
+                        )
+                    }
+                    if (collapsingScaffoldState.toolbarState.progress == 0f) {
+                        Text(
+                            text = platformName,
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(horizontal = 12.dp)
+                        )
+                    }
+                    Spacer(
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(
+                        onClick = {}
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(24.dp)
+                        )
+                    }
+                    IconButton(
+                        onClick = onAdvancedFiltersClicked
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_filter),
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(24.dp)
+                        )
+                    }
+                }
+            },
+        ) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 64.dp),
+                modifier = modifier
+                    .padding(innerPadding)
+            ) {
+                items(games) { game ->
+                    GameCard(
+                        game = game,
+                        sortStat = sortStat
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GameCard(
+    modifier: Modifier = Modifier,
+    game: Game,
+    sortStat: SortStat
+) {
+    var isLoadingImage by remember { mutableStateOf(true) }
+    val checkmarkColor = if (game.timesCompleted > 0) {
+        Color(0xff7FFF00)
+    } else {
+        Color.LightGray
+    }
+    val hours = when (sortStat) {
+        SortStat.HOURS_MAIN -> game.gameHoursStats.gameplayMain
+        SortStat.HOURS_MAIN_EXTRA -> game.gameHoursStats.gameplayMainExtra
+        SortStat.HOURS_COMPLETIONIST -> game.gameHoursStats.gameplayCompletionist
+        SortStat.NONE -> 0.0
+    }
+    val decimalFormat = DecimalFormat("#.#")
+    val hoursFormatted = stringResource(R.string.hours_template, decimalFormat.format(hours))
+
+    Card(
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        ),
+        shape = RoundedCornerShape(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.LightGray
+        ),
+        modifier = modifier
+            .height(310.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                AsyncImage(
+                    model = game.imageUri,
+                    contentDescription = stringResource(id = R.string.game_cover),
+                    contentScale = ContentScale.Fit,
+                    onLoading = { isLoadingImage = true },
+                    onSuccess = { isLoadingImage = false },
+                    onError = { isLoadingImage = false },
+                    error = painterResource(R.drawable.game_controller),
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .height(255.dp)
+                        .background(color = Color.LightGray)
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .background(Color.White)
+                        .padding(horizontal = 8.dp)
+                ) {
+                    BasicText(
+                        text = game.shortName.ifEmpty { game.name },
+                        autoSize = TextAutoSize.StepBased(
+                            minFontSize = 14.sp,
+                            maxFontSize = 18.sp
+                        ),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            color = colorResource(R.color.textColorPrimary)
+                        ),
+                        modifier = Modifier
+                            .weight(85f)
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.checked),
+                        contentDescription = "Is completed",
+                        tint = checkmarkColor,
+                        modifier = Modifier
+                            .weight(15f)
+                    )
+                }
+            }
+
+            if (isLoadingImage) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(255.dp)
+                ) {
+                    LoadingAnimation(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+
+            if (!game.isPhysical) {
+                Box(
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(35.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xff555555))
+                        .padding(6.dp)
+                        .align(Alignment.TopEnd)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.cloud),
+                        contentDescription = "Is digital",
+                        tint = Color.White,
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .height(255.dp)
+                    )
+                }
+            }
+
+            if (sortStat != SortStat.NONE) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(
+                        topStart = 0.dp,
+                        topEnd = 4.dp,
+                        bottomStart = 0.dp,
+                        bottomEnd = 4.dp
+                    ),
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                ) {
+                    Text(
+                        text = hoursFormatted,
+                        color = colorResource(id = ColorsUtils.getColorByHoursRange(hours)),
+                        modifier = Modifier
+                            .padding(vertical = 4.dp, horizontal = 8.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun GamesFromPlatformScreenPreview() {
+    val games = List(10) {
+        Game(
+            name = "The Legend of Zelda",
+            publisher = "Nintendo",
+            platform = "Nintendo Switch",
+            firstReleaseDate = 509366025,
+            userRating = 10.0,
+            userRatingCount = 10,
+            criticsRating = 50.0,
+            criticsRatingCount = 213,
+            totalRating = 90.0,
+            totalRatingCount = 223,
+            timesCompleted = 2,
+            genresNames = listOf("RPG", "FPS", "MOBA"),
+            completionDate = "2023-10-22T02:32:04.808Z"
+        )
+    }
+
+    AppTheme {
+        GamesFromPlatformScreen(
+            games = games,
+            platformName = "Nintendo Switch",
+            sortStat = SortStat.HOURS_MAIN
+        )
+    }
+}
+
+@Preview(device = "spec:width=1080px,height=600px,dpi=440,orientation=portrait")
+@Composable
+private fun GameCardPreview() {
+    val game = Game(
+        name = "The Legend of Zelda: Breath of the Wild",
+        shortName = "Zelda: BOTW",
+        imageUri = "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r76.jpg",
+        isPhysical = false,
+        timesCompleted = 1,
+        gameHoursStats = GameHoursStats(
+            gameplayMain = 50.0,
+            gameplayMainExtra = 90.0,
+            gameplayCompletionist = 180.0
+        )
+    )
+    AppTheme {
+        GameCard(
+            game = game,
+            sortStat = SortStat.HOURS_MAIN
+        )
+    }
+}
+
+@Preview(device = "spec:width=1080px,height=600px,dpi=440,orientation=portrait")
+@Composable
+private fun GameCardNoSortStatPreview() {
+    val game = Game(name = "The Witcher 3: Wild Hunt")
+    AppTheme {
+        GameCard(game = game, sortStat = SortStat.NONE)
     }
 }

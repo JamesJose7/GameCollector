@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.compose.AppTheme
+import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.databinding.ActivityStatsBinding
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.PlatformStats
 import com.jeeps.gamecollector.remaster.data.model.data.user.UserStats
