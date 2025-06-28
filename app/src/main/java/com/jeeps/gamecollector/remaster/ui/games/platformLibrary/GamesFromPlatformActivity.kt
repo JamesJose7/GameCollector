@@ -568,7 +568,7 @@ fun GamesFromPlatformScreen(
                 modifier = modifier
                     .padding(innerPadding)
             ) {
-                items(games) { game ->
+                items(items = games, key = { it.id }) { game ->
                     GameCard(
                         game = game,
                         sortStat = sortStat,
@@ -577,6 +577,7 @@ fun GamesFromPlatformScreen(
                                 onClick = { onEditGame(game) },
                                 onLongClick = { onDeleteGame(game) }
                             )
+                            .animateItem()
                     )
                 }
             }
