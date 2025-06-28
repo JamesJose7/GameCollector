@@ -136,8 +136,6 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
     private val binding by viewBinding(ActivityPlatformLibraryBinding::inflate)
     private lateinit var content: ContentPlatformLibraryBinding
 
-    private lateinit var searchView: SearchView
-
     private val viewModel: GamesFromPlatformViewModel by viewModels()
 
     private var isAnimating: Boolean = false
@@ -145,10 +143,8 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
 
     private val addGameResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            it?.let { handleAddGameResult(it) }
+            handleAddGameResult(it)
         }
-
-    private lateinit var gamesAdapter: GameCardAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -158,19 +154,13 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
 
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-//        setSupportActionBar(binding.toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         content = binding.content
 
-        initCollapsingToolbar()
-        initializeGamesAdapter()
         addFilterStatsHeaderAnimation()
 
         bindFab()
         getIntentData()
-        displayPlatformCover()
 
-        bindUserGames()
         bindFilterStats()
 
         binding.screenCompose.setComposable {
@@ -216,115 +206,7 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
         viewModel.deleteGamePendingDeletion()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_platform_library, menu)
-
-        searchView = menu?.findItem(R.id.search)?.actionView as SearchView
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let {
-                    viewModel.handleSearch(it)
-                    viewModel.clearFilters()
-                }
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                newText?.let {
-                    viewModel.handleSearch(it)
-                    viewModel.clearFilters()
-                }
-                return false
-            }
-        })
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_advanced_filters -> {
-                val advancedFiltersDialog = AdvancedFiltersDialog(
-                    this,
-                    this,
-                    viewModel.currentFilterControls.value ?: FilterControls(),
-                    viewModel.currentSortControls,
-                    getInfoControlsFromSortStat(
-                        viewModel.currentSortStat.value
-                    )
-                )
-                advancedFiltersDialog.show()
-                true
-            }
-            R.id.action_filter_alph -> {
-                viewModel.setCurrentSortStat(SortStat.NONE)
-                viewModel.rearrangeGames(GameByNameComparator())
-                true
-            }
-            R.id.action_filter_alph_desc -> {
-                viewModel.setCurrentSortStat(SortStat.NONE)
-                viewModel.rearrangeGames(GameByNameComparator(true))
-                true
-            }
-            R.id.action_filter_physical -> {
-                viewModel.setCurrentSortStat(SortStat.NONE)
-                viewModel.rearrangeGames(GameByPhysicalComparator(true))
-                true
-            }
-            R.id.action_filter_alph_physical_desc -> {
-                viewModel.setCurrentSortStat(SortStat.NONE)
-                viewModel.rearrangeGames(GameByPhysicalComparator())
-                true
-            }
-            R.id.action_filter_timesc -> {
-                viewModel.setCurrentSortStat(SortStat.NONE)
-                viewModel.rearrangeGames(GameByTimesPlayedComparator())
-                true
-            }
-            R.id.action_filter_alph_timesc_desc -> {
-                viewModel.setCurrentSortStat(SortStat.NONE)
-                viewModel.rearrangeGames(GameByTimesPlayedComparator(true))
-                true
-            }
-            R.id.action_filter_hoursmain -> {
-                viewModel.setCurrentSortStat(SortStat.HOURS_MAIN)
-                viewModel.rearrangeGames(GameByHoursStoryComparator())
-                true
-            }
-            R.id.action_filter_hoursmain_desc -> {
-                viewModel.setCurrentSortStat(SortStat.HOURS_MAIN)
-                viewModel.rearrangeGames(GameByHoursStoryComparator(true))
-                true
-            }
-            R.id.action_filter_hoursme -> {
-                viewModel.setCurrentSortStat(SortStat.HOURS_MAIN_EXTRA)
-                viewModel.rearrangeGames(GameByHoursMainExtraComparator())
-                true
-            }
-            R.id.action_filter_hoursme_desc -> {
-                viewModel.setCurrentSortStat(SortStat.HOURS_MAIN_EXTRA)
-                viewModel.rearrangeGames(GameByHoursMainExtraComparator(true))
-                true
-            }
-            R.id.action_filter_hourscompletionist -> {
-                viewModel.setCurrentSortStat(SortStat.HOURS_COMPLETIONIST)
-                viewModel.rearrangeGames(GameByHoursCompletionistComparator())
-                true
-            }
-            R.id.action_filter_hourscompletionist_desc -> {
-                viewModel.setCurrentSortStat(SortStat.HOURS_COMPLETIONIST)
-                viewModel.rearrangeGames(GameByHoursCompletionistComparator(true))
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    private fun resetSearchView() {
-//        searchView.setQuery("", false)
-    }
-
     override fun updateFilterControls(filterControls: FilterControls) {
-        resetSearchView()
         val (filtersList) = filterControls.getFilterData()
         viewModel.setFilterControls(filterControls)
         viewModel.updateFilters(filtersList)
@@ -332,7 +214,6 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
 
     override fun clearFilters() {
         viewModel.clearFilters(true)
-        resetSearchView()
     }
 
     override fun updateSortControls(sortControls: SortControls) {
@@ -346,58 +227,11 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
         val (sortStat) = showInfoControls.getInfoData()
         viewModel.currentShowInfoControls = showInfoControls
         viewModel.setCurrentSortStat(sortStat)
-        gamesAdapter.notifyItemRangeChanged(0, viewModel.games.value?.size ?: 0)
     }
 
     private fun getIntentData() {
         intent.getStringExtra(CURRENT_PLATFORM)?.let { viewModel.platformId = it }
         intent.getStringExtra(CURRENT_PLATFORM_NAME)?.let { viewModel.platformName = it }
-    }
-
-    private fun displayPlatformCover() {
-        //TODO: Should display the user's platform cover instead of default image
-//        Picasso.get()
-//            .load(PlatformCovers.getPlatformCover(viewModel.platformName))
-//            .into(binding.backdrop)
-    }
-
-    private fun initCollapsingToolbar() {
-//        val collapsingToolbar = binding.collapsingToolbar
-//        val appBar = binding.appbar
-//
-//        collapsingToolbar.title = " "
-//        appBar.setExpanded(true)
-
-        // hiding & showing the title when toolbar expanded & collapsed
-//        appBar.addOnOffsetChangedListener(object : AppBarLayout.OnOffsetChangedListener {
-//            var isShowing = false
-//            var scrollRange = -1
-//
-//            override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
-//                if (scrollRange == -1) {
-//                    scrollRange = appBarLayout?.totalScrollRange ?: -1
-//                }
-//                if (scrollRange + verticalOffset == 0) {
-//                    collapsingToolbar.title = viewModel.platformName
-//                    isShowing = true
-//                } else if (isShowing) {
-//                    collapsingToolbar.title = " "
-//                    isShowing = false
-//                }
-//            }
-//
-//        })
-    }
-
-    private fun initializeGamesAdapter() {
-        val gamesRecyclerView = content.gamesRecyclerView
-        gamesRecyclerView.layoutManager = GridLayoutManager(this, 2)
-        gamesRecyclerView.addItemDecoration(
-            GridSpacingItemDecoration(2, dpToPx(10f), true))
-        gamesRecyclerView.itemAnimator = DefaultItemAnimator()
-
-        gamesAdapter = GameCardAdapter(mutableListOf())
-        gamesRecyclerView.adapter = gamesAdapter
     }
 
     private fun bindFab() {
@@ -407,34 +241,6 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
                 putExtra(CURRENT_PLATFORM_NAME, viewModel.platformName)
             }
             addGameResultLauncher.launch(intent)
-        }
-    }
-
-    private fun bindUserGames() {
-        viewModel.isLoading.observe(this) {
-            it?.let { isLoading ->
-                content.gamesProgressbar.visibility = if (isLoading) View.VISIBLE else View.INVISIBLE
-            }
-        }
-
-        viewModel.games.observe(this) { games ->
-            games?.let {
-                gamesAdapter.setGames(it)
-            }
-        }
-
-        viewModel.currentSortStat.observe(this) {
-            it?.let { gamesAdapter.setSortStat(it) }
-        }
-
-        viewModel.errorMessage.observe(this) {
-            it?.let { showToast(it) }
-        }
-
-        viewModel.serverMessage.observe(this) { messageEvent ->
-            messageEvent.getContentIfNotHandled()?.let {
-                showToast(it)
-            }
         }
     }
 
