@@ -131,8 +131,7 @@ import java.text.DecimalFormat
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
-class GamesFromPlatformActivity : BaseActivity(),
-    GameCardAdapter.GameCardAdapterListener, AdvancedFiltersDialogListener {
+class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener {
 
     private val binding by viewBinding(ActivityPlatformLibraryBinding::inflate)
     private lateinit var content: ContentPlatformLibraryBinding
@@ -194,7 +193,19 @@ class GamesFromPlatformActivity : BaseActivity(),
                     advancedFiltersDialog.show()
                 },
                 onEditGame = { game ->
-
+                    val intent = Intent(this, GameDetailsActivity::class.java).apply {
+                        putExtra(CURRENT_PLATFORM, viewModel.platformId)
+                        putExtra(CURRENT_PLATFORM_NAME, viewModel.platformName)
+                        putExtra(SELECTED_GAME, game)
+                    }
+                    // TODO: Make this transition when implementing Compose navigation with shared elements
+                    /*val activityOptions = ActivityOptionsCompat
+                        .makeSceneTransitionAnimation(
+                            this,
+                            Pair.create(imageView, "cover"),
+                            Pair.create(binding.fab, "fab")
+                        )*/
+                    addGameResultLauncher.launch(intent)
                 },
             )
         }
@@ -385,7 +396,7 @@ class GamesFromPlatformActivity : BaseActivity(),
             GridSpacingItemDecoration(2, dpToPx(10f), true))
         gamesRecyclerView.itemAnimator = DefaultItemAnimator()
 
-        gamesAdapter = GameCardAdapter(mutableListOf(), this)
+        gamesAdapter = GameCardAdapter(mutableListOf())
         gamesRecyclerView.adapter = gamesAdapter
     }
 
@@ -436,23 +447,6 @@ class GamesFromPlatformActivity : BaseActivity(),
                 content.filterStatsTv.text = statsText
             }
         }
-    }
-
-    override fun editGame(position: Int, imageView: View, titleView: TextView) {
-        val selectedGame = viewModel.getGameAt(position)
-        val intent = Intent(this, GameDetailsActivity::class.java).apply {
-            putExtra(CURRENT_PLATFORM, viewModel.platformId)
-            putExtra(CURRENT_PLATFORM_NAME, viewModel.platformName)
-            putExtra(SELECTED_GAME, selectedGame)
-            putExtra(SELECTED_GAME_POSITION, position)
-        }
-        val activityOptions = ActivityOptionsCompat
-            .makeSceneTransitionAnimation(
-                this,
-                Pair.create(imageView, "cover"),
-                Pair.create(binding.fab, "fab")
-            )
-        addGameResultLauncher.launch(intent, activityOptions)
     }
 
     private fun handleAddGameResult(result: ActivityResult) {

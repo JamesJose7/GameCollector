@@ -23,8 +23,7 @@ import kotlin.math.roundToInt
  * Created by jeeps on 12/25/2017.
  */
 class GameCardAdapter(
-    val games: MutableList<Game>,
-    val listener: GameCardAdapterListener
+    val games: MutableList<Game>
 ) : RecyclerView.Adapter<MyViewHolder>() {
 
     private var sortStat = SortStat.NONE
@@ -40,11 +39,7 @@ class GameCardAdapter(
         holder.bind(game)
 
         holder.itemView.setOnClickListener {
-            listener.editGame(
-                position,
-                holder.binding.cardGameCover,
-                holder.binding.cardGameTitle
-            )
+
         }
     }
 
@@ -70,10 +65,6 @@ class GameCardAdapter(
     fun addGameAtPosition(position: Int, selectedGame: Game) {
         games.add(position, selectedGame)
         notifyItemInserted(position)
-    }
-
-    interface GameCardAdapterListener {
-        fun editGame(position: Int, imageView: View, titleView: TextView)
     }
 
     inner class MyViewHolder(val binding: GameCardLayoutBinding) : RecyclerView.ViewHolder(binding.root) {

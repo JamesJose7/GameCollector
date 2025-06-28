@@ -68,7 +68,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class PlatformLibraryActivity extends AppCompatActivity implements GameCardAdapter.GameCardAdapterListener {
+public class PlatformLibraryActivity extends AppCompatActivity {
 
     public static final String CURRENT_PLATFORM = "CURRENT_PLATFORM";
     public static final String CURRENT_PLATFORM_NAME = "CURRENT_PLATFORM_NAME";
@@ -150,7 +150,7 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         gamesRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
         gamesRecyclerView.setItemAnimator(new DefaultItemAnimator());
         // Create adapter
-        gamesAdapter = new GameCardAdapter(games, PlatformLibraryActivity.this);
+        gamesAdapter = new GameCardAdapter(games);
         gamesRecyclerView.setAdapter(gamesAdapter);
         gamesAdapter.notifyDataSetChanged();
     }
@@ -305,7 +305,6 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         }
     }
 
-    @Override
     public void editGame(int position, @NotNull View imageView, @NotNull TextView gameTitle) {
         Game game = games.get(position);
         //Start add game activity to edit selected
