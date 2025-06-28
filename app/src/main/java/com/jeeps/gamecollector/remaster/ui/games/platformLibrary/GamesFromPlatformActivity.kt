@@ -1,7 +1,6 @@
 package com.jeeps.gamecollector.remaster.ui.games.platformLibrary
 
 import android.animation.ValueAnimator
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.transition.Fade
@@ -14,10 +13,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +40,7 @@ import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,6 +49,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -58,6 +62,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,28 +84,46 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.compose.AsyncImage
-import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
-import com.google.android.material.snackbar.BaseTransientBottomBar
-import com.google.android.material.snackbar.Snackbar
 import com.jeeps.gamecollector.R
-import com.jeeps.gamecollector.deprecated.adapters.GameCardAdapter
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
+import com.jeeps.gamecollector.deprecated.adapters.GameCardAdapter
 import com.jeeps.gamecollector.deprecated.utils.ColorsUtils
-import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
-import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
-import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
-import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.*
-import com.jeeps.gamecollector.remaster.utils.comparators.*
-import com.jeeps.gamecollector.remaster.utils.extensions.*
 import com.jeeps.gamecollector.deprecated.utils.PlatformCovers
 import com.jeeps.gamecollector.deprecated.views.GridSpacingItemDecoration
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats
+import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
+import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
+import com.jeeps.gamecollector.remaster.ui.composables.Dialog
 import com.jeeps.gamecollector.remaster.ui.composables.LoadingAnimation
+import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
+import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialog
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialogListener
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterControls
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.ShowInfoControls
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.SortControls
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getAppropriateComparator
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getFilterData
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getInfoControlsFromSortStat
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getInfoData
+import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByHoursCompletionistComparator
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByHoursMainExtraComparator
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByHoursStoryComparator
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByNameComparator
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByPhysicalComparator
+import com.jeeps.gamecollector.remaster.utils.comparators.GameByTimesPlayedComparator
+import com.jeeps.gamecollector.remaster.utils.extensions.dpToPx
+import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
+import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
+import com.jeeps.gamecollector.remaster.utils.extensions.showToast
+import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
+import com.jeeps.gamecollector.remaster.utils.extensions.withExclusions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
@@ -169,7 +192,10 @@ class GamesFromPlatformActivity : BaseActivity(),
                         )
                     )
                     advancedFiltersDialog.show()
-                }
+                },
+                onEditGame = { game ->
+
+                },
             )
         }
     }
@@ -412,47 +438,6 @@ class GamesFromPlatformActivity : BaseActivity(),
         }
     }
 
-    override fun deleteSelectedGame(position: Int) {
-        val dialogClickListener = DialogInterface.OnClickListener { _, which ->
-            when (which) {
-                DialogInterface.BUTTON_POSITIVE -> {
-                    val selectedGame = viewModel.getGameAt(position)
-                    viewModel.gamePendingDeletion = selectedGame
-                    // Remove game from adapter
-                    gamesAdapter.removeGameAtPosition(position)
-                    // Notify user
-                    val undoCallback = object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                            // Delete game permanently
-                            selectedGame?.let { viewModel.deleteGame(it) }
-                        }
-                    }
-                    val undoSnackBar = createSnackBar(
-                        binding.root,
-                        "Deleted: ${selectedGame?.name}",
-                        Snackbar.LENGTH_LONG
-                    ).addCallback(undoCallback)
-
-                    undoSnackBar.setAction("UNDO") {
-                        undoSnackBar.removeCallback(undoCallback)
-                        // Restore game
-                        if (selectedGame != null) {
-                            gamesAdapter.addGameAtPosition(position, selectedGame)
-                        }
-                    }
-
-                    undoSnackBar.show()
-                }
-            }
-        }
-
-        AlertDialog.Builder(this)
-            .setMessage("Delete game?")
-            .setPositiveButton("Yes", dialogClickListener)
-            .setNegativeButton("No", dialogClickListener)
-            .show()
-    }
-
     override fun editGame(position: Int, imageView: View, titleView: TextView) {
         val selectedGame = viewModel.getGameAt(position)
         val intent = Intent(this, GameDetailsActivity::class.java).apply {
@@ -533,13 +518,53 @@ class GamesFromPlatformActivity : BaseActivity(),
 fun GamesFromPlatformScreen(
     viewModel: GamesFromPlatformViewModel = viewModel(),
     onBackPressed: () -> Unit,
-    onAdvancedFiltersClicked: () -> Unit
+    onAdvancedFiltersClicked: () -> Unit,
+    onEditGame: (Game) -> Unit
 ) {
     val games by viewModel.games.observeAsState(emptyList())
     val sortStat by viewModel.currentSortStat.observeAsState(SortStat.NONE)
     val searchQuery by viewModel.searchQuery.collectAsState()
+    var showDeleteGameDialog by remember { mutableStateOf(false) }
+    var gamePendingDeletion: Game? by remember { mutableStateOf(null) }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    val promptDeleteUndoAction: (game: Game) -> Unit = { game ->
+        scope.launch {
+            viewModel.removeGameLocally(game)
+            var dismissedCalled = false
+            try {
+                val result = snackbarHostState
+                    .showSnackbar(
+                        message = "Deleted: ${game.name}",
+                        actionLabel = "Undo",
+                        duration = SnackbarDuration.Short
+                    )
+                when (result) {
+                    SnackbarResult.ActionPerformed -> {
+                        dismissedCalled = true
+                        viewModel.addGameLocally(game)
+                    }
+
+                    SnackbarResult.Dismissed -> {
+                        dismissedCalled = true
+                        viewModel.deleteGame(game)
+                    }
+                }
+            } finally {
+                // TODO: Replace this with a restore game functionality, so that the game is always deleted,
+                //  and the user can undo the deletion by restoring the game instead
+                // Called if a coroutine is cancelled, like when the user navigates back
+                if (!dismissedCalled) {
+                    viewModel.deleteGame(game)
+                }
+            }
+        }
+    }
 
     GamesFromPlatformScreen(
+        snackbarHostState = snackbarHostState,
         games = games,
         platformName = viewModel.platformName,
         sortStat = sortStat,
@@ -548,20 +573,49 @@ fun GamesFromPlatformScreen(
         onAdvancedFiltersClicked = onAdvancedFiltersClicked,
         onSearchQueryChanged = {
             viewModel.handleSearch(it)
+        },
+        onEditGame = onEditGame,
+        onDeleteGame = {
+            gamePendingDeletion = it
+            showDeleteGameDialog = true
         }
     )
+
+    when {
+        showDeleteGameDialog -> {
+            gamePendingDeletion?.let { game ->
+                Dialog(
+                    title = "Delete game",
+                    description = "Are you sure you want to delete ${game.name}",
+                    icon = Icons.Filled.DeleteForever,
+                    confirmButtonText = "Yes",
+                    dismissButtonText = "No",
+                    onDismissRequest = {
+                        showDeleteGameDialog = false
+                    },
+                    onConfirmation = {
+                        showDeleteGameDialog = false
+                        promptDeleteUndoAction(game)
+                    }
+                )
+            }
+        }
+    }
 }
 
 @Composable
 fun GamesFromPlatformScreen(
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState,
     games: List<Game>,
     platformName: String,
     sortStat: SortStat,
     searchQuery: String,
     onBackPressed: () -> Unit = {},
     onAdvancedFiltersClicked: () -> Unit = {},
-    onSearchQueryChanged: (String) -> Unit = { }
+    onSearchQueryChanged: (String) -> Unit = {},
+    onEditGame: (Game) -> Unit = {},
+    onDeleteGame: (Game) -> Unit = {}
 ) {
     val collapsingScaffoldState = rememberCollapsingToolbarScaffoldState()
     val platformCover = PlatformCovers.getPlatformCover(platformName)
@@ -569,6 +623,9 @@ fun GamesFromPlatformScreen(
     var showSearch by remember { mutableStateOf(false) }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {  },
@@ -714,7 +771,12 @@ fun GamesFromPlatformScreen(
                 items(games) { game ->
                     GameCard(
                         game = game,
-                        sortStat = sortStat
+                        sortStat = sortStat,
+                        modifier = Modifier
+                            .combinedClickable(
+                                onClick = { onEditGame(game) },
+                                onLongClick = { onDeleteGame(game) }
+                            )
                     )
                 }
             }
@@ -886,6 +948,7 @@ private fun GamesFromPlatformScreenPreview() {
 
     AppTheme {
         GamesFromPlatformScreen(
+            snackbarHostState = SnackbarHostState(),
             games = games,
             platformName = "Nintendo Switch",
             sortStat = SortStat.HOURS_MAIN,

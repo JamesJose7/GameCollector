@@ -39,11 +39,6 @@ class GameCardAdapter(
         val game = games[position]
         holder.bind(game)
 
-        holder.itemView.setOnLongClickListener {
-            listener.deleteSelectedGame(position)
-            true
-        }
-
         holder.itemView.setOnClickListener {
             listener.editGame(
                 position,
@@ -78,7 +73,6 @@ class GameCardAdapter(
     }
 
     interface GameCardAdapterListener {
-        fun deleteSelectedGame(position: Int)
         fun editGame(position: Int, imageView: View, titleView: TextView)
     }
 

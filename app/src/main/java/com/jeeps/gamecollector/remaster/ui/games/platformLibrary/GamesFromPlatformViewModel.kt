@@ -174,6 +174,19 @@ class GamesFromPlatformViewModel @Inject constructor(
         return games.value?.get(position)
     }
 
+    // TODO: Replace this with deleting game permanently and restoring it by saving it again
+    fun removeGameLocally(game: Game) {
+        _games.value = _games.value
+            ?.filter { it.id != game.id }
+            ?.sortedWith(currentOrder)
+    }
+
+    fun addGameLocally(game: Game) {
+        _games.value = _games.value
+            ?.plus(listOf(game))
+            ?.sortedWith(currentOrder)
+    }
+
     fun deleteGame(game: Game) {
         gamePendingDeletion = null
 

@@ -236,7 +236,6 @@ public class PlatformLibraryActivity extends AppCompatActivity implements GameCa
         });*/
     }
 
-    @Override
     public void deleteSelectedGame(int position) {
         DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
             switch (which){
