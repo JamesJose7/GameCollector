@@ -1,19 +1,16 @@
 package com.jeeps.gamecollector.remaster.ui.games.platformLibrary
 
-import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.transition.Fade
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.util.Log
 import android.view.Window
-import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.widget.SearchView
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -33,6 +30,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -57,7 +55,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -71,26 +71,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.animation.addListener
-import androidx.core.app.ActivityOptionsCompat
-import androidx.core.util.Pair
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import coil.compose.AsyncImage
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
-import com.jeeps.gamecollector.deprecated.adapters.GameCardAdapter
 import com.jeeps.gamecollector.deprecated.utils.ColorsUtils
 import com.jeeps.gamecollector.deprecated.utils.PlatformCovers
-import com.jeeps.gamecollector.deprecated.views.GridSpacingItemDecoration
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats
 import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
@@ -102,6 +94,7 @@ import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialog
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialogListener
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterControls
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterStats
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.ShowInfoControls
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.SortControls
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getAppropriateComparator
@@ -109,16 +102,8 @@ import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getFilt
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getInfoControlsFromSortStat
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getInfoData
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
-import com.jeeps.gamecollector.remaster.utils.comparators.GameByHoursCompletionistComparator
-import com.jeeps.gamecollector.remaster.utils.comparators.GameByHoursMainExtraComparator
-import com.jeeps.gamecollector.remaster.utils.comparators.GameByHoursStoryComparator
-import com.jeeps.gamecollector.remaster.utils.comparators.GameByNameComparator
-import com.jeeps.gamecollector.remaster.utils.comparators.GameByPhysicalComparator
-import com.jeeps.gamecollector.remaster.utils.comparators.GameByTimesPlayedComparator
-import com.jeeps.gamecollector.remaster.utils.extensions.dpToPx
 import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
 import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
-import com.jeeps.gamecollector.remaster.utils.extensions.showToast
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import com.jeeps.gamecollector.remaster.utils.extensions.withExclusions
 import dagger.hilt.android.AndroidEntryPoint
@@ -138,9 +123,6 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
 
     private val viewModel: GamesFromPlatformViewModel by viewModels()
 
-    private var isAnimating: Boolean = false
-    private var currentFilterAnimationState = FilterHeaderAnimationState.STATE_DOWN
-
     private val addGameResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             handleAddGameResult(it)
@@ -156,12 +138,8 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
         setContentView(binding.root)
         content = binding.content
 
-        addFilterStatsHeaderAnimation()
-
         bindFab()
         getIntentData()
-
-        bindFilterStats()
 
         binding.screenCompose.setComposable {
             GamesFromPlatformScreen(
@@ -244,63 +222,11 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
         }
     }
 
-    private fun bindFilterStats() {
-        viewModel.filteredStats.observe(this) {
-            it?.let { stats ->
-                content.filterStatsCard.visibility = if (stats.showStats) View.VISIBLE else View.GONE
-                val plural = if (stats.totalAmount <= 1) "" else "s"
-                val statsText = "Showing ${stats.filteredAmount} out of ${stats.totalAmount} game$plural"
-                content.filterStatsTv.text = statsText
-            }
-        }
-    }
-
     private fun handleAddGameResult(result: ActivityResult) {
         if (result.resultCode == RESULT_OK) {
             result.data?.getStringExtra(ADD_GAME_RESULT_MESSAGE)?.let { message ->
                 showSnackBar(binding.root, message)
             }
-        }
-    }
-
-    private fun addFilterStatsHeaderAnimation() {
-        content.gamesRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (!recyclerView.canScrollVertically(-1) &&
-                        recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
-                    runFilterHeaderAnimation(FilterHeaderAnimationState.STATE_DOWN)
-                } else if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
-                    runFilterHeaderAnimation(FilterHeaderAnimationState.STATE_TOP)
-                }
-            }
-        })
-    }
-
-    private fun runFilterHeaderAnimation(animationState: FilterHeaderAnimationState) {
-        if (!isAnimating && animationState != currentFilterAnimationState) {
-            val newMargin = if (animationState == FilterHeaderAnimationState.STATE_TOP) {
-                dpToPx(12f)
-             } else {
-                dpToPx(55f)
-            }
-            val layoutParams: ConstraintLayout.LayoutParams? =
-                content.filterStatsCard.layoutParams as? ConstraintLayout.LayoutParams
-            val animator: ValueAnimator = ValueAnimator.ofInt(layoutParams?.topMargin ?: 0, newMargin)
-            animator.addUpdateListener { valueAnimator ->
-                layoutParams?.topMargin = valueAnimator.animatedValue as? Int ?: 0
-                content.filterStatsCard.requestLayout()
-            }
-
-            animator.addListener(
-                onStart = { isAnimating = true },
-                onEnd = {
-                    isAnimating = false
-                    currentFilterAnimationState = animationState
-                }
-            )
-            animator.duration = 300
-            animator.start()
         }
     }
 
@@ -324,6 +250,7 @@ fun GamesFromPlatformScreen(
     val games by viewModel.games.observeAsState(emptyList())
     val sortStat by viewModel.currentSortStat.observeAsState(SortStat.NONE)
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val filteredStats by viewModel.filteredStats.observeAsState(FilterStats())
     var showDeleteGameDialog by remember { mutableStateOf(false) }
     var gamePendingDeletion: Game? by remember { mutableStateOf(null) }
 
@@ -369,6 +296,7 @@ fun GamesFromPlatformScreen(
         platformName = viewModel.platformName,
         sortStat = sortStat,
         searchQuery = searchQuery,
+        filteredStats = filteredStats,
         onBackPressed = onBackPressed,
         onAdvancedFiltersClicked = onAdvancedFiltersClicked,
         onSearchQueryChanged = {
@@ -411,6 +339,7 @@ fun GamesFromPlatformScreen(
     platformName: String,
     sortStat: SortStat,
     searchQuery: String,
+    filteredStats: FilterStats,
     onBackPressed: () -> Unit = {},
     onAdvancedFiltersClicked: () -> Unit = {},
     onSearchQueryChanged: (String) -> Unit = {},
@@ -421,6 +350,19 @@ fun GamesFromPlatformScreen(
     val platformCover = PlatformCovers.getPlatformCover(platformName)
 
     var showSearch by remember { mutableStateOf(false) }
+
+    // Animate filter stats card when scrolling
+    val gridState = rememberLazyGridState()
+    val isScrolledFromTop by remember {
+        derivedStateOf {
+            gridState.firstVisibleItemIndex > 0 || gridState.firstVisibleItemScrollOffset > 0
+        }
+    }
+    val animatedPadding by animateDpAsState(
+        targetValue = if (isScrolledFromTop) 12.dp else 60.dp,
+        animationSpec = tween(durationMillis = 300),
+        label = "filteredStatsAnimation"
+    )
 
     Scaffold(
         snackbarHost = {
@@ -560,27 +502,42 @@ fun GamesFromPlatformScreen(
                 }
             },
         ) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 64.dp),
+            Box(
                 modifier = modifier
                     .padding(innerPadding)
+                    .fillMaxSize()
             ) {
-                items(items = games, key = { it.id }) { game ->
-                    GameCard(
-                        game = game,
-                        sortStat = sortStat,
+                LazyVerticalGrid(
+                    state = gridState,
+                    columns = GridCells.Fixed(2),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 64.dp)
+                ) {
+                    items(items = games, key = { it.id }) { game ->
+                        GameCard(
+                            game = game,
+                            sortStat = sortStat,
+                            modifier = Modifier
+                                .combinedClickable(
+                                    onClick = { onEditGame(game) },
+                                    onLongClick = { onDeleteGame(game) }
+                                )
+                                .animateItem()
+                        )
+                    }
+                }
+
+                if (filteredStats.showStats) {
+                    FilteredStatsCard(
+                        stats = filteredStats,
                         modifier = Modifier
-                            .combinedClickable(
-                                onClick = { onEditGame(game) },
-                                onLongClick = { onDeleteGame(game) }
-                            )
-                            .animateItem()
+                            .padding(top = animatedPadding)
+                            .align(Alignment.TopEnd)
                     )
                 }
             }
+
         }
     }
 }
@@ -726,11 +683,37 @@ private fun GameCard(
     }
 }
 
+@Composable
+fun FilteredStatsCard(
+    modifier: Modifier = Modifier,
+    stats: FilterStats
+) {
+    val statsText = pluralStringResource(R.plurals.filtered_stats, stats.totalAmount, stats.filteredAmount, stats.totalAmount)
+
+    Card(
+        shape = RoundedCornerShape(topStart = 10.dp, topEnd = 0.dp, bottomStart = 10.dp, bottomEnd = 0.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        ),
+        modifier = modifier
+    ) {
+        Text(
+            text = statsText,
+            modifier = Modifier
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+        )
+    }
+}
+
 @Preview
 @Composable
 private fun GamesFromPlatformScreenPreview() {
     val games = List(10) {
         Game(
+            id = it.toString(),
             name = "The Legend of Zelda",
             publisher = "Nintendo",
             platform = "Nintendo Switch",
@@ -746,6 +729,11 @@ private fun GamesFromPlatformScreenPreview() {
             completionDate = "2023-10-22T02:32:04.808Z"
         )
     }
+    val filterStats = FilterStats(
+        showStats = true,
+        filteredAmount = 3,
+        totalAmount = 10
+    )
 
     AppTheme {
         GamesFromPlatformScreen(
@@ -753,7 +741,8 @@ private fun GamesFromPlatformScreenPreview() {
             games = games,
             platformName = "Nintendo Switch",
             sortStat = SortStat.HOURS_MAIN,
-            searchQuery = ""
+            searchQuery = "",
+            filteredStats = filterStats
         )
     }
 }

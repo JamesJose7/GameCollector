@@ -46,4 +46,9 @@
     <string name="platform_color_switch_red">Switch Red</string>
     <string name="platform_color_xbox_green">Xbox Green</string>
     <string name="platform_color_playstation_blue">Playstation Blue</string>
+    
+    <plurals name="filtered_stats">
+        <item quantity="one">Showing %1$d out of %2$d game</item>
+        <item quantity="other">Showing %1$d out of %2$d games</item>
+    </plurals>
 </resources>
