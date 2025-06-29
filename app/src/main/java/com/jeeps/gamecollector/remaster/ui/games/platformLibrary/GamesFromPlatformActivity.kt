@@ -138,7 +138,6 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
         setContentView(binding.root)
         content = binding.content
 
-        bindFab()
         getIntentData()
 
         binding.screenCompose.setComposable {
@@ -175,6 +174,13 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
                         )*/
                     addGameResultLauncher.launch(intent)
                 },
+                onAddGame = {
+                    val intent = Intent(this, AddGameActivity::class.java).apply {
+                        putExtra(CURRENT_PLATFORM, viewModel.platformId)
+                        putExtra(CURRENT_PLATFORM_NAME, viewModel.platformName)
+                    }
+                    addGameResultLauncher.launch(intent)
+                }
             )
         }
     }
@@ -212,16 +218,6 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
         intent.getStringExtra(CURRENT_PLATFORM_NAME)?.let { viewModel.platformName = it }
     }
 
-    private fun bindFab() {
-        binding.fab.setOnClickListener {
-            val intent = Intent(this, AddGameActivity::class.java).apply {
-                putExtra(CURRENT_PLATFORM, viewModel.platformId)
-                putExtra(CURRENT_PLATFORM_NAME, viewModel.platformName)
-            }
-            addGameResultLauncher.launch(intent)
-        }
-    }
-
     private fun handleAddGameResult(result: ActivityResult) {
         if (result.resultCode == RESULT_OK) {
             result.data?.getStringExtra(ADD_GAME_RESULT_MESSAGE)?.let { message ->
@@ -245,7 +241,8 @@ fun GamesFromPlatformScreen(
     viewModel: GamesFromPlatformViewModel = viewModel(),
     onBackPressed: () -> Unit,
     onAdvancedFiltersClicked: () -> Unit,
-    onEditGame: (Game) -> Unit
+    onEditGame: (Game) -> Unit,
+    onAddGame: () -> Unit
 ) {
     val games by viewModel.games.observeAsState(emptyList())
     val sortStat by viewModel.currentSortStat.observeAsState(SortStat.NONE)
@@ -306,7 +303,8 @@ fun GamesFromPlatformScreen(
         onDeleteGame = {
             gamePendingDeletion = it
             showDeleteGameDialog = true
-        }
+        },
+        onAddGame = onAddGame
     )
 
     when {
@@ -344,7 +342,8 @@ fun GamesFromPlatformScreen(
     onAdvancedFiltersClicked: () -> Unit = {},
     onSearchQueryChanged: (String) -> Unit = {},
     onEditGame: (Game) -> Unit = {},
-    onDeleteGame: (Game) -> Unit = {}
+    onDeleteGame: (Game) -> Unit = {},
+    onAddGame: () -> Unit = {}
 ) {
     val collapsingScaffoldState = rememberCollapsingToolbarScaffoldState()
     val platformCover = PlatformCovers.getPlatformCover(platformName)
@@ -370,7 +369,7 @@ fun GamesFromPlatformScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {  },
+                onClick = onAddGame,
                 shape = CircleShape,
                 containerColor = colorResource(id = R.color.colorAccent)
             ) {
