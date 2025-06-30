@@ -20,6 +20,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,18 +38,20 @@ class GamesFromPlatformViewModel @Inject constructor(
         }
 
     var platformName: String = ""
-    var currentSortControls: SortControls = SortControls()
-    var currentShowInfoControls: ShowInfoControls = ShowInfoControls()
+
+    private val _currentFilterControls: MutableStateFlow<FilterControls> = MutableStateFlow(FilterControls())
+    val currentFilterControls: StateFlow<FilterControls> = _currentFilterControls.asStateFlow()
+    private var _currentSortControls: MutableStateFlow<SortControls> = MutableStateFlow(SortControls())
+    val currentSortControls: StateFlow<SortControls> = _currentSortControls.asStateFlow()
+    private var _currentShowInfoControls: MutableStateFlow<ShowInfoControls> = MutableStateFlow(ShowInfoControls())
+    val currentShowInfoControls: StateFlow<ShowInfoControls> = _currentShowInfoControls.asStateFlow()
+
     var gamePendingDeletion: Game? = null
 
     private var dbGames = MutableLiveData<List<Game>>()
     private var currentOrder: Comparator<Game> = GameByNameComparator()
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
-
-    private val _currentFilterControls = MutableLiveData<FilterControls>()
-    val currentFilterControls: LiveData<FilterControls>
-        get() = _currentFilterControls
 
     private val _filteredStats = MediatorLiveData<FilterStats>()
     val filteredStats: MediatorLiveData<FilterStats>
@@ -68,7 +71,7 @@ class GamesFromPlatformViewModel @Inject constructor(
                 _games.value = sortGames(game, currentOrder)
                 val query = searchQuery.value.takeIf { it.isNotEmpty() }
                 query?.let { handleSearch(query) }
-                currentFilterControls.value?.let { filters ->
+                currentFilterControls.value.let { filters ->
                     if (filters.isNotCleared()) {
                         updateFilters(filters.getFilterData().filtersList)
                     }
@@ -147,12 +150,20 @@ class GamesFromPlatformViewModel @Inject constructor(
         _currentFilterControls.value = filterControls
     }
 
+    fun setSortControls(sortControls: SortControls) {
+        _currentSortControls.value = sortControls
+    }
+
+    fun setShowInfoControls(showInfoControls: ShowInfoControls) {
+        _currentShowInfoControls.value = showInfoControls
+    }
+
     fun rearrangeGames(comparator: Comparator<Game>) = dbGames.value?.let {
         _games.value = sortGames(it, comparator)
     }.also {
         currentOrder = comparator
         if (searchQuery.value.isNotEmpty()) handleSearch(searchQuery.value)
-        currentFilterControls.value?.let { filters ->
+        currentFilterControls.value.let { filters ->
             if (filters.isNotCleared()) {
                 updateFilters(filters.getFilterData().filtersList)
             }
@@ -222,5 +233,15 @@ class GamesFromPlatformViewModel @Inject constructor(
         val shortName = game.shortName.lowercase()
         val queryNormalized = query.lowercase()
         return name.contains(queryNormalized) || shortName.contains(queryNormalized)
+    }
+
+    fun clearShowInfoControls() {
+        _currentShowInfoControls.update {
+            it.copy(
+                isHoursMain = false,
+                isHoursExtra = false,
+                isHoursCompletionist = false
+            )
+        }
     }
 }

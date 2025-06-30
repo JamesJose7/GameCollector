@@ -1,214 +1,446 @@
 package com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs
 
-import android.content.Context
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.widget.ToggleButton
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.jeeps.gamecollector.databinding.AdvancedFiltersDialogBinding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.jeeps.gamecollector.R
+import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 
-class AdvancedFiltersDialog(
-    context: Context,
-    private val listener: AdvancedFiltersDialogListener,
-    private val filterControls: FilterControls,
-    private val sortControls: SortControls,
-    private val showInfoControls: ShowInfoControls
-) : BottomSheetDialog(context) {
-
-    private lateinit var binding: AdvancedFiltersDialogBinding
-
-    init {
-        inflateViews()
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        bindFilterControls()
-        bindSortControls()
-        bindShowInfoControls()
-        activateEnabledFilterToggles()
-        activateEnabledSortToggles()
-        activateEnabledShowInfoToggles()
-    }
-
-    private fun inflateViews() {
-        binding = AdvancedFiltersDialogBinding.inflate(LayoutInflater.from(context))
-        setContentView(binding.root)
-    }
-
-    private fun bindFilterControls() {
-        bindFilterButton(binding.filterCompletedToggle) { filterControls.completed = it }
-        bindFilterButton(binding.filterNotCompletedToggle) { filterControls.notCompleted = it }
-        bindFilterButton(binding.filterDigitalToggle) { filterControls.isDigital = it }
-        bindFilterButton(binding.filterPhysicalToggle) { filterControls.isPhysical = it }
-
-        binding.clearFiltersButton.setOnClickListener {
-            listener.clearFilters()
-            clearFilters()
-        }
-    }
-
-    private fun bindFilterButton(
-        filterToggleButton: ToggleButton,
-        updateFilterControl: (Boolean) -> Unit
+@Composable
+fun AdvancedFiltersDialog(
+    modifier: Modifier = Modifier,
+    filterControls: FilterControls,
+    sortControls: SortControls,
+    showInfoControls: ShowInfoControls,
+    onFilterControlsUpdated: (FilterControls) -> Unit = {},
+    onSortControlsUpdated: (SortControls, isOrderSort: Boolean) -> Unit = { _, _ -> },
+    onShowInfoControlsUpdated: (ShowInfoControls) -> Unit = {},
+    onClearFilters: () -> Unit = {}
+) {
+    Column(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        filterToggleButton.setOnCheckedChangeListener { toggleView, isChecked ->
-            if (toggleView.isPressed) {
-                updateFilterControl(isChecked)
-                listener.updateFilterControls(filterControls)
+        Text(
+            text = "Filters",
+            fontSize = 25.sp,
+            color = colorResource(R.color.textColorPrimary),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+        FlowRow(
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+        ) {
+            FilterChip(
+                onClick = {
+                    onFilterControlsUpdated(
+                        filterControls.copy(completed = !filterControls.completed)
+                    )
+                },
+                label = { Text(text = "Completed") },
+                selected = filterControls.completed,
+                leadingIcon = {
+                    if (filterControls.completed) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier
+                                .size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                }
+            )
+            FilterChip(
+                onClick = {
+                    onFilterControlsUpdated(
+                        filterControls.copy(notCompleted = !filterControls.notCompleted)
+                    )
+                },
+                label = { Text(text = "Not completed") },
+                selected = filterControls.notCompleted,
+                leadingIcon = {
+                    if (filterControls.notCompleted) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier
+                                .size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                }
+            )
+            FilterChip(
+                onClick = {
+                    onFilterControlsUpdated(
+                        filterControls.copy(isDigital = !filterControls.isDigital)
+                    )
+                },
+                label = { Text(text = "Digital") },
+                selected = filterControls.isDigital,
+                leadingIcon = {
+                    if (filterControls.isDigital) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier
+                                .size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                }
+            )
+            FilterChip(
+                onClick = {
+                    onFilterControlsUpdated(
+                        filterControls.copy(isPhysical = !filterControls.isPhysical)
+                    )
+                },
+                label = { Text(text = "Physical") },
+                selected = filterControls.isPhysical,
+                leadingIcon = {
+                    if (filterControls.isPhysical) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier
+                                .size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                },
+                modifier = Modifier
+            )
+        }
+        AssistChip(
+            onClick = onClearFilters,
+            label = { Text("Clear filters") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "Localized description",
+                    modifier = Modifier.size(AssistChipDefaults.IconSize)
+                )
             }
-        }
-    }
-
-    private fun bindSortControls() {
-        binding.sortOrderToggle.setOnCheckedChangeListener { _, isChecked ->
-            sortControls.isAscending = !isChecked
-            listener.updateSortControls(sortControls)
-        }
-
-        bindSortButton(binding.sortFormatPhysicalToggle) {
-            sortControls.isPhysical = it
-        }
-        bindSortButton(binding.sortFormatDigitalToggle) {
-            sortControls.isDigital = it
-        }
-        bindSortButton(binding.sortAlphabeticalToggle) {
-            sortControls.isAlphabetical = it
-        }
-        bindSortButton(binding.sortTimesCompletedToggle) {
-            sortControls.isCompletion = it
-        }
-        bindSortButton(binding.sortHoursMainToggle) {
-            sortControls.isHoursMain = it
-        }
-        bindSortButton(binding.sortHoursExtraToggle) {
-            sortControls.isHoursExtra = it
-        }
-        bindSortButton(binding.sortHoursCompletionistToggle) {
-            sortControls.isHoursCompletionist = it
-        }
-    }
-
-    private fun bindSortButton(
-        toggleButton: ToggleButton,
-        updateSortControl: (isChecked: Boolean) -> Unit
-    ) {
-        toggleButton.setOnCheckedChangeListener { view, isChecked ->
-            if (view.isPressed) {
-                clearShowInfoControls()
-                activateEnabledShowInfoToggles()
-
-                clearMiscellaneousToggles()
-                updateSortControl(isChecked)
-                activateEnabledSortToggles()
-                listener.updateSortControls(sortControls)
+        )
+        Text(
+            text = "Sorting",
+            fontSize = 25.sp,
+            color = colorResource(R.color.textColorPrimary),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp)
+        )
+        Text(
+            text = "Order",
+            fontSize = 18.sp,
+            color = colorResource(R.color.textColorPrimary),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp)
+        )
+        AssistChip(
+            onClick = {
+                onSortControlsUpdated(
+                    sortControls.copy(isAscending = !sortControls.isAscending), true
+                )
+            },
+            label = {
+                Text(
+                    text = if (sortControls.isAscending) "Ascending" else "Descending"
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = if (sortControls.isAscending) Icons.Filled.ArrowUpward else Icons.Filled.ArrowDownward,
+                    contentDescription = "Localized description",
+                    modifier = Modifier.size(AssistChipDefaults.IconSize)
+                )
             }
+        )
+        Text(
+            text = "Format",
+            fontSize = 18.sp,
+            color = colorResource(R.color.textColorPrimary),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp)
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(
+                onClick = {
+                    onSortControlsUpdated(
+                        SortControls(isDigital = !sortControls.isDigital, isAscending = sortControls.isAscending),
+                        false
+                    )
+                },
+                label = { Text("Digital") },
+                selected = sortControls.isDigital,
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_download_cloud),
+                        contentDescription = "Localized description",
+                        modifier = Modifier.size(AssistChipDefaults.IconSize)
+                    )
+                }
+            )
+            FilterChip(
+                onClick = {
+                    onSortControlsUpdated(
+                        SortControls(isPhysical = !sortControls.isPhysical, isAscending = sortControls.isAscending),
+                        false
+                    )
+                },
+                label = { Text("Physical") },
+                selected = sortControls.isPhysical,
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_physical),
+                        contentDescription = "Localized description",
+                        modifier = Modifier.size(AssistChipDefaults.IconSize)
+                    )
+                }
+            )
         }
-    }
-
-    private fun bindShowInfoControls() {
-        bindShowInfoButton(binding.infoHoursMainToggle) {
-            showInfoControls.isHoursMain = it
+        Text(
+            text = "Miscellaneous",
+            fontSize = 18.sp,
+            color = colorResource(R.color.textColorPrimary),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp)
+        )
+        FlowRow(
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+        ) {
+            FilterChip(
+                onClick = {
+                    onSortControlsUpdated(
+                        SortControls(isAlphabetical = !sortControls.isAlphabetical, isAscending = sortControls.isAscending),
+                        false
+                    )
+                },
+                label = { Text(text = "Alphabetical") },
+                selected = sortControls.isAlphabetical,
+                leadingIcon = {
+                    if (sortControls.isAlphabetical) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier
+                                .size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                }
+            )
+            FilterChip(
+                onClick = {
+                    onSortControlsUpdated(
+                        SortControls(isCompletion = !sortControls.isCompletion, isAscending = sortControls.isAscending),
+                        false
+                    )
+                },
+                label = { Text(text = "Completion") },
+                selected = sortControls.isCompletion,
+                leadingIcon = {
+                    if (sortControls.isCompletion) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier
+                                .size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                }
+            )
+            FilterChip(
+                onClick = {
+                    onSortControlsUpdated(
+                        SortControls(isHoursMain = !sortControls.isHoursMain, isAscending = sortControls.isAscending),
+                        false
+                    )
+                },
+                label = { Text(text = "Hours (Main)") },
+                selected = sortControls.isHoursMain,
+                leadingIcon = {
+                    if (sortControls.isHoursMain) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier
+                                .size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                }
+            )
+            FilterChip(
+                onClick = {
+                    onSortControlsUpdated(
+                        SortControls(isHoursExtra = !sortControls.isHoursExtra, isAscending = sortControls.isAscending),
+                        false
+                    )
+                },
+                label = { Text(text = "Hours (Main + Extra)") },
+                selected = sortControls.isHoursExtra,
+                leadingIcon = {
+                    if (sortControls.isHoursExtra) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier
+                                .size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                },
+                modifier = Modifier
+            )
+            FilterChip(
+                onClick = {
+                    onSortControlsUpdated(
+                        SortControls(isHoursCompletionist = !sortControls.isHoursCompletionist, isAscending = sortControls.isAscending),
+                        false
+                    )
+                },
+                label = { Text(text = "Hours (Completionist)") },
+                selected = sortControls.isHoursCompletionist,
+                leadingIcon = {
+                    if (sortControls.isHoursCompletionist) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier
+                                .size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                },
+                modifier = Modifier
+            )
         }
-        bindShowInfoButton(binding.infoHoursExtraToggle) {
-            showInfoControls.isHoursExtra = it
-        }
-        bindShowInfoButton(binding.infoHoursCompletionistToggle) {
-            showInfoControls.isHoursCompletionist = it
-        }
-    }
-
-    private fun bindShowInfoButton(
-        toggleButton: ToggleButton,
-        updateShowInfoControl: (isChecked: Boolean) -> Unit
-    ) {
-        toggleButton.setOnCheckedChangeListener { view, isChecked ->
-            if (view.isPressed) {
-                clearShowInfoControls()
-                updateShowInfoControl(isChecked)
-                activateEnabledShowInfoToggles()
-                listener.updateShowInfoControls(showInfoControls)
-            }
-        }
-    }
-
-    private fun activateEnabledSortToggles() {
-        with(sortControls) {
-            with(binding) {
-                sortOrderToggle.isChecked = !isAscending
-                sortFormatPhysicalToggle.isChecked = isPhysical
-                sortFormatDigitalToggle.isChecked = isDigital
-                sortAlphabeticalToggle.isChecked = isAlphabetical
-                sortTimesCompletedToggle.isChecked = isCompletion
-                sortHoursMainToggle.isChecked = isHoursMain
-                sortHoursExtraToggle.isChecked = isHoursExtra
-                sortHoursCompletionistToggle.isChecked = isHoursCompletionist
-            }
-        }
-    }
-
-    private fun activateEnabledFilterToggles() {
-        with(filterControls) {
-            with(binding) {
-                filterCompletedToggle.isChecked = completed
-                filterNotCompletedToggle.isChecked = notCompleted
-                filterDigitalToggle.isChecked = isDigital
-                filterPhysicalToggle.isChecked = isPhysical
-            }
-        }
-    }
-
-    private fun activateEnabledShowInfoToggles() {
-        with(showInfoControls) {
-            with(binding) {
-                infoHoursMainToggle.isChecked = isHoursMain
-                infoHoursExtraToggle.isChecked = isHoursExtra
-                infoHoursCompletionistToggle.isChecked = isHoursCompletionist
-            }
-        }
-    }
-
-    private fun clearMiscellaneousToggles() {
-        with(sortControls) {
-            isPhysical = false
-            isDigital = false
-            isAlphabetical = false
-            isCompletion = false
-            isHoursMain = false
-            isHoursExtra = false
-            isHoursCompletionist = false
-        }
-    }
-
-    private fun clearFilters() {
-        with(filterControls) {
-            completed = false
-            notCompleted = false
-            isPhysical = false
-            isDigital = false
-        }
-
-        with(binding) {
-            filterCompletedToggle.isChecked = false
-            filterNotCompletedToggle.isChecked = false
-            filterDigitalToggle.isChecked = false
-            filterPhysicalToggle.isChecked = false
-        }
-    }
-
-    private fun clearShowInfoControls() {
-        with(showInfoControls) {
-            isHoursMain = false
-            isHoursExtra = false
-            isHoursCompletionist = false
+        Text(
+            text = "Show info",
+            fontSize = 25.sp,
+            color = colorResource(R.color.textColorPrimary),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp)
+        )
+        FlowRow(
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+        ) {
+            FilterChip(
+                onClick = {
+                    onShowInfoControlsUpdated(
+                        ShowInfoControls(isHoursMain = !showInfoControls.isHoursMain)
+                    )
+                },
+                label = { Text(text = "Hours (Main)") },
+                selected = showInfoControls.isHoursMain,
+                leadingIcon = {
+                    if (showInfoControls.isHoursMain) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier
+                                .size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                }
+            )
+            FilterChip(
+                onClick = {
+                    onShowInfoControlsUpdated(
+                        ShowInfoControls(isHoursExtra = !showInfoControls.isHoursExtra)
+                    )
+                },
+                label = { Text(text = "Hours (Main + Extra)") },
+                selected = showInfoControls.isHoursExtra,
+                leadingIcon = {
+                    if (showInfoControls.isHoursExtra) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier
+                                .size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                },
+                modifier = Modifier
+            )
+            FilterChip(
+                onClick = {
+                    onShowInfoControlsUpdated(
+                        ShowInfoControls(isHoursCompletionist = !showInfoControls.isHoursCompletionist)
+                    )
+                },
+                label = { Text(text = "Hours (Completionist)") },
+                selected = showInfoControls.isHoursCompletionist,
+                leadingIcon = {
+                    if (showInfoControls.isHoursCompletionist) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+                            modifier = Modifier
+                                .size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                },
+                modifier = Modifier
+            )
         }
     }
 }
 
-interface AdvancedFiltersDialogListener {
-    fun updateFilterControls(filterControls: FilterControls)
-    fun clearFilters()
-    fun updateSortControls(sortControls: SortControls)
-    fun updateShowInfoControls(showInfoControls: ShowInfoControls)
+@Preview
+@Composable
+private fun AdvancedFiltersDialogPreview() {
+    AppTheme {
+        AdvancedFiltersDialog(
+            filterControls = FilterControls(),
+            sortControls = SortControls(),
+            showInfoControls = ShowInfoControls()
+        )
+    }
 }

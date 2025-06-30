@@ -3,7 +3,6 @@ package com.jeeps.gamecollector.remaster.ui.games.platformLibrary
 import android.content.Intent
 import android.os.Bundle
 import android.transition.Fade
-import android.util.Log
 import android.view.Window
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
@@ -42,10 +41,12 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -55,7 +56,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -73,6 +73,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -92,14 +93,9 @@ import com.jeeps.gamecollector.remaster.ui.composables.LoadingAnimation
 import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
 import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialog
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialogListener
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterControls
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterStats
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.ShowInfoControls
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.SortControls
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getAppropriateComparator
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getFilterData
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getInfoControlsFromSortStat
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getInfoData
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
@@ -116,7 +112,7 @@ import java.text.DecimalFormat
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
-class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener {
+class GamesFromPlatformActivity : BaseActivity() {
 
     private val binding by viewBinding(ActivityPlatformLibraryBinding::inflate)
     private lateinit var content: ContentPlatformLibraryBinding
@@ -145,19 +141,6 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
                 viewModel = viewModel,
                 onBackPressed = {
                     onBackPressedDispatcher.onBackPressed()
-                },
-                onAdvancedFiltersClicked = {
-                    // TODO: Replace with compose dialog
-                    val advancedFiltersDialog = AdvancedFiltersDialog(
-                        this,
-                        this,
-                        viewModel.currentFilterControls.value ?: FilterControls(),
-                        viewModel.currentSortControls,
-                        getInfoControlsFromSortStat(
-                            viewModel.currentSortStat.value
-                        )
-                    )
-                    advancedFiltersDialog.show()
                 },
                 onEditGame = { game ->
                     val intent = Intent(this, GameDetailsActivity::class.java).apply {
@@ -190,29 +173,6 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
         viewModel.deleteGamePendingDeletion()
     }
 
-    override fun updateFilterControls(filterControls: FilterControls) {
-        val (filtersList) = filterControls.getFilterData()
-        viewModel.setFilterControls(filterControls)
-        viewModel.updateFilters(filtersList)
-    }
-
-    override fun clearFilters() {
-        viewModel.clearFilters(true)
-    }
-
-    override fun updateSortControls(sortControls: SortControls) {
-        val (comparator, sortStat) = sortControls.getAppropriateComparator()
-        viewModel.currentSortControls = sortControls
-        viewModel.setCurrentSortStat(sortStat)
-        viewModel.rearrangeGames(comparator)
-    }
-
-    override fun updateShowInfoControls(showInfoControls: ShowInfoControls) {
-        val (sortStat) = showInfoControls.getInfoData()
-        viewModel.currentShowInfoControls = showInfoControls
-        viewModel.setCurrentSortStat(sortStat)
-    }
-
     private fun getIntentData() {
         intent.getStringExtra(CURRENT_PLATFORM)?.let { viewModel.platformId = it }
         intent.getStringExtra(CURRENT_PLATFORM_NAME)?.let { viewModel.platformName = it }
@@ -235,12 +195,11 @@ class GamesFromPlatformActivity : BaseActivity(), AdvancedFiltersDialogListener 
     }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun GamesFromPlatformScreen(
     viewModel: GamesFromPlatformViewModel = viewModel(),
     onBackPressed: () -> Unit,
-    onAdvancedFiltersClicked: () -> Unit,
     onEditGame: (Game) -> Unit,
     onAddGame: () -> Unit
 ) {
@@ -248,11 +207,16 @@ fun GamesFromPlatformScreen(
     val sortStat by viewModel.currentSortStat.observeAsState(SortStat.NONE)
     val searchQuery by viewModel.searchQuery.collectAsState()
     val filteredStats by viewModel.filteredStats.observeAsState(FilterStats())
+    val filterControls by viewModel.currentFilterControls.collectAsState()
+    val sortControls by viewModel.currentSortControls.collectAsState()
+    val showInfoControls by viewModel.currentShowInfoControls.collectAsState()
     var showDeleteGameDialog by remember { mutableStateOf(false) }
     var gamePendingDeletion: Game? by remember { mutableStateOf(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    var showFiltersBottomSheet by remember { mutableStateOf(false) }
 
     val promptDeleteUndoAction: (game: Game) -> Unit = { game ->
         scope.launch {
@@ -295,7 +259,7 @@ fun GamesFromPlatformScreen(
         searchQuery = searchQuery,
         filteredStats = filteredStats,
         onBackPressed = onBackPressed,
-        onAdvancedFiltersClicked = onAdvancedFiltersClicked,
+        onAdvancedFiltersClicked = { showFiltersBottomSheet = true },
         onSearchQueryChanged = {
             viewModel.handleSearch(it)
         },
@@ -323,6 +287,43 @@ fun GamesFromPlatformScreen(
                         showDeleteGameDialog = false
                         promptDeleteUndoAction(game)
                     }
+                )
+            }
+        }
+        showFiltersBottomSheet -> {
+            ModalBottomSheet(
+                containerColor = MaterialTheme.colorScheme.surface,
+                onDismissRequest = { showFiltersBottomSheet = false }
+            ) {
+                AdvancedFiltersDialog(
+                    filterControls = filterControls,
+                    sortControls = sortControls,
+                    showInfoControls = showInfoControls,
+                    onFilterControlsUpdated = { filterControls ->
+                        val (filtersList) = filterControls.getFilterData()
+                        viewModel.setFilterControls(filterControls)
+                        viewModel.updateFilters(filtersList)
+                    },
+                    onClearFilters = {
+                        viewModel.clearFilters(true)
+                    },
+                    onSortControlsUpdated = { sortControls, isOrderSort ->
+                        if (!isOrderSort) {
+                            viewModel.clearShowInfoControls()
+                        }
+
+                        val (comparator, sort) = sortControls.getAppropriateComparator()
+                        viewModel.setSortControls(sortControls)
+                        viewModel.setCurrentSortStat(sort)
+                        viewModel.rearrangeGames(comparator)
+                    },
+                    onShowInfoControlsUpdated = { showInfoControls ->
+                        val (sort) = showInfoControls.getInfoData()
+                        viewModel.clearShowInfoControls()
+                        viewModel.setShowInfoControls(showInfoControls)
+                        viewModel.setCurrentSortStat(sort)
+                    },
+                    modifier = Modifier
                 )
             }
         }
@@ -522,7 +523,6 @@ fun GamesFromPlatformScreen(
                                     onClick = { onEditGame(game) },
                                     onLongClick = { onDeleteGame(game) }
                                 )
-                                .animateItem()
                         )
                     }
                 }
@@ -607,6 +607,8 @@ private fun GameCard(
                             minFontSize = 14.sp,
                             maxFontSize = 18.sp
                         ),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.titleMedium.copy(
                             color = colorResource(R.color.textColorPrimary)
                         ),
