@@ -55,6 +55,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -215,6 +216,7 @@ fun GamesFromPlatformScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val filtersSheetState = rememberModalBottomSheetState()
 
     var showFiltersBottomSheet by remember { mutableStateOf(false) }
 
@@ -292,6 +294,7 @@ fun GamesFromPlatformScreen(
         }
         showFiltersBottomSheet -> {
             ModalBottomSheet(
+                sheetState = filtersSheetState,
                 containerColor = MaterialTheme.colorScheme.surface,
                 onDismissRequest = { showFiltersBottomSheet = false }
             ) {
