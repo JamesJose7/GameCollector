@@ -82,7 +82,7 @@ public class PlatformLibraryActivity extends AppCompatActivity {
     @BindView(R.id.games_recycler_view) RecyclerView gamesRecyclerView;
     ImageView backdrop;
     @BindView(R.id.games_progressbar) ProgressBar progressBar;
-    @BindView(R.id.fab) FloatingActionButton fab;
+    FloatingActionButton fab;
 
     private Context context;
     private String platformId;

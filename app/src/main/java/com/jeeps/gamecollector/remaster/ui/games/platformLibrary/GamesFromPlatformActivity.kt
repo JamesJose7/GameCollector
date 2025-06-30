@@ -116,7 +116,6 @@ import java.text.DecimalFormat
 class GamesFromPlatformActivity : BaseActivity() {
 
     private val binding by viewBinding(ActivityPlatformLibraryBinding::inflate)
-    private lateinit var content: ContentPlatformLibraryBinding
 
     private val viewModel: GamesFromPlatformViewModel by viewModels()
 
@@ -133,7 +132,6 @@ class GamesFromPlatformActivity : BaseActivity() {
 
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        content = binding.content
 
         getIntentData()
 

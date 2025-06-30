@@ -13,7 +13,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,22 +27,21 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.jeeps.gamecollector.R;
-import com.jeeps.gamecollector.remaster.ui.adapters.PlatformsListAdapter;
 import com.jeeps.gamecollector.deprecated.model.CurrentUser;
-import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
-import com.jeeps.gamecollector.remaster.data.model.data.user.User;
-import com.jeeps.gamecollector.remaster.data.model.data.user.UserDetails;
 import com.jeeps.gamecollector.deprecated.services.api.ApiClient;
 import com.jeeps.gamecollector.deprecated.services.api.UserService;
 import com.jeeps.gamecollector.deprecated.services.igdb.IgdbApiClient;
 import com.jeeps.gamecollector.deprecated.utils.UserUtils;
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
+import com.jeeps.gamecollector.remaster.data.model.data.user.User;
+import com.jeeps.gamecollector.remaster.data.model.data.user.UserDetails;
+import com.jeeps.gamecollector.remaster.ui.adapters.PlatformsListAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -59,7 +57,7 @@ public class MainLibraryActivity extends AppCompatActivity {
 
     RecyclerView platformsRecyclerView;
     ProgressBar mProgressBar;
-    @BindView(R.id.fab) FloatingActionButton fab;
+    FloatingActionButton fab;
 
     private Context context;
     private SharedPreferences sharedPreferences;

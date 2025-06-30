@@ -17,26 +17,22 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.jeeps.gamecollector.R;
 import com.jeeps.gamecollector.deprecated.model.CurrentUser;
-import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
 import com.jeeps.gamecollector.deprecated.services.api.ApiClient;
 import com.jeeps.gamecollector.deprecated.services.api.PlatformService;
 import com.jeeps.gamecollector.deprecated.utils.PlatformColor;
 import com.jeeps.gamecollector.deprecated.utils.UserUtils;
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.util.Arrays;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -56,7 +52,7 @@ public class AddPlatformActivityOld extends AppCompatActivity {
     ImageView platformCover;
     EditText platformNameInput;
     RadioGroup colorRadioGroup;
-    @BindView(R.id.fab) FloatingActionButton fab;
+    FloatingActionButton fab;
     ProgressBar progressBar;
 
     private Context context;
