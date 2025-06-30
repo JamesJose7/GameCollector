@@ -82,7 +82,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
-import com.jeeps.gamecollector.databinding.ContentPlatformLibraryBinding
 import com.jeeps.gamecollector.deprecated.utils.ColorsUtils
 import com.jeeps.gamecollector.deprecated.utils.PlatformCovers
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game

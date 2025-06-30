@@ -82,17 +82,7 @@ fun AdvancedFiltersDialog(
                     )
                 },
                 label = { Text(text = "Completed") },
-                selected = filterControls.completed,
-                leadingIcon = {
-                    if (filterControls.completed) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                }
+                selected = filterControls.completed
             )
             FilterChip(
                 onClick = {
@@ -111,17 +101,7 @@ fun AdvancedFiltersDialog(
                     )
                 },
                 label = { Text(text = "Not completed") },
-                selected = filterControls.notCompleted,
-                leadingIcon = {
-                    if (filterControls.notCompleted) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                }
+                selected = filterControls.notCompleted
             )
             FilterChip(
                 onClick = {
@@ -140,17 +120,7 @@ fun AdvancedFiltersDialog(
                     )
                 },
                 label = { Text(text = "Digital") },
-                selected = filterControls.isDigital,
-                leadingIcon = {
-                    if (filterControls.isDigital) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                }
+                selected = filterControls.isDigital
             )
             FilterChip(
                 onClick = {
@@ -169,18 +139,7 @@ fun AdvancedFiltersDialog(
                     )
                 },
                 label = { Text(text = "Physical") },
-                selected = filterControls.isPhysical,
-                leadingIcon = {
-                    if (filterControls.isPhysical) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                },
-                modifier = Modifier
+                selected = filterControls.isPhysical
             )
         }
         AssistChip(
@@ -299,17 +258,7 @@ fun AdvancedFiltersDialog(
                     )
                 },
                 label = { Text(text = "Alphabetical") },
-                selected = sortControls.isAlphabetical,
-                leadingIcon = {
-                    if (sortControls.isAlphabetical) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                }
+                selected = sortControls.isAlphabetical
             )
             FilterChip(
                 onClick = {
@@ -319,17 +268,7 @@ fun AdvancedFiltersDialog(
                     )
                 },
                 label = { Text(text = "Completion") },
-                selected = sortControls.isCompletion,
-                leadingIcon = {
-                    if (sortControls.isCompletion) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                }
+                selected = sortControls.isCompletion
             )
             FilterChip(
                 onClick = {
@@ -339,17 +278,7 @@ fun AdvancedFiltersDialog(
                     )
                 },
                 label = { Text(text = "Hours (Main)") },
-                selected = sortControls.isHoursMain,
-                leadingIcon = {
-                    if (sortControls.isHoursMain) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                }
+                selected = sortControls.isHoursMain
             )
             FilterChip(
                 onClick = {
@@ -359,18 +288,7 @@ fun AdvancedFiltersDialog(
                     )
                 },
                 label = { Text(text = "Hours (Main + Extra)") },
-                selected = sortControls.isHoursExtra,
-                leadingIcon = {
-                    if (sortControls.isHoursExtra) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                },
-                modifier = Modifier
+                selected = sortControls.isHoursExtra
             )
             FilterChip(
                 onClick = {
@@ -380,18 +298,7 @@ fun AdvancedFiltersDialog(
                     )
                 },
                 label = { Text(text = "Hours (Completionist)") },
-                selected = sortControls.isHoursCompletionist,
-                leadingIcon = {
-                    if (sortControls.isHoursCompletionist) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                },
-                modifier = Modifier
+                selected = sortControls.isHoursCompletionist
             )
         }
         Text(
@@ -417,17 +324,7 @@ fun AdvancedFiltersDialog(
                     )
                 },
                 label = { Text(text = "Hours (Main)") },
-                selected = showInfoControls.isHoursMain,
-                leadingIcon = {
-                    if (showInfoControls.isHoursMain) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                }
+                selected = showInfoControls.isHoursMain
             )
             FilterChip(
                 onClick = {
@@ -436,18 +333,7 @@ fun AdvancedFiltersDialog(
                     )
                 },
                 label = { Text(text = "Hours (Main + Extra)") },
-                selected = showInfoControls.isHoursExtra,
-                leadingIcon = {
-                    if (showInfoControls.isHoursExtra) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                },
-                modifier = Modifier
+                selected = showInfoControls.isHoursExtra
             )
             FilterChip(
                 onClick = {
@@ -456,18 +342,7 @@ fun AdvancedFiltersDialog(
                     )
                 },
                 label = { Text(text = "Hours (Completionist)") },
-                selected = showInfoControls.isHoursCompletionist,
-                leadingIcon = {
-                    if (showInfoControls.isHoursCompletionist) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                },
-                modifier = Modifier
+                selected = showInfoControls.isHoursCompletionist
             )
         }
     }
