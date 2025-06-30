@@ -67,8 +67,18 @@ fun AdvancedFiltersDialog(
         ) {
             FilterChip(
                 onClick = {
+                    // Turn off opposite filter if it's on
+                    val notCompleted = if (!filterControls.completed && filterControls.notCompleted) {
+                        false
+                    } else {
+                        filterControls.notCompleted
+                    }
+
                     onFilterControlsUpdated(
-                        filterControls.copy(completed = !filterControls.completed)
+                        filterControls.copy(
+                            completed = !filterControls.completed,
+                            notCompleted = notCompleted
+                        )
                     )
                 },
                 label = { Text(text = "Completed") },
@@ -86,8 +96,18 @@ fun AdvancedFiltersDialog(
             )
             FilterChip(
                 onClick = {
+                    // Turn off opposite filter if it's on
+                    val completed = if (!filterControls.notCompleted && filterControls.completed) {
+                        false
+                    } else {
+                        filterControls.completed
+                    }
+
                     onFilterControlsUpdated(
-                        filterControls.copy(notCompleted = !filterControls.notCompleted)
+                        filterControls.copy(
+                            notCompleted = !filterControls.notCompleted,
+                            completed = completed
+                        )
                     )
                 },
                 label = { Text(text = "Not completed") },
@@ -105,8 +125,18 @@ fun AdvancedFiltersDialog(
             )
             FilterChip(
                 onClick = {
+                    // Turn off opposite filter if it's on
+                    val isPhysical = if (!filterControls.isDigital && filterControls.isPhysical) {
+                        false
+                    } else {
+                        filterControls.notCompleted
+                    }
+
                     onFilterControlsUpdated(
-                        filterControls.copy(isDigital = !filterControls.isDigital)
+                        filterControls.copy(
+                            isDigital = !filterControls.isDigital,
+                            isPhysical = isPhysical
+                        )
                     )
                 },
                 label = { Text(text = "Digital") },
@@ -124,8 +154,18 @@ fun AdvancedFiltersDialog(
             )
             FilterChip(
                 onClick = {
+                    // Turn off opposite filter if it's on
+                    val isDigital = if (!filterControls.isPhysical && filterControls.isDigital) {
+                        false
+                    } else {
+                        filterControls.isDigital
+                    }
+
                     onFilterControlsUpdated(
-                        filterControls.copy(isPhysical = !filterControls.isPhysical)
+                        filterControls.copy(
+                            isPhysical = !filterControls.isPhysical,
+                            isDigital = isDigital
+                        )
                     )
                 },
                 label = { Text(text = "Physical") },
