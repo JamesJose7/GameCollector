@@ -57,6 +57,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -363,6 +364,11 @@ fun GamesFromPlatformScreen(
         animationSpec = tween(durationMillis = 300),
         label = "filteredStatsAnimation"
     )
+
+    // Reset scroll when sorting or filtering
+    LaunchedEffect(games, filteredStats, sortStat) {
+        gridState.scrollToItem(0)
+    }
 
     Scaffold(
         snackbarHost = {
