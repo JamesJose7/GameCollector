@@ -109,7 +109,7 @@ fun AdvancedFiltersDialog(
                     val isPhysical = if (!filterControls.isDigital && filterControls.isPhysical) {
                         false
                     } else {
-                        filterControls.notCompleted
+                        filterControls.isPhysical
                     }
 
                     onFilterControlsUpdated(
