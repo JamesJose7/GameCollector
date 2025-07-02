@@ -46,9 +46,6 @@ class AddPlatformViewModel @Inject constructor(
 
     fun setPlatform(platform: Platform) {
         _platform.value = platform
-
-        // Invalidate cached image URI
-        Picasso.get().invalidate(platform.imageUri)
     }
 
     fun setPlatformImageUri(uri: Uri?) {

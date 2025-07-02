@@ -2,6 +2,8 @@ package com.jeeps.gamecollector.remaster.ui.gamePlatforms
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -56,7 +58,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.R
@@ -64,6 +66,7 @@ import com.jeeps.gamecollector.databinding.ActivityMainLibraryBinding
 import com.jeeps.gamecollector.deprecated.MainLibraryActivity
 import com.jeeps.gamecollector.deprecated.PlatformLibraryActivity
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
+import com.jeeps.gamecollector.remaster.navigation.Main
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.composables.MenuItem
@@ -95,8 +98,16 @@ class GamePlatformsActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(binding.root)
 
+        setContent { 
+            AppTheme {
+                Main()
+            }
+        }
+
+        return
         binding.screenCompose.setComposable {
             GamePlatformsScreen(
                 viewModel = viewModel,
@@ -138,7 +149,7 @@ class GamePlatformsActivity : BaseActivity() {
 @OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun GamePlatformsScreen(
-    viewModel: GamePlatformsViewModel = viewModel(),
+    viewModel: GamePlatformsViewModel = hiltViewModel(),
     onOpenStats: () -> Unit,
     onCreatePlatform: () -> Unit,
     onOpenPlatform: (Platform) -> Unit,

@@ -49,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -71,7 +72,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.R
@@ -187,17 +188,20 @@ class GameDetailsActivity : BaseActivity() {
 
 @Composable
 fun GameDetailsScreen(
-    gameDetailsViewModel: GameDetailsViewModel = viewModel(),
+    viewModel: GameDetailsViewModel = hiltViewModel(),
+    platformId: String? = null,
+    platformName: String? = null,
+    selectedGame: Game? = null,
     onBackPressed: () -> Unit = {},
-    onEditGame: () -> Unit = {}
+    onEditGame: (Game) -> Unit = {}
 ) {
-    val game by gameDetailsViewModel.selectedGame.observeAsState(Game())
-    val platformGames by gameDetailsViewModel.games.observeAsState(emptyList())
-    val stats by gameDetailsViewModel.gameHoursStats.observeAsState(GameplayHoursStats())
-    val isLoadingHourStats by gameDetailsViewModel.loadingGameHours.observeAsState(true)
-    val isLoadingCompletionUpdate by gameDetailsViewModel.loadingCompletionUpdate.observeAsState(false)
-    val isError by gameDetailsViewModel.showHoursErrorMessage.observeAsState(false)
-    val gameMainColor by gameDetailsViewModel.gameMainColor.observeAsState(MaterialTheme.colorScheme.primary)
+    val game by viewModel.selectedGame.observeAsState(Game())
+    val platformGames by viewModel.games.observeAsState(emptyList())
+    val stats by viewModel.gameHoursStats.observeAsState(GameplayHoursStats())
+    val isLoadingHourStats by viewModel.loadingGameHours.observeAsState(true)
+    val isLoadingCompletionUpdate by viewModel.loadingCompletionUpdate.observeAsState(false)
+    val isError by viewModel.showHoursErrorMessage.observeAsState(false)
+    val gameMainColor by viewModel.gameMainColor.observeAsState(MaterialTheme.colorScheme.primary)
 
     val activity = LocalActivity.current
     val window = activity?.window
@@ -216,6 +220,12 @@ fun GameDetailsScreen(
         if (luminance < 0.5) Color.White else Color(0xFF212121)
     }
 
+    LaunchedEffect(platformId, platformName, selectedGame) {
+        viewModel.platformId = platformId.orEmpty()
+        viewModel.platformName = platformName
+        selectedGame?.let { viewModel.setSelectedGame(it) }
+    }
+
     SideEffect {
         if (window != null && view != null) {
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = useDarkIcons
@@ -231,8 +241,8 @@ fun GameDetailsScreen(
         isStatsError = isError,
         topBarColor = topBarColor,
         topBarTextColor = topBarTextColor,
-        onRefreshClick = { gameDetailsViewModel.getGameHours() },
-        onGameCompletedClick = { gameDetailsViewModel.updateGameCompletion() },
+        onRefreshClick = { viewModel.getGameHours() },
+        onGameCompletedClick = { viewModel.updateGameCompletion() },
         onBackPressed = onBackPressed,
         onEditGame = onEditGame
     )
@@ -253,7 +263,7 @@ fun GameDetailsScreen(
     topBarTextColor: Color = Color.White,
     onRefreshClick: () -> Unit = {},
     onBackPressed: () -> Unit = {},
-    onEditGame: () -> Unit = {}
+    onEditGame: (Game) -> Unit = {}
 ) {
     var isCompletedButtonClicked by rememberSaveable { mutableStateOf(false) }
     val title = game.shortName.ifEmpty { game.name }
@@ -286,7 +296,7 @@ fun GameDetailsScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onEditGame,
+                onClick = { onEditGame(game) },
                 shape = CircleShape,
                 containerColor = colorResource(id = R.color.colorAccent)
             ) {

@@ -52,6 +52,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -72,6 +73,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -143,7 +145,10 @@ class AddGameActivity : BaseActivity() {
 
 @Composable
 fun AddGameScreen(
-    viewModel: AddGameViewModel = viewModel(),
+    viewModel: AddGameViewModel = hiltViewModel(),
+    platformId: String? = null,
+    platformName: String? = null,
+    selectedGame: Game? = null,
     onBackPressed: () -> Unit = {},
     onGameSaved: (String) -> Unit = {}
 ) {
@@ -156,6 +161,13 @@ fun AddGameScreen(
         scope.launch {
             snackbarHostState.showSnackbar(message = message)
         }
+    }
+
+    LaunchedEffect(platformId, platformName, selectedGame) {
+        viewModel.platformId = platformId.orEmpty()
+        viewModel.platformName = platformName
+        selectedGame?.let { viewModel.setSelectedGame(it) }
+        viewModel.checkIfGameIsBeingEdited()
     }
 
     ObserveAsEvents(viewModel.messageEventsChannelFlow) { event ->
@@ -320,8 +332,7 @@ fun CoverImageSelector(
     coverImageUri: String = "",
     onCoverImageChange: (Uri?) -> Unit = { },
 ) {
-    val parsedImageUri = if (coverImageUri.isNotEmpty()) coverImageUri.toUri() else null
-    var selectedCover by rememberSaveable { mutableStateOf(parsedImageUri) }
+    var selectedCover: Uri? by rememberSaveable { mutableStateOf(null) }
     val pickMedia = rememberLauncherForActivityResult(contract = PickVisualMedia()) {
         it?.let { uri ->
             // TODO: Remove once other images no longer rely on Picasso
@@ -329,6 +340,11 @@ fun CoverImageSelector(
             selectedCover = uri
             onCoverImageChange(uri)
         }
+    }
+
+    LaunchedEffect(coverImageUri) {
+        val parsedImageUri = if (coverImageUri.isNotEmpty()) coverImageUri.toUri() else null
+        selectedCover = parsedImageUri
     }
 
     Box {

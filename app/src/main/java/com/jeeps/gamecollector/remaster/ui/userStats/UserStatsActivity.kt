@@ -36,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.databinding.ActivityStatsBinding
@@ -68,12 +69,11 @@ class UserStatsActivity : BaseActivity() {
 
 @Composable
 fun UserStatsScreen(
-    userStatsViewModel: UserStatsViewModel = viewModel()
+    userStatsViewModel: UserStatsViewModel = hiltViewModel()
 ) {
     val userStats by userStatsViewModel.userStats.collectAsState()
 
     UserStatsScreen(userStats = userStats)
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

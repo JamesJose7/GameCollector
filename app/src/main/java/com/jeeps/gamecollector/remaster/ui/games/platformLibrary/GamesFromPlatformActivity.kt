@@ -79,7 +79,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
@@ -135,9 +135,12 @@ class GamesFromPlatformActivity : BaseActivity() {
 
         getIntentData()
 
+        return
         binding.screenCompose.setComposable {
             GamesFromPlatformScreen(
                 viewModel = viewModel,
+                platformId = viewModel.platformId,
+                platformName = viewModel.platformName,
                 onBackPressed = {
                     onBackPressedDispatcher.onBackPressed()
                 },
@@ -197,7 +200,9 @@ class GamesFromPlatformActivity : BaseActivity() {
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun GamesFromPlatformScreen(
-    viewModel: GamesFromPlatformViewModel = viewModel(),
+    viewModel: GamesFromPlatformViewModel = hiltViewModel(),
+    platformId: String,
+    platformName: String,
     onBackPressed: () -> Unit,
     onEditGame: (Game) -> Unit,
     onAddGame: () -> Unit
@@ -249,6 +254,11 @@ fun GamesFromPlatformScreen(
                 }
             }
         }
+    }
+
+    LaunchedEffect(platformId, platformName) {
+        viewModel.platformName = platformName
+        viewModel.platformId = platformId
     }
 
     GamesFromPlatformScreen(
