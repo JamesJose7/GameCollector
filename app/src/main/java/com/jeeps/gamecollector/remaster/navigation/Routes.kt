@@ -8,6 +8,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.Lifecycle
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -100,7 +102,7 @@ fun Main() {
             AddPlatformScreen(
                 initialPlatform = route.platform,
                 onBackPressed = {
-                    navController.popBackStack()
+                    navController.popBackStackOnResume()
                 }
             )
         }
@@ -110,7 +112,7 @@ fun Main() {
             GamesFromPlatformScreen(
                 platformId = route.platformId,
                 platformName = route.platformName,
-                onBackPressed = { navController.popBackStack() },
+                onBackPressed = { navController.popBackStackOnResume() },
                 onEditGame = { game ->
                     navController.navigate(Screen.GameDetails(
                         platformId = route.platformId,
@@ -137,7 +139,7 @@ fun Main() {
                 platformId = route.platformId,
                 platformName = route.platformName,
                 selectedGame = route.game,
-                onBackPressed = { navController.popBackStack() },
+                onBackPressed = { navController.popBackStackOnResume() },
                 onEditGame = { game ->
                     navController.navigate(Screen.AddGame(
                         platformId = route.platformId,
@@ -158,7 +160,7 @@ fun Main() {
                 platformId = route.platformId,
                 platformName = route.platformName,
                 selectedGame = route.game,
-                onBackPressed = { navController.popBackStack() },
+                onBackPressed = { navController.popBackStackOnResume() },
                 onGameSaved = { message ->
                     // TODO: Notify user that game was saved
                     navController.popBackStack(route = Screen.GamesFromPlatform(
@@ -168,5 +170,11 @@ fun Main() {
                 }
             )
         }
+    }
+}
+
+fun NavHostController.popBackStackOnResume() {
+    if (currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+        popBackStack()
     }
 }
