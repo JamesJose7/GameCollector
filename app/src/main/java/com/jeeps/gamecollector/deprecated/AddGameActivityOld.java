@@ -40,7 +40,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
-import butterknife.ButterKnife;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -88,7 +87,6 @@ public class AddGameActivityOld extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_game);
-        ButterKnife.bind(this);
         context = this;
 
         //Change title

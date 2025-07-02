@@ -15,7 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,18 +23,15 @@ import com.db.williamchart.view.DonutChartView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.jeeps.gamecollector.R;
-import com.jeeps.gamecollector.remaster.ui.adapters.PlatformStatsAdapter;
 import com.jeeps.gamecollector.deprecated.model.CurrentUser;
+import com.jeeps.gamecollector.deprecated.utils.UserUtils;
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.PlatformStats;
 import com.jeeps.gamecollector.remaster.data.model.data.user.UserStats;
-import com.jeeps.gamecollector.deprecated.utils.UserUtils;
+import com.jeeps.gamecollector.remaster.ui.adapters.PlatformStatsAdapter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class StatsActivity extends AppCompatActivity {
 
@@ -69,7 +65,6 @@ public class StatsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stats);
-        ButterKnife.bind(this);
 
         //Change title
         getSupportActionBar().setTitle("Statistics");

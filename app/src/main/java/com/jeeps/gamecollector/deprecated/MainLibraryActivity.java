@@ -42,7 +42,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import butterknife.ButterKnife;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -74,7 +73,6 @@ public class MainLibraryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main_library);
 //        Toolbar toolbar = findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
-        ButterKnife.bind(this);
 
         getSupportActionBar().setTitle("Platforms");
 

@@ -32,7 +32,6 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 
-import butterknife.ButterKnife;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -69,7 +68,6 @@ public class AddPlatformActivityOld extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_platform);
-        ButterKnife.bind(this);
 
         context = this;
 

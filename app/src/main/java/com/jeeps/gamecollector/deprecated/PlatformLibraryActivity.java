@@ -60,8 +60,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -79,9 +77,9 @@ public class PlatformLibraryActivity extends AppCompatActivity {
     public static final String NEW_GAME = "NEW_GAME";
     private static final String TAG = PlatformLibraryActivity.class.getSimpleName();
 
-    @BindView(R.id.games_recycler_view) RecyclerView gamesRecyclerView;
+    RecyclerView gamesRecyclerView;
     ImageView backdrop;
-    @BindView(R.id.games_progressbar) ProgressBar progressBar;
+    ProgressBar progressBar;
     FloatingActionButton fab;
 
     private Context context;
@@ -107,7 +105,6 @@ public class PlatformLibraryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_platform_library);
 //        Toolbar toolbar = findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
-        ButterKnife.bind(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         context = this;
         games = new ArrayList<>();

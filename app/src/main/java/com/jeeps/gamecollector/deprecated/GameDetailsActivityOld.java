@@ -54,7 +54,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.net.URL;
 
-import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -94,7 +93,6 @@ public class GameDetailsActivityOld extends AppCompatActivity {
         setContentView(R.layout.activity_game_details);
 //        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        ButterKnife.bind(this);
 
         // Get Firestore instance
         db = FirebaseFirestore.getInstance();
