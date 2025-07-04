@@ -279,8 +279,20 @@ fun GamesFromPlatformScreen(
     )
 
     // Reset scroll when sorting or filtering
-    LaunchedEffect(games, filteredStats, sortStat) {
-        gridState.scrollToItem(0)
+    var previousSortStat by remember { mutableStateOf<SortStat?>(null) }
+    var previousFilterStats by remember { mutableStateOf<FilterStats?>(null) }
+
+    LaunchedEffect(sortStat, filteredStats, sortStat) {
+        // Track previous sort stat and filter stats to prevent changing when navigating back from another screen
+        val sortChanged = previousSortStat != null && previousSortStat != sortStat
+        val filterChanged = previousFilterStats != null && previousFilterStats != filteredStats
+
+        if (sortChanged || filterChanged) {
+            gridState.scrollToItem(0)
+        }
+
+        previousSortStat = sortStat
+        previousFilterStats = filteredStats
     }
 
     // Request focus when search bar is visible
