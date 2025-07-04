@@ -40,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -53,6 +54,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -95,7 +97,7 @@ fun GameDetailsScreen(
 
     val activity = LocalActivity.current
     val window = activity?.window
-    val view = window?.decorView
+    val view = LocalView.current
 
     val topBarColor by animateColorAsState(
         targetValue = gameMainColor,
@@ -116,9 +118,15 @@ fun GameDetailsScreen(
         selectedGame?.let { viewModel.setSelectedGame(it) }
     }
 
-    SideEffect {
-        if (window != null && view != null) {
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = useDarkIcons
+    DisposableEffect(useDarkIcons) {
+        val insetsController = window?.let { WindowCompat.getInsetsController(it, view) }
+        val previousValue = insetsController?.isAppearanceLightStatusBars
+
+        insetsController?.isAppearanceLightStatusBars = useDarkIcons
+
+        onDispose {
+            // Return the color to previous value so that other screens won't remain with the wrong color
+            insetsController?.isAppearanceLightStatusBars = previousValue ?: true
         }
     }
 
