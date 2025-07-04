@@ -40,6 +40,11 @@ android {
         kotlinCompilerExtensionVersion = "1.5.9"
     }
 
+    // TODO: Figure out why this is happening after upgrading to kotlin 2
+    lint {
+        disable "NullSafeMutableLiveData"
+    }
+
     namespace 'com.jeeps.gamecollector'
 }
 
@@ -62,8 +67,8 @@ dependencies {
     implementation 'androidx.palette:palette:1.0.0'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1"
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.9.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.1'
     implementation "com.google.dagger:hilt-android:2.56.2"
     kapt "com.google.dagger:hilt-compiler:2.56.2"
 
@@ -75,7 +80,7 @@ dependencies {
     implementation 'androidx.compose.ui:ui-tooling-preview'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     implementation 'androidx.activity:activity-compose:1.10.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.9.1'
     implementation 'androidx.compose.runtime:runtime-livedata'
     implementation "androidx.constraintlayout:constraintlayout-compose:1.1.1"
     implementation "androidx.compose.material:material-icons-extended:1.7.8"
