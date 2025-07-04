@@ -113,3 +113,11 @@ fun Game?.releaseDateFormatted(): String {
         ""
     }
 }
+
+// Jetpack navigation decodes this slash that breaks the firestore link during serialization
+fun Game?.encodeImageUriPath() : Game? = apply {
+    if (this == null) return null
+    if (imageUri.contains("/o/gameCovers/")) {
+        imageUri = imageUri.replace("/o/gameCovers/", "/o/gameCovers%2F")
+    }
+}

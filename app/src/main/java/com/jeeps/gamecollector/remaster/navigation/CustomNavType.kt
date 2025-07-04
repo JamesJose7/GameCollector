@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.navigation.NavType
 import androidx.savedstate.SavedState
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
+import com.jeeps.gamecollector.remaster.data.model.data.games.encodeImageUriPath
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
 import kotlinx.serialization.json.Json
 
@@ -55,7 +56,7 @@ object CustomNavType {
         }
 
         override fun parseValue(value: String): Game? {
-            return Json.decodeFromString(Uri.decode(value))
+            return (Json.decodeFromString(Uri.decode(value)) as? Game).encodeImageUriPath()
         }
 
         override fun serializeAsValue(value: Game?): String {
