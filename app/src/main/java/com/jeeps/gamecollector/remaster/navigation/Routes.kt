@@ -5,9 +5,11 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -53,17 +55,22 @@ fun Main() {
         popEnterTransition = {
             EnterTransition.None
         },
+        // TODO: Experiment to find the best transitions
         enterTransition = {
-            slideInHorizontally(animationSpec = tween(300)) { fullWidth ->
-                100
-            } +
+//            slideInHorizontally(animationSpec = tween(300)) { fullWidth ->
+//                fullWidth / 4
+//            }  + fadeIn(animationSpec = tween(300))
             fadeIn(animationSpec = tween(300))
         },
         popExitTransition = {
-            slideOutHorizontally(animationSpec = tween(300)) {
-                100
-            } +
-            fadeOut(animationSpec = tween(300))
+//            slideOutHorizontally(animationSpec = tween(300)) {
+//                it / 4
+//            } + fadeOut(animationSpec = tween(300))
+//            fadeOut(animationSpec = tween(300))
+            scaleOut(
+                targetScale = 0.9f,
+                transformOrigin = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 0.5f)
+            ) + fadeOut(animationSpec = tween(300))
         },
         exitTransition = {
 //            fadeOut(animationSpec = tween(600))
