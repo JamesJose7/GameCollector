@@ -61,6 +61,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
@@ -256,6 +258,7 @@ fun GamesFromPlatformScreen(
 ) {
     val collapsingScaffoldState = rememberCollapsingToolbarScaffoldState()
     val platformCover = PlatformCovers.getPlatformCover(platformName)
+    val focusRequester = remember { FocusRequester() }
 
     var showSearch by remember { mutableStateOf(false) }
 
@@ -275,6 +278,13 @@ fun GamesFromPlatformScreen(
     // Reset scroll when sorting or filtering
     LaunchedEffect(games, filteredStats, sortStat) {
         gridState.scrollToItem(0)
+    }
+
+    // Request focus when search bar is visible
+    LaunchedEffect(showSearch) {
+        if (showSearch) {
+            focusRequester.requestFocus()
+        }
     }
 
     Scaffold(
@@ -377,7 +387,9 @@ fun GamesFromPlatformScreen(
                                 focusedTextColor = Color.White,
                                 cursorColor = Color.White
                             ),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .weight(1f)
+                                .focusRequester(focusRequester)
                         )
                     } else {
                         Spacer(
