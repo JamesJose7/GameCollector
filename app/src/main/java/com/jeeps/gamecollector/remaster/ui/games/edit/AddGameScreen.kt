@@ -2,13 +2,10 @@
 
 package com.jeeps.gamecollector.remaster.ui.games.edit
 
-import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
-import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -74,74 +71,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.R
-import com.jeeps.gamecollector.databinding.ActivityAddGameBinding
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
-import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.composables.ObserveAsEvents
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.ADD_GAME_RESULT_MESSAGE
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM_NAME
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.SELECTED_GAME
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.SELECTED_GAME_POSITION
-import com.jeeps.gamecollector.remaster.utils.extensions.serializable
-import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
-import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
+import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.squareup.picasso.Picasso
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
-
-@ExperimentalCoroutinesApi
-@AndroidEntryPoint
-class AddGameActivity : BaseActivity() {
-
-    private val binding by viewBinding(ActivityAddGameBinding::inflate)
-
-    private val viewModel: AddGameViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(binding.root)
-
-        getIntentData()
-
-        binding.screenCompose.setComposable {
-            AddGameScreen(
-                viewModel = viewModel,
-                onBackPressed = { onBackPressedDispatcher.onBackPressed() },
-                onGameSaved = { message ->
-                    finishActivityWithResult(message)
-                }
-            )
-        }
-    }
-
-    private fun getIntentData() {
-        viewModel.platformId = intent.getStringExtra(CURRENT_PLATFORM)
-        viewModel.platformName = intent.getStringExtra(CURRENT_PLATFORM_NAME)
-        intent.serializable<Game>(SELECTED_GAME)?.let { viewModel.setSelectedGame(it) }
-        viewModel.selectedGamePosition = intent.getIntExtra(SELECTED_GAME_POSITION, -1)
-        viewModel.checkIfGameIsBeingEdited()
-    }
-
-    private fun finishActivityWithResult(message: String) {
-        val intent = Intent().apply {
-            putExtra(ADD_GAME_RESULT_MESSAGE, message)
-        }
-        setResult(RESULT_OK, intent)
-        finish()
-    }
-}
 
 @Composable
 fun AddGameScreen(

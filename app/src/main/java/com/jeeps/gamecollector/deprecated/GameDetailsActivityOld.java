@@ -90,7 +90,6 @@ public class GameDetailsActivityOld extends AppCompatActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_game_details);
 //        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 

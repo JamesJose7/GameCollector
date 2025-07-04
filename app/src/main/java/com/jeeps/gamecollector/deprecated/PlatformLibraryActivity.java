@@ -102,7 +102,6 @@ public class PlatformLibraryActivity extends AppCompatActivity {
         getWindow().setExitTransition(new Explode());
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_platform_library);
 //        Toolbar toolbar = findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

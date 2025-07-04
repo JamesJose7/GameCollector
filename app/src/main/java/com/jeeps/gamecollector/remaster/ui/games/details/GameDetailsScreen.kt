@@ -2,16 +2,7 @@
 
 package com.jeeps.gamecollector.remaster.ui.games.details
 
-import android.content.Intent
-import android.os.Bundle
-import android.transition.Fade
-import android.view.Window
-import android.view.WindowManager
 import androidx.activity.compose.LocalActivity
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -74,117 +65,16 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.R
-import com.jeeps.gamecollector.databinding.ActivityGameDetailsBinding
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.releaseDateFormatted
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
-import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.composables.CompletionTimeline
 import com.jeeps.gamecollector.remaster.ui.composables.FireworksAnimation
 import com.jeeps.gamecollector.remaster.ui.composables.HourStats
 import com.jeeps.gamecollector.remaster.ui.composables.RatingChip
-import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.ADD_GAME_RESULT_MESSAGE
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.CURRENT_PLATFORM_NAME
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.SELECTED_GAME
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity.Companion.SELECTED_GAME_POSITION
-import com.jeeps.gamecollector.remaster.utils.extensions.serializable
-import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
-import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
-import com.jeeps.gamecollector.remaster.utils.extensions.showToast
-import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
-import com.jeeps.gamecollector.remaster.utils.extensions.withExclusions
-import dagger.hilt.android.AndroidEntryPoint
+import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-
-@ExperimentalCoroutinesApi
-@AndroidEntryPoint
-class GameDetailsActivity : BaseActivity() {
-
-    private val binding by viewBinding(ActivityGameDetailsBinding::inflate)
-
-    private val viewModel: GameDetailsViewModel by viewModels()
-
-    private val editGameResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            handleEditGameResult(it)
-        }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
-        // Setup exit transition
-        window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        window.enterTransition = Fade().withExclusions()
-        window.exitTransition = Fade().withExclusions()
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-
-        super.onCreate(savedInstanceState)
-        setContentView(binding.rootLayout)
-
-        getIntentData()
-
-        bindViews()
-        bindAlerts()
-    }
-
-    private fun getIntentData() {
-        viewModel.platformId = intent.getStringExtra(CURRENT_PLATFORM).orEmpty()
-        viewModel.platformName = intent.getStringExtra(CURRENT_PLATFORM_NAME)
-        viewModel.setSelectedGame(intent.serializable<Game>(SELECTED_GAME)!!)
-        viewModel.selectedGamePosition = intent.getIntExtra(SELECTED_GAME_POSITION, -1)
-    }
-
-    private fun bindViews() {
-        binding.screenCompose.setComposable {
-            GameDetailsScreen(
-                viewModel,
-                onBackPressed = {
-                    onBackPressedDispatcher.onBackPressed()
-                },
-                onEditGame = {
-                    editGame()
-                }
-            )
-        }
-    }
-
-    private fun bindAlerts() {
-        viewModel.errorMessage.observe(this) {
-            it?.let { showToast(it) }
-        }
-
-        viewModel.serverMessage.observe(this) { messageEvent ->
-            messageEvent?.getContentIfNotHandled()?.let {
-                showSnackBar(binding.root, it)
-            }
-        }
-    }
-
-    private fun editGame() {
-        val intent = Intent(this, AddGameActivity::class.java).apply {
-            putExtra(CURRENT_PLATFORM, viewModel.platformId)
-            putExtra(CURRENT_PLATFORM_NAME, viewModel.platformName)
-            putExtra(SELECTED_GAME, viewModel.selectedGame.value)
-            putExtra(SELECTED_GAME_POSITION, viewModel.selectedGamePosition)
-        }
-        editGameResultLauncher.launch(intent)
-    }
-
-    private fun handleEditGameResult(result: ActivityResult) {
-        if (result.resultCode == RESULT_OK) {
-            val intent = Intent().apply {
-                result.data?.getStringExtra(ADD_GAME_RESULT_MESSAGE)?.let { message ->
-                    putExtra(ADD_GAME_RESULT_MESSAGE, message)
-                }
-            }
-            setResult(result.resultCode, intent)
-            finish()
-        }
-    }
-}
 
 @Composable
 fun GameDetailsScreen(

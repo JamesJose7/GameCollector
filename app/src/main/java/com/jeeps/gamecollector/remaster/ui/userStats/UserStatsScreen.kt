@@ -2,8 +2,6 @@
 
 package com.jeeps.gamecollector.remaster.ui.userStats
 
-import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,35 +35,13 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
-import com.jeeps.gamecollector.databinding.ActivityStatsBinding
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.PlatformStats
 import com.jeeps.gamecollector.remaster.data.model.data.user.UserStats
-import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.composables.CircularGraph
+import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.remaster.utils.extensions.completionPercent
-import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
 import com.jeeps.gamecollector.remaster.utils.extensions.totalGames
-import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-
-@ExperimentalCoroutinesApi
-@AndroidEntryPoint
-class UserStatsActivity : BaseActivity() {
-
-    private val binding by viewBinding(ActivityStatsBinding::inflate)
-
-    private val viewModel: UserStatsViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(binding.root)
-
-        binding.screenCompose.setComposable { UserStatsScreen(viewModel) }
-    }
-}
 
 @Composable
 fun UserStatsScreen(

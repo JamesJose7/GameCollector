@@ -1,13 +1,5 @@
 package com.jeeps.gamecollector.remaster.ui.games.platformLibrary
 
-import android.content.Intent
-import android.os.Bundle
-import android.transition.Fade
-import android.view.Window
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -82,120 +74,25 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.jeeps.gamecollector.R
-import com.jeeps.gamecollector.databinding.ActivityPlatformLibraryBinding
 import com.jeeps.gamecollector.deprecated.utils.ColorsUtils
 import com.jeeps.gamecollector.deprecated.utils.PlatformCovers
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats
 import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
-import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.composables.Dialog
 import com.jeeps.gamecollector.remaster.ui.composables.LoadingAnimation
-import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsActivity
-import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameActivity
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialog
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterStats
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getAppropriateComparator
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getFilterData
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getInfoData
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
-import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
-import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
-import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
-import com.jeeps.gamecollector.remaster.utils.extensions.withExclusions
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 import java.text.DecimalFormat
-
-@ExperimentalCoroutinesApi
-@AndroidEntryPoint
-class GamesFromPlatformActivity : BaseActivity() {
-
-    private val binding by viewBinding(ActivityPlatformLibraryBinding::inflate)
-
-    private val viewModel: GamesFromPlatformViewModel by viewModels()
-
-    private val addGameResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            handleAddGameResult(it)
-        }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
-        window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        window.exitTransition = Fade().withExclusions()
-        window.enterTransition = Fade().withExclusions()
-
-        super.onCreate(savedInstanceState)
-        setContentView(binding.root)
-
-        getIntentData()
-
-        return
-        binding.screenCompose.setComposable {
-            GamesFromPlatformScreen(
-                viewModel = viewModel,
-                platformId = viewModel.platformId,
-                platformName = viewModel.platformName,
-                onBackPressed = {
-                    onBackPressedDispatcher.onBackPressed()
-                },
-                onEditGame = { game ->
-                    val intent = Intent(this, GameDetailsActivity::class.java).apply {
-                        putExtra(CURRENT_PLATFORM, viewModel.platformId)
-                        putExtra(CURRENT_PLATFORM_NAME, viewModel.platformName)
-                        putExtra(SELECTED_GAME, game)
-                    }
-                    // TODO: Make this transition when implementing Compose navigation with shared elements
-                    /*val activityOptions = ActivityOptionsCompat
-                        .makeSceneTransitionAnimation(
-                            this,
-                            Pair.create(imageView, "cover"),
-                            Pair.create(binding.fab, "fab")
-                        )*/
-                    addGameResultLauncher.launch(intent)
-                },
-                onAddGame = {
-                    val intent = Intent(this, AddGameActivity::class.java).apply {
-                        putExtra(CURRENT_PLATFORM, viewModel.platformId)
-                        putExtra(CURRENT_PLATFORM_NAME, viewModel.platformName)
-                    }
-                    addGameResultLauncher.launch(intent)
-                }
-            )
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        viewModel.deleteGamePendingDeletion()
-    }
-
-    private fun getIntentData() {
-        intent.getStringExtra(CURRENT_PLATFORM)?.let { viewModel.platformId = it }
-        intent.getStringExtra(CURRENT_PLATFORM_NAME)?.let { viewModel.platformName = it }
-    }
-
-    private fun handleAddGameResult(result: ActivityResult) {
-        if (result.resultCode == RESULT_OK) {
-            result.data?.getStringExtra(ADD_GAME_RESULT_MESSAGE)?.let { message ->
-                showSnackBar(binding.root, message)
-            }
-        }
-    }
-
-    companion object {
-        const val CURRENT_PLATFORM = "CURRENT_PLATFORM"
-        const val CURRENT_PLATFORM_NAME = "CURRENT_PLATFORM_NAME"
-        const val SELECTED_GAME = "SELECTED_GAME"
-        const val SELECTED_GAME_POSITION = "SELECTED_GAME_POSITION"
-        const val ADD_GAME_RESULT_MESSAGE = "ADD_GAME_RESULT_MESSAGE"
-    }
-}
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class)
 @Composable

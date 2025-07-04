@@ -1,12 +1,6 @@
 package com.jeeps.gamecollector.remaster.ui.gamePlatforms
 
 import android.content.Intent
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -60,91 +54,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.R
-import com.jeeps.gamecollector.databinding.ActivityMainLibraryBinding
-import com.jeeps.gamecollector.deprecated.MainLibraryActivity
-import com.jeeps.gamecollector.deprecated.PlatformLibraryActivity
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
-import com.jeeps.gamecollector.remaster.navigation.Main
-import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.composables.MenuItem
 import com.jeeps.gamecollector.remaster.ui.composables.ObserveAsEvents
 import com.jeeps.gamecollector.remaster.ui.composables.PopUpMenu
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity
 import com.jeeps.gamecollector.remaster.ui.login.LoginActivity
-import com.jeeps.gamecollector.remaster.ui.userStats.UserStatsActivity
+import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.remaster.utils.extensions.colorFromHexString
-import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
-import com.jeeps.gamecollector.remaster.utils.extensions.showSnackBar
-import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-
-@ExperimentalCoroutinesApi
-@AndroidEntryPoint
-class GamePlatformsActivity : BaseActivity() {
-
-    private val binding by viewBinding(ActivityMainLibraryBinding::inflate)
-
-    private val viewModel: GamePlatformsViewModel by viewModels()
-
-    private val addPlatformResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            handleAddPlatformResult(it)
-        }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(binding.root)
-
-        setContent { 
-            AppTheme {
-                Main()
-            }
-        }
-
-        return
-        binding.screenCompose.setComposable {
-            GamePlatformsScreen(
-                viewModel = viewModel,
-                onOpenStats = {
-                    val intent = Intent(this, UserStatsActivity::class.java)
-                    startActivity(intent)
-                },
-                onCreatePlatform = {
-                    intent = Intent(this, AddPlatformActivity::class.java)
-                    addPlatformResultLauncher.launch(intent)
-                },
-                onOpenPlatform = { platform ->
-                    val intent = Intent(this, GamesFromPlatformActivity::class.java).apply {
-                        putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.id)
-                        putExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME, platform.name)
-                    }
-                    startActivity(intent)
-                },
-                onEditPlatform = { platform ->
-                    val intent = Intent(this, AddPlatformActivity::class.java).apply {
-                        putExtra(AddPlatformActivity.EDITED_PLATFORM, platform)
-                    }
-                    startActivityForResult(
-                        intent,
-                        MainLibraryActivity.EDIT_PLATFORM_RESULT
-                    )
-                }
-            )
-        }
-    }
-
-    private fun handleAddPlatformResult(result: ActivityResult) {
-        if (result.resultCode == RESULT_OK) {
-            showSnackBar(binding.root, "Successfully added platform")
-        }
-    }
-}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Composable

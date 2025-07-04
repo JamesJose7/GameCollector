@@ -64,7 +64,6 @@ public class StatsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_stats);
 
         //Change title
         getSupportActionBar().setTitle("Statistics");
