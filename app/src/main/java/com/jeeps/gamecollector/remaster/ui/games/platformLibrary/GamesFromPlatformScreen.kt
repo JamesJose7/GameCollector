@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -259,6 +261,7 @@ fun GamesFromPlatformScreen(
     val collapsingScaffoldState = rememberCollapsingToolbarScaffoldState()
     val platformCover = PlatformCovers.getPlatformCover(platformName)
     val focusRequester = remember { FocusRequester() }
+    val imePadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
 
     var showSearch by remember { mutableStateOf(false) }
 
@@ -437,7 +440,12 @@ fun GamesFromPlatformScreen(
                     columns = GridCells.Fixed(2),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 64.dp)
+                    contentPadding = PaddingValues(
+                        start = 12.dp,
+                        end = 12.dp,
+                        top = 12.dp,
+                        bottom = 64.dp + imePadding
+                    )
                 ) {
                     items(items = games, key = { it.id }) { game ->
                         GameCard(
