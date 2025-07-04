@@ -1,8 +1,13 @@
+plugins {
+    // Kotlin serialization plugin for type safe routes and navigation arguments
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.2.0'
+}
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 android {
     compileSdk 35
@@ -10,8 +15,8 @@ android {
         applicationId "com.jeeps.gamecollector"
         minSdkVersion 26
         targetSdkVersion 35
-        versionCode 30
-        versionName "4.2.3"
+        versionCode 36
+        versionName "6.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -35,6 +40,11 @@ android {
         kotlinCompilerExtensionVersion = "1.5.9"
     }
 
+    // TODO: Figure out why this is happening after upgrading to kotlin 2
+    lint {
+        disable "NullSafeMutableLiveData"
+    }
+
     namespace 'com.jeeps.gamecollector'
 }
 
@@ -55,22 +65,27 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.6.0'
     implementation 'androidx.navigation:navigation-fragment:2.6.0'
     implementation 'androidx.palette:palette:1.0.0'
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
-    implementation "com.google.dagger:hilt-android:2.50"
-    kapt "com.google.dagger:hilt-compiler:2.50"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1"
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.9.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.1'
+    implementation "com.google.dagger:hilt-android:2.56.2"
+    kapt "com.google.dagger:hilt-compiler:2.56.2"
+
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0'
+    implementation "androidx.activity:activity:1.6.0-alpha05"
 
     /* Compose */
     implementation 'androidx.compose.material3:material3'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     implementation 'androidx.activity:activity-compose:1.10.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.9.1'
     implementation 'androidx.compose.runtime:runtime-livedata'
     implementation "androidx.constraintlayout:constraintlayout-compose:1.1.1"
     implementation "androidx.compose.material:material-icons-extended:1.7.8"
+    implementation "androidx.navigation:navigation-compose:2.9.0"
+    implementation "androidx.hilt:hilt-navigation-compose:1.2.0"
 
     /* UI */
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -88,7 +103,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore:24.7.0'
 
     /* Third party */
-    implementation 'com.jakewharton:butterknife:10.2.1'
     implementation 'io.github.florent37:shapeofview:1.4.7'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1'
 
@@ -110,6 +124,8 @@ dependencies {
 
     implementation 'io.coil-kt:coil:2.6.0'
     implementation 'io.coil-kt:coil-compose:2.6.0'
+
+    implementation "me.onebone:toolbar-compose:2.3.5"
 
     /* Tests */
     testImplementation 'junit:junit:4.13.2'

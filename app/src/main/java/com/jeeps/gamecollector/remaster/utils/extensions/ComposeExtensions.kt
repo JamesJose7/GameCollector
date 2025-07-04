@@ -1,9 +1,11 @@
 package com.jeeps.gamecollector.remaster.utils.extensions
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import com.example.compose.AppTheme
+import androidx.core.graphics.toColorInt
+import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 
 fun ComposeView.setComposable(
     content: @Composable() () -> Unit
@@ -16,4 +18,11 @@ fun ComposeView.setComposable(
             }
         }
     }
+}
+
+@Composable
+internal fun String?.colorFromHexString(fallbackColor: Color = Color.White): Color = when (this?.trim()) {
+    null -> fallbackColor
+    "" -> fallbackColor
+    else -> Color(this.toColorInt())
 }

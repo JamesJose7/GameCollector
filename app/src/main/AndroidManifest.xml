@@ -13,56 +13,14 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
-        <activity
-            android:name=".remaster.ui.games.edit.AddGameActivity"
-            android:exported="false"
-            android:label="@string/title_activity_add_game"
-            android:parentActivityName=".deprecated.PlatformLibraryActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" >
-        <meta-data
-            android:name="android.support.PARENT_ACTIVITY"
-            android:value="com.jeeps.gamecollector.deprecated.PlatformLibraryActivity" />
-        </activity>
-        <activity
-            android:name=".remaster.ui.games.platformLibrary.GamesFromPlatformActivity"
-            android:exported="false"
-            android:label="@string/title_activity_platform_library"
-            android:parentActivityName=".remaster.ui.gamePlatforms.GamePlatformsActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jeeps.gamecollector.remaster.ui.gamePlatforms.GamePlatformsActivity" />
-        </activity>
-        <activity
-            android:name=".remaster.ui.gamePlatforms.AddPlatformActivity"
-            android:exported="false"
-            android:label="@string/title_activity_add_platform"
-            android:parentActivityName=".remaster.ui.gamePlatforms.GamePlatformsActivity"
-            android:theme="@style/AppTheme.NoActionBar" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jeeps.gamecollector.remaster.ui.gamePlatforms.GamePlatformsActivity" />
-        </activity>
-        <activity
-            android:name=".remaster.ui.userStats.UserStatsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_stats"
-            android:parentActivityName=".remaster.ui.gamePlatforms.GamePlatformsActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.jeeps.gamecollector.remaster.ui.gamePlatforms.GamePlatformsActivity" />
-        </activity>
+        android:theme="@style/AppTheme"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".remaster.ui.login.LoginActivity"
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".remaster.ui.gamePlatforms.GamePlatformsActivity"
+            android:name=".remaster.ui.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" >
@@ -72,10 +30,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".remaster.ui.games.details.GameDetailsActivity"
-            android:label="@string/title_activity_game_details"
-            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".deprecated.GameDetailsActivityOld"
             android:label="@string/title_activity_game_details"

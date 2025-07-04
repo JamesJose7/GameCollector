@@ -13,7 +13,6 @@ import com.jeeps.gamecollector.remaster.ui.adapters.PlatformsListAdapter.Platfor
 import com.jeeps.gamecollector.databinding.PlatformCardLayoutBinding
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
 import com.jeeps.gamecollector.remaster.ui.gamePlatforms.AddPlatformActivity
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformActivity
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -37,11 +36,6 @@ class PlatformsListAdapter(
         holder.bind(platform)
 
         holder.binding.platformCard.setOnClickListener {
-            val intent = Intent(parentActivity, GamesFromPlatformActivity::class.java).apply {
-                putExtra(PlatformLibraryActivity.CURRENT_PLATFORM, platform.id)
-                putExtra(PlatformLibraryActivity.CURRENT_PLATFORM_NAME, platform.name)
-            }
-            parentActivity.startActivity(intent)
         }
         holder.binding.platformCard.setOnLongClickListener {
             val intent = Intent(parentActivity, AddPlatformActivity::class.java).apply {

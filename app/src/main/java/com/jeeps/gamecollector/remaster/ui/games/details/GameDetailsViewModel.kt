@@ -1,8 +1,8 @@
 package com.jeeps.gamecollector.remaster.ui.games.details
 
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.util.Log
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URL
 import javax.inject.Inject
+import androidx.core.graphics.toColorInt
 
 @ExperimentalCoroutinesApi
 @HiltViewModel
@@ -39,14 +40,12 @@ class GameDetailsViewModel @Inject constructor(
     private val statsRepository: UserStatsRepository
 ) : BaseViewModel() {
 
-    var toolbarAnimationStarted = false
-
     private val _selectedGame = MutableLiveData<Game>()
     val selectedGame: LiveData<Game>
         get() = _selectedGame
 
-    private val _gameMainColor = MutableLiveData<Int>()
-    val gameMainColor: LiveData<Int>
+    private val _gameMainColor = MutableLiveData<Color>()
+    val gameMainColor: LiveData<Color>
         get() = _gameMainColor
 
     private val _gameHoursStats = MutableLiveData<GameplayHoursStats>()
@@ -78,13 +77,17 @@ class GameDetailsViewModel @Inject constructor(
         get() = _games
 
     fun setSelectedGame(game: Game) {
+        // TODO: Check if this is still needed
+        game.currentSortStat = ""
+
         _selectedGame.value = game
         _gameHoursStats.value = GameplayHoursStats(game.gameHoursStats)
+        getColorBasedOnCover()
         checkIfGameHasHoursStats(game.gameHoursStats)
         updateGameDetails()
     }
 
-    fun getColorBasedOnCover() {
+    private fun getColorBasedOnCover() {
         viewModelScope.launch {
             decodeBitmapUrl()
         }
@@ -97,8 +100,8 @@ class GameDetailsViewModel @Inject constructor(
                     val url = URL(game.imageUri)
                     val image = BitmapFactory.decodeStream(url.openConnection().getInputStream())
                     val palette = Palette.from(image).generate()
-                    val mainColor = palette.getDominantColor(Color.parseColor("#3F51B5"))
-                    _gameMainColor.postValue(mainColor)
+                    val mainColor = palette.getDominantColor("#3F51B5".toColorInt())
+                    _gameMainColor.postValue(Color(mainColor))
                 }.onFailure {
                     Log.e(TAG, it.message, it)
                 }

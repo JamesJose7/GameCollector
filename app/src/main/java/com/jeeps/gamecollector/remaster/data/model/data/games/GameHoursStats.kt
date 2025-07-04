@@ -3,6 +3,7 @@ package com.jeeps.gamecollector.remaster.data.model.data.games
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
 import java.io.Serializable
 
+@kotlinx.serialization.Serializable
 data class GameHoursStats(
     var gameplayMain: Double = 0.0,
     var gameplayMainExtra: Double = 0.0,

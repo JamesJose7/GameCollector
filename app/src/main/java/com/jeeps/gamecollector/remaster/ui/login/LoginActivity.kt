@@ -8,8 +8,8 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.jeeps.gamecollector.R
+import com.jeeps.gamecollector.remaster.ui.MainActivity
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
-import com.jeeps.gamecollector.remaster.ui.gamePlatforms.GamePlatformsActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -55,7 +55,7 @@ class LoginActivity : BaseActivity() {
         viewModel.isLoginSuccessful.observe(this) {
             it.getContentIfNotHandled()?.let { isSuccessful ->
                 if (isSuccessful) {
-                    val intent = Intent(this, GamePlatformsActivity::class.java).apply {
+                    val intent = Intent(this, MainActivity::class.java).apply {
                         flags = (Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                     }
                     startActivity(intent)

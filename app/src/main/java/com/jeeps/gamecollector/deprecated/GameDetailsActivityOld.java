@@ -1,5 +1,14 @@
 package com.jeeps.gamecollector.deprecated;
 
+import static com.jeeps.gamecollector.deprecated.PlatformLibraryActivity.CURRENT_PLATFORM;
+import static com.jeeps.gamecollector.deprecated.PlatformLibraryActivity.CURRENT_PLATFORM_NAME;
+import static com.jeeps.gamecollector.deprecated.PlatformLibraryActivity.EDIT_GAME_RESULT;
+import static com.jeeps.gamecollector.deprecated.PlatformLibraryActivity.NEW_GAME;
+import static com.jeeps.gamecollector.deprecated.PlatformLibraryActivity.SELECTED_GAME;
+import static com.jeeps.gamecollector.deprecated.PlatformLibraryActivity.SELECTED_GAME_POSITION;
+import static com.jeeps.gamecollector.deprecated.utils.ColorsUtils.getColorByHoursRange;
+import static com.jeeps.gamecollector.deprecated.utils.FormatUtils.formatDecimal;
+
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -28,14 +37,14 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.jeeps.gamecollector.R;
 import com.jeeps.gamecollector.deprecated.model.CurrentUser;
-import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
-import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats;
-import com.jeeps.gamecollector.remaster.data.model.data.games.ToggleCompletionResponse;
-import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats;
 import com.jeeps.gamecollector.deprecated.services.api.ApiClient;
 import com.jeeps.gamecollector.deprecated.services.api.GameService;
 import com.jeeps.gamecollector.deprecated.services.api.StatsService;
 import com.jeeps.gamecollector.deprecated.utils.UserUtils;
+import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
+import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats;
+import com.jeeps.gamecollector.remaster.data.model.data.games.ToggleCompletionResponse;
+import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats;
 import com.squareup.picasso.Picasso;
 import com.varunest.sparkbutton.SparkButton;
 import com.varunest.sparkbutton.SparkEventListener;
@@ -45,31 +54,18 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.net.URL;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static com.jeeps.gamecollector.deprecated.PlatformLibraryActivity.CURRENT_PLATFORM;
-import static com.jeeps.gamecollector.deprecated.PlatformLibraryActivity.CURRENT_PLATFORM_NAME;
-import static com.jeeps.gamecollector.deprecated.PlatformLibraryActivity.EDIT_GAME_RESULT;
-import static com.jeeps.gamecollector.deprecated.PlatformLibraryActivity.NEW_GAME;
-import static com.jeeps.gamecollector.deprecated.PlatformLibraryActivity.SELECTED_GAME;
-import static com.jeeps.gamecollector.deprecated.PlatformLibraryActivity.SELECTED_GAME_POSITION;
-import static com.jeeps.gamecollector.deprecated.utils.ColorsUtils.getColorByHoursRange;
-import static com.jeeps.gamecollector.deprecated.utils.FormatUtils.formatDecimal;
 
 public class GameDetailsActivityOld extends AppCompatActivity {
 
     private static final String TAG = GameDetailsActivityOld.class.getSimpleName();
 
-    @BindView(R.id.game_cover)
     ImageView gameCoverView;
     TextView gameTitleText;
     TextView gamePublisherText;
     TextView gamePlatformText;
-    @BindView(R.id.fab)
     FloatingActionButton fabButton;
     SparkButton completeSwitch;
 
@@ -94,10 +90,8 @@ public class GameDetailsActivityOld extends AppCompatActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_game_details);
-        toolbar = findViewById(R.id.toolbar);
+//        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        ButterKnife.bind(this);
 
         // Get Firestore instance
         db = FirebaseFirestore.getInstance();

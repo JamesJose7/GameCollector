@@ -7,6 +7,7 @@ import java.io.Serializable
  * Created by jeeps on 12/23/2017.
  */
 
+@kotlinx.serialization.Serializable
 data class Platform(
     @SerializedName("platformId")
     var id: String = "",

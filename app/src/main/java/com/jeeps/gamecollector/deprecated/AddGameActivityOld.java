@@ -18,33 +18,28 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DatabaseReference;
 import com.jeeps.gamecollector.R;
 import com.jeeps.gamecollector.deprecated.model.CurrentUser;
-import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
 import com.jeeps.gamecollector.deprecated.model.Publisher;
-import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameCoverIG;
-import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameIG;
 import com.jeeps.gamecollector.deprecated.services.api.ApiClient;
 import com.jeeps.gamecollector.deprecated.services.api.GameService;
 import com.jeeps.gamecollector.deprecated.services.igdb.IgdbApiClient;
 import com.jeeps.gamecollector.deprecated.services.igdb.IgdbService;
-import com.jeeps.gamecollector.remaster.utils.IgdbUtils;
 import com.jeeps.gamecollector.deprecated.utils.UserUtils;
+import com.jeeps.gamecollector.remaster.data.model.data.games.Game;
+import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameCoverIG;
+import com.jeeps.gamecollector.remaster.data.model.data.igdb.GameIG;
+import com.jeeps.gamecollector.remaster.utils.IgdbUtils;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -57,7 +52,7 @@ public class AddGameActivityOld extends AppCompatActivity {
 
     private static final String TAG = "ADD_GAME_ACTIVITY";
 
-    @BindView(R.id.game_cover) ImageView gameCover;
+    ImageView gameCover;
     EditText nameEdit;
     EditText shortNameEdit;
     EditText platformEdit;
@@ -66,7 +61,7 @@ public class AddGameActivityOld extends AppCompatActivity {
     RadioButton mRadioDigital;
     RadioButton radioPhysical;
     NumberPicker mNumberPicker;
-    @BindView(R.id.fab) FloatingActionButton fab;
+    FloatingActionButton fab;
     ProgressBar progressBar;
 
     private SharedPreferences sharedPreferences;
@@ -91,8 +86,6 @@ public class AddGameActivityOld extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_game);
-        ButterKnife.bind(this);
         context = this;
 
         //Change title

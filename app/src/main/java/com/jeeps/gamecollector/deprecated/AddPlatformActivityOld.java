@@ -17,27 +17,21 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.jeeps.gamecollector.R;
 import com.jeeps.gamecollector.deprecated.model.CurrentUser;
-import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
 import com.jeeps.gamecollector.deprecated.services.api.ApiClient;
 import com.jeeps.gamecollector.deprecated.services.api.PlatformService;
-import com.jeeps.gamecollector.deprecated.utils.PlatformColors;
+import com.jeeps.gamecollector.deprecated.utils.PlatformColor;
 import com.jeeps.gamecollector.deprecated.utils.UserUtils;
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -53,12 +47,12 @@ public class AddPlatformActivityOld extends AppCompatActivity {
     public static final String EDITED_PLATFORM_POSITION = "EDITED PLATFORM POSITION";
     private static final String TAG = AddPlatformActivityOld.class.getSimpleName();
 
-    @BindView(R.id.add_platform_layout) ConstraintLayout rootLayout;
-    @BindView(R.id.platform_cover) ImageView platformCover;
-    @BindView(R.id.platform_name_edit) EditText platformNameInput;
-    @BindView(R.id.platform_color_radio_group) RadioGroup colorRadioGroup;
-    @BindView(R.id.fab) FloatingActionButton fab;
-    @BindView(R.id.add_platform_progressbar) ProgressBar progressBar;
+    ConstraintLayout rootLayout;
+    ImageView platformCover;
+    EditText platformNameInput;
+    RadioGroup colorRadioGroup;
+    FloatingActionButton fab;
+    ProgressBar progressBar;
 
     private Context context;
 
@@ -74,14 +68,11 @@ public class AddPlatformActivityOld extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_platform);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        ButterKnife.bind(this);
 
         context = this;
 
         platform = new Platform();
-        platform.setColor(PlatformColors.NORMIE_WHITE.getColor());
+        platform.setColor(PlatformColor.NORMIE_WHITE.getColor());
 
         fab.setOnClickListener(view -> {
             toggleProgressbar(true);
@@ -117,10 +108,10 @@ public class AddPlatformActivityOld extends AppCompatActivity {
         // Platform name
         platformNameInput.setText(editedPlatform.getName());
         // Get appropriate color
-        Arrays.stream(PlatformColors.values())
-                .filter(color -> color.getColor().equals(editedPlatform.getColor()))
-                .findFirst()
-                .ifPresent(color -> colorRadioGroup.check(color.getColorId()));
+//        Arrays.stream(PlatformColor.values())
+//                .filter(color -> color.getColor().equals(editedPlatform.getColor()))
+//                .findFirst()
+//                .ifPresent(color -> colorRadioGroup.check(color.getColorId()));
     }
 
     @Override
@@ -167,20 +158,20 @@ public class AddPlatformActivityOld extends AppCompatActivity {
 
     public void onColorPickerClicked(View view) {
         boolean checked = ((RadioButton) view).isChecked();
-        switch (view.getId()) {
-            case R.id.color_switch_normiewhite:
-                if (checked) platform.setColor(PlatformColors.NORMIE_WHITE.getColor());
-                break;
-            case R.id.color_switchred:
-                if (checked) platform.setColor(PlatformColors.SWITCH_RED.getColor());
-                break;
-            case R.id.color_xboxgreen:
-                if (checked) platform.setColor(PlatformColors.XBOX_GREEN.getColor());
-                break;
-            case R.id.color_playstationblue:
-                if (checked) platform.setColor(PlatformColors.PLAYSTATION_BLUE.getColor());
-                break;
-        }
+//        switch (view.getId()) {
+//            case R.id.color_switch_normiewhite:
+//                if (checked) platform.setColor(PlatformColor.NORMIE_WHITE.getColor());
+//                break;
+//            case R.id.color_switchred:
+//                if (checked) platform.setColor(PlatformColor.SWITCH_RED.getColor());
+//                break;
+//            case R.id.color_xboxgreen:
+//                if (checked) platform.setColor(PlatformColor.XBOX_GREEN.getColor());
+//                break;
+//            case R.id.color_playstationblue:
+//                if (checked) platform.setColor(PlatformColor.PLAYSTATION_BLUE.getColor());
+//                break;
+//        }
     }
 
     private void dataCheckMessage(String message) {
@@ -291,7 +282,7 @@ public class AddPlatformActivityOld extends AppCompatActivity {
         finish();
     }
 
-    @OnClick(R.id.platform_cover)
+//    @OnClick(R.id.platform_cover)
     protected void choosePlatformCover(View v) {
         // To open up a gallery browser
         Intent intent1 = new Intent();

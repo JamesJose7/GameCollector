@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter
 
 private const val RELEASE_DATE_FORMAT = "MMM dd, yyyy"
 
+@kotlinx.serialization.Serializable
 data class Game(
     @SerializedName("gameId")
     var id: String = "",

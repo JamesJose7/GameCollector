@@ -13,7 +13,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,23 +27,21 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.jeeps.gamecollector.R;
-import com.jeeps.gamecollector.remaster.ui.adapters.PlatformsListAdapter;
 import com.jeeps.gamecollector.deprecated.model.CurrentUser;
-import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
-import com.jeeps.gamecollector.remaster.data.model.data.user.User;
-import com.jeeps.gamecollector.remaster.data.model.data.user.UserDetails;
 import com.jeeps.gamecollector.deprecated.services.api.ApiClient;
 import com.jeeps.gamecollector.deprecated.services.api.UserService;
 import com.jeeps.gamecollector.deprecated.services.igdb.IgdbApiClient;
 import com.jeeps.gamecollector.deprecated.utils.UserUtils;
+import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform;
+import com.jeeps.gamecollector.remaster.data.model.data.user.User;
+import com.jeeps.gamecollector.remaster.data.model.data.user.UserDetails;
+import com.jeeps.gamecollector.remaster.ui.adapters.PlatformsListAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,9 +54,9 @@ public class MainLibraryActivity extends AppCompatActivity {
     public static final int ADD_PLATFORM_RESULT = 13;
     public static final int EDIT_PLATFORM_RESULT = 97;
 
-    @BindView(R.id.platforms_list) RecyclerView platformsRecyclerView;
-    @BindView(R.id.platforms_progress_bar) ProgressBar mProgressBar;
-    @BindView(R.id.fab) FloatingActionButton fab;
+    RecyclerView platformsRecyclerView;
+    ProgressBar mProgressBar;
+    FloatingActionButton fab;
 
     private Context context;
     private SharedPreferences sharedPreferences;
@@ -73,10 +70,8 @@ public class MainLibraryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_library);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        ButterKnife.bind(this);
+//        Toolbar toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
 
         getSupportActionBar().setTitle("Platforms");
 
@@ -152,7 +147,7 @@ public class MainLibraryActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main_library, menu);
+//        getMenuInflater().inflate(R.menu.menu_main_library, menu);
         return true;
     }
 
@@ -164,13 +159,13 @@ public class MainLibraryActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_stats) {
-            Intent intent = new Intent(this, StatsActivity.class);
-            startActivity(intent);
-            return true;
-        } else if (id == R.id.action_logout) {
-            signOut();
-        }
+//        if (id == R.id.action_stats) {
+//            Intent intent = new Intent(this, StatsActivity.class);
+//            startActivity(intent);
+//            return true;
+//        } else if (id == R.id.action_logout) {
+//            signOut();
+//        }
 
         return super.onOptionsItemSelected(item);
     }
