@@ -30,6 +30,9 @@ import kotlinx.coroutines.withContext
 import java.net.URL
 import javax.inject.Inject
 import androidx.core.graphics.toColorInt
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @ExperimentalCoroutinesApi
 @HiltViewModel
@@ -40,9 +43,8 @@ class GameDetailsViewModel @Inject constructor(
     private val statsRepository: UserStatsRepository
 ) : BaseViewModel() {
 
-    private val _selectedGame = MutableLiveData<Game>()
-    val selectedGame: LiveData<Game>
-        get() = _selectedGame
+    private val _selectedGame: MutableStateFlow<Game?> = MutableStateFlow(null)
+    val selectedGame: StateFlow<Game?> = _selectedGame.asStateFlow()
 
     private val _gameMainColor = MutableLiveData<Color>()
     val gameMainColor: LiveData<Color>
@@ -123,7 +125,7 @@ class GameDetailsViewModel @Inject constructor(
 
                     val timesCompleted = if (isCompleted) 1 else 0
                     _selectedGame.value?.copy(timesCompleted = timesCompleted)?.let { game ->
-                        _selectedGame.postValue(game)
+                        _selectedGame.value = game
                     }
                 }
             }

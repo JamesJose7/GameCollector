@@ -3,6 +3,11 @@
 package com.jeeps.gamecollector.remaster.ui.games.details
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -42,7 +47,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +59,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -67,6 +73,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.releaseDateFormatted
@@ -75,19 +82,22 @@ import com.jeeps.gamecollector.remaster.ui.composables.CompletionTimeline
 import com.jeeps.gamecollector.remaster.ui.composables.FireworksAnimation
 import com.jeeps.gamecollector.remaster.ui.composables.HourStats
 import com.jeeps.gamecollector.remaster.ui.composables.RatingChip
+import com.jeeps.gamecollector.remaster.ui.composables.SharedElements
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun GameDetailsScreen(
+fun SharedTransitionScope.GameDetailsScreen(
     viewModel: GameDetailsViewModel = hiltViewModel(),
+    animatedVisibilityScope: AnimatedVisibilityScope,
     platformId: String? = null,
     platformName: String? = null,
     selectedGame: Game? = null,
     onBackPressed: () -> Unit = {},
     onEditGame: (Game) -> Unit = {}
 ) {
-    val game by viewModel.selectedGame.observeAsState(Game())
+    val game by viewModel.selectedGame.collectAsState()
     val platformGames by viewModel.games.observeAsState(emptyList())
     val stats by viewModel.gameHoursStats.observeAsState(GameplayHoursStats())
     val isLoadingHourStats by viewModel.loadingGameHours.observeAsState(true)
@@ -130,26 +140,30 @@ fun GameDetailsScreen(
         }
     }
 
-    GameDetailsScreen(
-        game = game,
-        platformGames = platformGames,
-        hoursStats = stats,
-        isLoadingStats = isLoadingHourStats,
-        isLoadingCompletionUpdate = isLoadingCompletionUpdate,
-        isStatsError = isError,
-        topBarColor = topBarColor,
-        topBarTextColor = topBarTextColor,
-        onRefreshClick = { viewModel.getGameHours() },
-        onGameCompletedClick = { viewModel.updateGameCompletion() },
-        onBackPressed = onBackPressed,
-        onEditGame = onEditGame
-    )
+    game?.let {
+        GameDetailsScreen(
+            animatedVisibilityScope = animatedVisibilityScope,
+            game = it,
+            platformGames = platformGames,
+            hoursStats = stats,
+            isLoadingStats = isLoadingHourStats,
+            isLoadingCompletionUpdate = isLoadingCompletionUpdate,
+            isStatsError = isError,
+            topBarColor = topBarColor,
+            topBarTextColor = topBarTextColor,
+            onRefreshClick = { viewModel.getGameHours() },
+            onGameCompletedClick = { viewModel.updateGameCompletion() },
+            onBackPressed = onBackPressed,
+            onEditGame = onEditGame
+        )
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
-fun GameDetailsScreen(
+fun SharedTransitionScope.GameDetailsScreen(
     modifier: Modifier = Modifier,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     game: Game,
     platformGames: List<Game>,
     onGameCompletedClick: () -> Unit = {},
@@ -182,7 +196,13 @@ fun GameDetailsScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
+                    IconButton(
+                        onClick = onBackPressed,
+                        modifier = Modifier.sharedElement(
+                            sharedContentState = rememberSharedContentState(key = SharedElements.NavButton),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        )
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Localized description",
@@ -196,7 +216,12 @@ fun GameDetailsScreen(
             FloatingActionButton(
                 onClick = { onEditGame(game) },
                 shape = CircleShape,
-                containerColor = colorResource(id = R.color.colorAccent)
+                containerColor = colorResource(id = R.color.colorAccent),
+                modifier = Modifier
+                    .sharedElement(
+                        sharedContentState = rememberSharedContentState(key = SharedElements.Fab),
+                        animatedVisibilityScope = animatedVisibilityScope
+                    )
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.edit),
@@ -226,10 +251,19 @@ fun GameDetailsScreen(
                     }
             ) {
                 AsyncImage(
-                    model = game.imageUri,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(game.imageUri)
+                        .crossfade(true)
+                        .placeholderMemoryCacheKey(SharedElements.GameImage(game.id).toString())
+                        .memoryCacheKey(SharedElements.GameImage(game.id).toString())
+                        .build(),
                     contentDescription = stringResource(id = R.string.game_cover),
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
+                        .sharedElement(
+                            sharedContentState = rememberSharedContentState(key = SharedElements.GameImage(game.id)),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        )
                         .width(150.dp)
                         .height(200.dp)
                         .shadow(elevation = 5.dp)
@@ -534,6 +568,7 @@ fun GameTimelineCardContent(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Preview
 @Composable
 fun GameDetailsPreview() {
@@ -558,13 +593,18 @@ fun GameDetailsPreview() {
         gameplayCompletionist = 88.0
     )
     AppTheme {
-        GameDetailsScreen(
-            game = game,
-            platformGames = listOf(game),
-            hoursStats = stats,
-            isLoadingStats = false,
-            isLoadingCompletionUpdate = false,
-            isStatsError = false
-        )
+        SharedTransitionLayout {
+            AnimatedVisibility(visible = true) {
+                GameDetailsScreen(
+                    animatedVisibilityScope = this,
+                    game = game,
+                    platformGames = listOf(game),
+                    hoursStats = stats,
+                    isLoadingStats = false,
+                    isLoadingCompletionUpdate = false,
+                    isStatsError = false
+                )
+            }
+        }
     }
 }

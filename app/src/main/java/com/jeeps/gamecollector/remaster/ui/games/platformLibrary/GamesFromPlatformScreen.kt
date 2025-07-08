@@ -1,5 +1,10 @@
 package com.jeeps.gamecollector.remaster.ui.games.platformLibrary
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -67,6 +72,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -77,6 +83,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.deprecated.utils.ColorsUtils
 import com.jeeps.gamecollector.deprecated.utils.PlatformCovers
@@ -85,6 +92,7 @@ import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats
 import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
 import com.jeeps.gamecollector.remaster.ui.composables.Dialog
 import com.jeeps.gamecollector.remaster.ui.composables.LoadingAnimation
+import com.jeeps.gamecollector.remaster.ui.composables.SharedElements
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialog
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterStats
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getAppropriateComparator
@@ -94,14 +102,18 @@ import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
+import me.onebone.toolbar.ExperimentalToolbarApi
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 import java.text.DecimalFormat
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalSharedTransitionApi::class
+)
 @Composable
-fun GamesFromPlatformScreen(
+fun SharedTransitionScope.GamesFromPlatformScreen(
     viewModel: GamesFromPlatformViewModel = hiltViewModel(),
+    animatedVisibilityScope: AnimatedVisibilityScope,
     platformId: String,
     platformName: String,
     onBackPressed: () -> Unit,
@@ -163,6 +175,7 @@ fun GamesFromPlatformScreen(
     }
 
     GamesFromPlatformScreen(
+        animatedVisibilityScope = animatedVisibilityScope,
         snackbarHostState = snackbarHostState,
         games = games,
         platformName = viewModel.platformName,
@@ -242,9 +255,11 @@ fun GamesFromPlatformScreen(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun GamesFromPlatformScreen(
+fun SharedTransitionScope.GamesFromPlatformScreen(
     modifier: Modifier = Modifier,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     snackbarHostState: SnackbarHostState,
     games: List<Game>,
     platformName: String,
@@ -310,7 +325,12 @@ fun GamesFromPlatformScreen(
             FloatingActionButton(
                 onClick = onAddGame,
                 shape = CircleShape,
-                containerColor = colorResource(id = R.color.colorAccent)
+                containerColor = colorResource(id = R.color.colorAccent),
+                modifier = Modifier
+                    .sharedElement(
+                        sharedContentState = rememberSharedContentState(key = SharedElements.Fab),
+                        animatedVisibilityScope = animatedVisibilityScope
+                    )
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.plus),
@@ -366,6 +386,11 @@ fun GamesFromPlatformScreen(
                                 onBackPressed()
                             }
                         },
+                        modifier = Modifier
+                            .sharedElement(
+                                sharedContentState = rememberSharedContentState(key = SharedElements.NavButton),
+                                animatedVisibilityScope = animatedVisibilityScope
+                            )
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -461,6 +486,7 @@ fun GamesFromPlatformScreen(
                 ) {
                     items(items = games, key = { it.id }) { game ->
                         GameCard(
+                            animatedVisibilityScope = animatedVisibilityScope,
                             game = game,
                             sortStat = sortStat,
                             modifier = Modifier
@@ -486,9 +512,11 @@ fun GamesFromPlatformScreen(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun GameCard(
+private fun SharedTransitionScope.GameCard(
     modifier: Modifier = Modifier,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     game: Game,
     sortStat: SortStat
 ) {
@@ -525,7 +553,12 @@ private fun GameCard(
                 modifier = Modifier.fillMaxSize()
             ) {
                 AsyncImage(
-                    model = game.imageUri,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .crossfade(true)
+                        .data(game.imageUri)
+                        .placeholderMemoryCacheKey(SharedElements.GameImage(game.id).toString())
+                        .memoryCacheKey(SharedElements.GameImage(game.id).toString())
+                        .build(),
                     contentDescription = stringResource(id = R.string.game_cover),
                     contentScale = ContentScale.Fit,
                     onLoading = { isLoadingImage = true },
@@ -533,6 +566,10 @@ private fun GameCard(
                     onError = { isLoadingImage = false },
                     error = painterResource(R.drawable.game_controller),
                     modifier = modifier
+                        .sharedElement(
+                            sharedContentState = rememberSharedContentState(key = SharedElements.GameImage(game.id)),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        )
                         .fillMaxWidth()
                         .height(255.dp)
                         .background(color = Color.LightGray)
@@ -654,6 +691,7 @@ fun FilteredStatsCard(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Preview
 @Composable
 private fun GamesFromPlatformScreenPreview() {
@@ -682,17 +720,23 @@ private fun GamesFromPlatformScreenPreview() {
     )
 
     AppTheme {
-        GamesFromPlatformScreen(
-            snackbarHostState = SnackbarHostState(),
-            games = games,
-            platformName = "Nintendo Switch",
-            sortStat = SortStat.HOURS_MAIN,
-            searchQuery = "",
-            filteredStats = filterStats
-        )
+        SharedTransitionLayout {
+            AnimatedVisibility(visible = true) {
+                GamesFromPlatformScreen(
+                    animatedVisibilityScope = this,
+                    snackbarHostState = SnackbarHostState(),
+                    games = games,
+                    platformName = "Nintendo Switch",
+                    sortStat = SortStat.HOURS_MAIN,
+                    searchQuery = "",
+                    filteredStats = filterStats
+                )
+            }
+        }
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Preview(device = "spec:width=1080px,height=600px,dpi=440,orientation=portrait")
 @Composable
 private fun GameCardPreview() {
@@ -709,18 +753,32 @@ private fun GameCardPreview() {
         )
     )
     AppTheme {
-        GameCard(
-            game = game,
-            sortStat = SortStat.HOURS_MAIN
-        )
+        SharedTransitionLayout {
+            AnimatedVisibility(visible = true) {
+                GameCard(
+                    game = game,
+                    animatedVisibilityScope = this,
+                    sortStat = SortStat.HOURS_MAIN
+                )
+            }
+        }
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Preview(device = "spec:width=1080px,height=600px,dpi=440,orientation=portrait")
 @Composable
 private fun GameCardNoSortStatPreview() {
     val game = Game(name = "The Witcher 3: Wild Hunt")
     AppTheme {
-        GameCard(game = game, sortStat = SortStat.NONE)
+        SharedTransitionLayout {
+            AnimatedVisibility(visible = true) {
+                GameCard(
+                    animatedVisibilityScope = this,
+                    game = game,
+                    sortStat = SortStat.NONE
+                )
+            }
+        }
     }
 }
