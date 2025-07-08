@@ -44,7 +44,8 @@ class LoginActivity : BaseActivity() {
             .setTheme(R.style.LoginTheme)
             .setLogo(R.drawable.login_text_logo)
             .setAlwaysShowSignInMethodScreen(true)
-            .setIsSmartLockEnabled(false)
+            // TODO: Not working with Firebase UI - look into this
+            .setCredentialManagerEnabled(false)
             .build()
         signInLauncher.launch(signInIntent)
     }
