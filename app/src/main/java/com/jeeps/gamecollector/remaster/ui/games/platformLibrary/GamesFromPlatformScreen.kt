@@ -38,6 +38,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -102,7 +103,6 @@ import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
-import me.onebone.toolbar.ExperimentalToolbarApi
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 import java.text.DecimalFormat
@@ -522,7 +522,7 @@ private fun SharedTransitionScope.GameCard(
 ) {
     var isLoadingImage by remember { mutableStateOf(true) }
     val checkmarkColor = if (game.timesCompleted > 0) {
-        Color(0xff7FFF00)
+        colorResource(R.color.success)
     } else {
         Color.LightGray
     }
@@ -598,11 +598,12 @@ private fun SharedTransitionScope.GameCard(
                             .weight(85f)
                     )
                     Icon(
-                        painter = painterResource(R.drawable.checked),
+                        imageVector = Icons.Rounded.CheckCircle,
                         contentDescription = "Is completed",
                         tint = checkmarkColor,
                         modifier = Modifier
                             .weight(15f)
+                            .fillMaxSize()
                     )
                 }
             }
