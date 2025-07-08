@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,9 +23,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.deprecated.utils.ColorsUtils
+import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import kotlin.math.roundToInt
 
 
@@ -34,15 +36,22 @@ fun RatingChip(
     reviewCount: Int,
     modifier: Modifier = Modifier
 ) {
-    val chipColorRes by rememberSaveable { mutableIntStateOf(ColorsUtils.getColorByRatingRange(score)) }
-    val chipColor = colorResource(id = chipColorRes)
+    var chipColorRes by remember { mutableIntStateOf(R.color.rating_range_0) }
+
+    LaunchedEffect(score) {
+        chipColorRes = ColorsUtils.getColorByRatingRange(score)
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
          modifier = modifier
     ) {
         Title(text = title)
-        Chip(score = score.roundToInt(), chipColor, modifier = Modifier.padding(top = 5.dp))
+        Chip(
+            score = score.roundToInt(),
+            backgroundColor = colorResource(id = chipColorRes),
+            modifier = Modifier.padding(top = 5.dp)
+        )
         ReviewCounter(reviewCount = reviewCount)
     }
 }
