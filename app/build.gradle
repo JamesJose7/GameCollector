@@ -95,12 +95,12 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
 
     /* Firebase */
-    implementation 'com.google.firebase:firebase-analytics:21.3.0'
-    implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
-    implementation 'com.google.firebase:firebase-database:20.2.2'
-    implementation 'com.google.firebase:firebase-storage:20.2.1'
-    implementation 'com.google.firebase:firebase-auth:22.1.0'
-    implementation 'com.google.firebase:firebase-firestore:24.7.0'
+    implementation 'com.google.firebase:firebase-analytics:22.5.0'
+    implementation 'com.firebaseui:firebase-ui-auth:9.0.0'
+    implementation 'com.google.firebase:firebase-auth:23.2.1'
+    implementation 'com.google.firebase:firebase-database:21.0.0'
+    implementation 'com.google.firebase:firebase-storage:21.0.2'
+    implementation 'com.google.firebase:firebase-firestore:25.1.4'
 
     /* Third party */
     implementation 'io.github.florent37:shapeofview:1.4.7'
@@ -139,7 +139,7 @@ kapt {
 }
 
 configurations {
-    all {
+    configureEach {
         exclude group: 'org.json', module: 'json'
     }
 }
