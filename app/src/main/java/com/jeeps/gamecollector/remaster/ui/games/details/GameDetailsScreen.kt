@@ -72,6 +72,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jeeps.gamecollector.R
@@ -97,34 +98,30 @@ fun SharedTransitionScope.GameDetailsScreen(
     onBackPressed: () -> Unit = {},
     onEditGame: (Game) -> Unit = {}
 ) {
-    val game by viewModel.selectedGame.collectAsState()
-    val platformGames by viewModel.games.observeAsState(emptyList())
-    val stats by viewModel.gameHoursStats.observeAsState(GameplayHoursStats())
-    val isLoadingHourStats by viewModel.loadingGameHours.observeAsState(true)
-    val isLoadingCompletionUpdate by viewModel.loadingCompletionUpdate.observeAsState(false)
-    val isError by viewModel.showHoursErrorMessage.observeAsState(false)
-    val gameMainColor by viewModel.gameMainColor.observeAsState(MaterialTheme.colorScheme.primary)
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val activity = LocalActivity.current
     val window = activity?.window
     val view = LocalView.current
 
+    val primaryColor = MaterialTheme.colorScheme.primary
     val topBarColor by animateColorAsState(
-        targetValue = gameMainColor,
+        targetValue = uiState.gameMainColor ?: primaryColor,
         animationSpec = tween(durationMillis = 300)
     )
-    val useDarkIcons = remember(gameMainColor) {
-        val luminance = ColorUtils.calculateLuminance(gameMainColor.toArgb())
+    val useDarkIcons = remember(uiState.gameMainColor) {
+        val color = uiState.gameMainColor ?: primaryColor
+        val luminance = ColorUtils.calculateLuminance(color.toArgb())
         luminance > 0.5
     }
-    val topBarTextColor = remember(gameMainColor) {
-        val luminance = ColorUtils.calculateLuminance(gameMainColor.toArgb())
+    val topBarTextColor = remember(uiState.gameMainColor) {
+        val color = uiState.gameMainColor ?: primaryColor
+        val luminance = ColorUtils.calculateLuminance(color.toArgb())
         if (luminance < 0.5) Color.White else Color(0xFF212121)
     }
 
     LaunchedEffect(platformId, platformName, selectedGame) {
         viewModel.platformId = platformId.orEmpty()
-        viewModel.platformName = platformName
         selectedGame?.let { viewModel.setSelectedGame(it) }
     }
 
@@ -140,15 +137,15 @@ fun SharedTransitionScope.GameDetailsScreen(
         }
     }
 
-    game?.let {
+    uiState.selectedGame?.let {
         GameDetailsScreen(
             animatedVisibilityScope = animatedVisibilityScope,
             game = it,
-            platformGames = platformGames,
-            hoursStats = stats,
-            isLoadingStats = isLoadingHourStats,
-            isLoadingCompletionUpdate = isLoadingCompletionUpdate,
-            isStatsError = isError,
+            platformGames = uiState.games,
+            hoursStats = uiState.gameHoursStats,
+            isLoadingStats = uiState.isLoadingGameHours,
+            isLoadingCompletionUpdate = uiState.isLoadingCompletionUpdate,
+            isStatsError = uiState.showHoursErrorMessage,
             topBarColor = topBarColor,
             topBarTextColor = topBarTextColor,
             onRefreshClick = { viewModel.getGameHours() },

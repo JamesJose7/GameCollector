@@ -3,8 +3,6 @@ package com.jeeps.gamecollector.remaster.ui.games.details
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
 import com.jeeps.gamecollector.remaster.data.State
@@ -33,6 +31,7 @@ import androidx.core.graphics.toColorInt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 @ExperimentalCoroutinesApi
 @HiltViewModel
@@ -43,47 +42,35 @@ class GameDetailsViewModel @Inject constructor(
     private val statsRepository: UserStatsRepository
 ) : BaseViewModel() {
 
-    private val _selectedGame: MutableStateFlow<Game?> = MutableStateFlow(null)
-    val selectedGame: StateFlow<Game?> = _selectedGame.asStateFlow()
+    data class GameDetailsUiState(
+        val selectedGame: Game? = null,
+        val gameMainColor: Color? = null,
+        val gameHoursStats: GameplayHoursStats = GameplayHoursStats(),
+        val showHoursErrorMessage: Boolean = false,
+        val isLoadingGameHours: Boolean = false,
+        val isLoadingCompletionUpdate: Boolean = false,
+        val games: List<Game> = emptyList()
+    )
 
-    private val _gameMainColor = MutableLiveData<Color>()
-    val gameMainColor: LiveData<Color>
-        get() = _gameMainColor
+    private val _uiState = MutableStateFlow(GameDetailsUiState())
+    val uiState: StateFlow<GameDetailsUiState> = _uiState.asStateFlow()
 
-    private val _gameHoursStats = MutableLiveData<GameplayHoursStats>()
-    val gameHoursStats: LiveData<GameplayHoursStats>
-        get() = _gameHoursStats
-
-    private val _showHoursErrorMessage = MutableLiveData(false)
-    val showHoursErrorMessage: LiveData<Boolean>
-        get() = _showHoursErrorMessage
-
-    private val _loadingGameHours = MutableLiveData(false)
-    val loadingGameHours: LiveData<Boolean>
-        get() = _loadingGameHours
-
-    private val _loadingCompletionUpdate = MutableLiveData(false)
-    val loadingCompletionUpdate: LiveData<Boolean>
-        get() = _loadingCompletionUpdate
-
-    var selectedGamePosition: Int = -1
-    var platformName: String? = null
     var platformId: String = ""
         set(value) {
             field = value
             getUserGames()
         }
 
-    private val _games = MutableLiveData<List<Game>>()
-    val games: LiveData<List<Game>>
-        get() = _games
-
     fun setSelectedGame(game: Game) {
         // TODO: Check if this is still needed
         game.currentSortStat = ""
 
-        _selectedGame.value = game
-        _gameHoursStats.value = GameplayHoursStats(game.gameHoursStats)
+        _uiState.update {
+            it.copy(
+                selectedGame = game,
+                gameHoursStats = GameplayHoursStats(game.gameHoursStats)
+            )
+        }
         getColorBasedOnCover()
         checkIfGameHasHoursStats(game.gameHoursStats)
         updateGameDetails()
@@ -97,13 +84,13 @@ class GameDetailsViewModel @Inject constructor(
 
     private suspend fun decodeBitmapUrl() {
         withContext(Dispatchers.IO) {
-            selectedGame.value?.let { game ->
+            _uiState.value.selectedGame?.let { game ->
                 kotlin.runCatching {
                     val url = URL(game.imageUri)
                     val image = BitmapFactory.decodeStream(url.openConnection().getInputStream())
                     val palette = Palette.from(image).generate()
                     val mainColor = palette.getDominantColor("#3F51B5".toColorInt())
-                    _gameMainColor.postValue(Color(mainColor))
+                    _uiState.update { it.copy(gameMainColor = Color(mainColor)) }
                 }.onFailure {
                     Log.e(TAG, it.message, it)
                 }
@@ -113,8 +100,8 @@ class GameDetailsViewModel @Inject constructor(
 
     fun updateGameCompletion() {
         viewModelScope.launch {
-            _loadingCompletionUpdate.postValue(true)
-            selectedGame.value?.id?.let { gameId ->
+            _uiState.update { it.copy(isLoadingCompletionUpdate = true) }
+            _uiState.value.selectedGame?.id?.let { gameId ->
                 handleNetworkResponse(gamesRepository.toggleGameCompletion(gameId)) {
                     val isCompleted = it.completed
                     val message =
@@ -123,12 +110,12 @@ class GameDetailsViewModel @Inject constructor(
                     postServerMessage(message)
 
                     val timesCompleted = if (isCompleted) 1 else 0
-                    _selectedGame.value?.copy(timesCompleted = timesCompleted)?.let { game ->
-                        _selectedGame.value = game
+                    _uiState.value.selectedGame?.copy(timesCompleted = timesCompleted)?.let { game ->
+                        _uiState.update { state -> state.copy(selectedGame = game) }
                     }
                 }
             }
-            _loadingCompletionUpdate.postValue(false)
+            _uiState.update { it.copy(isLoadingCompletionUpdate = false) }
         }
     }
 
@@ -141,20 +128,29 @@ class GameDetailsViewModel @Inject constructor(
 
     fun getGameHours() {
         viewModelScope.launch {
-            _loadingGameHours.postValue(true)
-            _selectedGame.value?.let { game ->
+            _uiState.update { it.copy(isLoadingGameHours = true) }
+            _uiState.value.selectedGame?.let { game ->
                 handleNetworkResponse(statsRepository.getGameHours(game.name),
                     { stats ->
                         if (isStoredHoursDifferentFromIgbd(game.gameHoursStats, stats)) {
-                            _gameHoursStats.value = stats
                             updateGameHours(stats, game.id)
                         }
-                        _showHoursErrorMessage.postValue(false)
+                        _uiState.update {
+                            it.copy(
+                                gameHoursStats = stats,
+                                showHoursErrorMessage = false,
+                                isLoadingGameHours = false
+                            )
+                        }
                     }, {
-                        _showHoursErrorMessage.postValue(true)
+                        _uiState.update {
+                            it.copy(
+                                showHoursErrorMessage = true,
+                                isLoadingGameHours = false
+                            )
+                        }
                     })
             }
-            _loadingGameHours.postValue(false)
         }
     }
 
@@ -176,7 +172,7 @@ class GameDetailsViewModel @Inject constructor(
                 storedHours.gameplayMainExtra != igdbHours.gameplayMainExtra
     }
 
-    private fun updateGameDetails() = _selectedGame.value?.let { game ->
+    private fun updateGameDetails() = _uiState.value.selectedGame?.let { game ->
         if (game.url.isNotEmpty() && game.genresNames.isNotEmpty()) return@let
 
         viewModelScope.launch {
@@ -190,7 +186,7 @@ class GameDetailsViewModel @Inject constructor(
                 game.addAdditionalGameDetails(gameIG, genres.toNames())
 
                 handleNetworkResponse(gamesRepository.editGame(game.id, game)) {
-                    _selectedGame.value = game
+                    _uiState.update { state -> state.copy(selectedGame = game) }
                 }
             }
         }
@@ -209,7 +205,7 @@ class GameDetailsViewModel @Inject constructor(
                     is State.Success -> {
                         stopLoading()
                         state.data.let { result ->
-                            result.let { _games.value = it }
+                            result.let { _uiState.update { state -> state.copy(games = it) } }
                         }
                     }
                     is State.Failed -> {
