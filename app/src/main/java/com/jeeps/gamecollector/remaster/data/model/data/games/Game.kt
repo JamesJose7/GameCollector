@@ -84,20 +84,22 @@ data class Game(
         }
 }
 
-fun Game.addAdditionalGameDetails(gameIG: GameIG, genresIg: List<String> = emptyList()) {
-    firstReleaseDate = gameIG.firstReleaseDate ?: 0
-    ageRatings = gameIG.ageRatings ?: emptyList()
-    criticsRating = gameIG.criticsRating ?: 0.0
-    criticsRatingCount = gameIG.criticsRatingCount ?: 0
-    userRating = gameIG.userRating ?: 0.0
-    userRatingCount = gameIG.userRatingCount ?: 0
-    totalRating = gameIG.totalRating ?: 0.0
-    totalRatingCount = gameIG.totalRatingCount ?: 0
-    genres = gameIG.genres ?: emptyList()
-    genresNames = genresIg
-    storyline = gameIG.storyline ?: ""
-    summary = gameIG.summary ?: ""
-    url = gameIG.url ?: ""
+fun Game.addAdditionalGameDetails(gameIG: GameIG, genresIg: List<String> = emptyList()): Game {
+    return copy(
+        firstReleaseDate = gameIG.firstReleaseDate ?: 0,
+        ageRatings = gameIG.ageRatings ?: emptyList(),
+        criticsRating = gameIG.criticsRating ?: 0.0,
+        criticsRatingCount = gameIG.criticsRatingCount ?: 0,
+        userRating = gameIG.userRating ?: 0.0,
+        userRatingCount = gameIG.userRatingCount ?: 0,
+        totalRating = gameIG.totalRating ?: 0.0,
+        totalRatingCount = gameIG.totalRatingCount ?: 0,
+        genres = gameIG.genres ?: emptyList(),
+        genresNames = genresIg,
+        storyline = gameIG.storyline ?: "",
+        summary = gameIG.summary ?: "",
+        url = gameIG.url ?: ""
+    )
 }
 
 fun Game?.releaseDateFormatted(): String {

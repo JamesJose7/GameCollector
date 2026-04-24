@@ -63,16 +63,16 @@ class GameDetailsViewModel @Inject constructor(
 
     fun setSelectedGame(game: Game) {
         // TODO: Check if this is still needed
-        game.currentSortStat = ""
+        val gameToSet = game.copy(currentSortStat = "")
 
         _uiState.update {
             it.copy(
-                selectedGame = game,
-                gameHoursStats = GameplayHoursStats(game.gameHoursStats)
+                selectedGame = gameToSet,
+                gameHoursStats = GameplayHoursStats(gameToSet.gameHoursStats)
             )
         }
         getColorBasedOnCover()
-        checkIfGameHasHoursStats(game.gameHoursStats)
+        checkIfGameHasHoursStats(gameToSet.gameHoursStats)
         updateGameDetails()
     }
 
@@ -110,8 +110,8 @@ class GameDetailsViewModel @Inject constructor(
                     postServerMessage(message)
 
                     val timesCompleted = if (isCompleted) 1 else 0
-                    _uiState.value.selectedGame?.copy(timesCompleted = timesCompleted)?.let { game ->
-                        _uiState.update { state -> state.copy(selectedGame = game) }
+                    _uiState.update { state ->
+                        state.copy(selectedGame = state.selectedGame?.copy(timesCompleted = timesCompleted))
                     }
                 }
             }
@@ -172,8 +172,9 @@ class GameDetailsViewModel @Inject constructor(
                 storedHours.gameplayMainExtra != igdbHours.gameplayMainExtra
     }
 
-    private fun updateGameDetails() = _uiState.value.selectedGame?.let { game ->
-        if (game.url.isNotEmpty() && game.genresNames.isNotEmpty()) return@let
+    private fun updateGameDetails() {
+        val game = _uiState.value.selectedGame ?: return
+        if (game.url.isNotEmpty() && game.genresNames.isNotEmpty()) return
 
         viewModelScope.launch {
             val igdbGames =
@@ -183,10 +184,14 @@ class GameDetailsViewModel @Inject constructor(
                     ?.let { handleNetworkResponse(igdbRepository.getGenresByIds(IgdbUtils.getGameGenresQuery(it))) }
                     ?: emptyList()
 
-                game.addAdditionalGameDetails(gameIG, genres.toNames())
+                val genreNames = genres.toNames()
+                val updatedGame = game.addAdditionalGameDetails(
+                    gameIG,
+                    genreNames.ifEmpty { game.genresNames }
+                )
 
-                handleNetworkResponse(gamesRepository.editGame(game.id, game)) {
-                    _uiState.update { state -> state.copy(selectedGame = game) }
+                handleNetworkResponse(gamesRepository.editGame(updatedGame.id, updatedGame)) {
+                    _uiState.update { state -> state.copy(selectedGame = updatedGame) }
                 }
             }
         }

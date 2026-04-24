@@ -178,7 +178,7 @@ class AddGameViewModel @Inject constructor(
                     ?.let { handleNetworkResponse(igdbRepository.getGenresByIds(IgdbUtils.getGameGenresQuery(it))) }
                     ?: emptyList()
 
-                game.addAdditionalGameDetails(selectedGame, genres.toNames())
+                val updatedGame = game.addAdditionalGameDetails(selectedGame, genres.toNames())
                 // Get image cover
                 when (val response = igdbRepository
                     .getGameCoverById(IgdbUtils.getCoverImageQuery(selectedGame.cover))) {
@@ -190,12 +190,12 @@ class AddGameViewModel @Inject constructor(
                                 currentImageUri = null
                             }
                         }
-                        continueSavingGame(isEdit, game)
+                        continueSavingGame(isEdit, updatedGame)
                     }
                     is NetworkResponse.Error -> {
                         stopLoading()
                         handleError(response)
-                        continueSavingGame(isEdit, game)
+                        continueSavingGame(isEdit, updatedGame)
                     }
                 }
             }
