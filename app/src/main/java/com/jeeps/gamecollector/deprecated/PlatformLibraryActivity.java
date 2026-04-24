@@ -190,7 +190,7 @@ public class PlatformLibraryActivity extends AppCompatActivity {
                     games.clear();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         Game game = doc.toObject(Game.class);
-                        game.setId(doc.getId());
+//                        game.setId(doc.getId());
                         games.add(game);
                     }
                     // Sort A-z

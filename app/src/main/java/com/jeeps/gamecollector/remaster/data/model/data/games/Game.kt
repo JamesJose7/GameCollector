@@ -20,55 +20,42 @@ private const val RELEASE_DATE_FORMAT = "MMM dd, yyyy"
 @kotlinx.serialization.Serializable
 data class Game(
     @SerializedName("gameId")
-    var id: String = "",
+    val id: String = "",
 
     //Game data
-    var user: String = "",
-    var dateAdded: String = "",
-    var imageUri: String = "",
+    val user: String = "",
+    val dateAdded: String = "",
+    val imageUri: String = "",
     @field:JvmField
-    var isPhysical: Boolean = true,
-    var name: String = "",
-    var shortName: String = "",
-    var platformId: String = "",
-    var platform: String = "",
-    var publisherId: String = "",
-    var publisher: String = "",
-    var timesCompleted: Int = 0,
-    var completionDate: String = "",
-    var gameHoursStats: GameHoursStats = GameHoursStats(),
+    val isPhysical: Boolean = true,
+    val name: String = "",
+    val shortName: String = "",
+    val platformId: String = "",
+    val platform: String = "",
+    val publisherId: String = "",
+    val publisher: String = "",
+    val timesCompleted: Int = 0,
+    val completionDate: String = "",
+    val gameHoursStats: GameHoursStats = GameHoursStats(),
 
     // AdditionalDetails
-    var firstReleaseDate: Long = 0,
-    var ageRatings: List<Int> = emptyList(),
-    var criticsRating: Double = 0.0,
-    var criticsRatingCount: Int = 0,
-    var userRating: Double = 0.0,
-    var userRatingCount: Int = 0,
-    var totalRating: Double = 0.0,
-    var totalRatingCount: Int = 0,
-    var genres: List<Int> = emptyList(),
-    var genresNames: List<String> = emptyList(),
-    var storyline: String = "",
-    var summary: String = "",
-    var url: String = "",
+    val firstReleaseDate: Long = 0,
+    val ageRatings: List<Int> = emptyList(),
+    val criticsRating: Double = 0.0,
+    val criticsRatingCount: Int = 0,
+    val userRating: Double = 0.0,
+    val userRatingCount: Int = 0,
+    val totalRating: Double = 0.0,
+    val totalRatingCount: Int = 0,
+    val genres: List<Int> = emptyList(),
+    val genresNames: List<String> = emptyList(),
+    val storyline: String = "",
+    val summary: String = "",
+    val url: String = "",
 
     @Expose(serialize = false, deserialize = false)
-    var currentSortStat: String = ""
+    val currentSortStat: String = ""
 ) : Serializable {
-    constructor(
-        imageUri: String, isPhysical: Boolean, name: String, shortName: String,
-        platformId: String, platform: String, publisherId: String, publisher: String
-    ) : this() {
-        this.imageUri = imageUri
-        this.isPhysical = isPhysical
-        this.name = name
-        this.shortName = shortName
-        this.platformId = platformId
-        this.platform = platform
-        this.publisherId = publisherId
-        this.publisher = publisher
-    }
 
     val completionDateParsed: LocalDate?
         get() = completionDate.ifEmpty { null }?.let {
@@ -117,9 +104,11 @@ fun Game?.releaseDateFormatted(): String {
 }
 
 // Jetpack navigation decodes this slash that breaks the firestore link during serialization
-fun Game?.encodeImageUriPath() : Game? = apply {
+fun Game?.encodeImageUriPath() : Game? {
     if (this == null) return null
-    if (imageUri.contains("/o/gameCovers/")) {
-        imageUri = imageUri.replace("/o/gameCovers/", "/o/gameCovers%2F")
-    }
+    return if (imageUri.contains("/o/gameCovers/")) {
+        copy(
+            imageUri = imageUri.replace("/o/gameCovers/", "/o/gameCovers%2F")
+        )
+    } else this
 }

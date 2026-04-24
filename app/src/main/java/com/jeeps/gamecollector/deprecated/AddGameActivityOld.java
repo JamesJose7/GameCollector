@@ -218,26 +218,27 @@ public class AddGameActivityOld extends AppCompatActivity {
         boolean isPhysical = radioPhysical.isChecked();
 
         //Create game
-        Game game = new Game("",
-                isPhysical, name, shortName, platformId, platformName, publisherId, publisher);
-        game.setTimesCompleted(timesCompleted);
+//        Game game = new Game("",
+//                isPhysical, name, shortName, platformId, platformName, publisherId, publisher);
+        Game game = new Game();
+//        game.setTimesCompleted(timesCompleted);
 
         // When editing a game
         if (selectedGame != null)  {
-            game.setId(selectedGame.getId());
+//            game.setId(selectedGame.getId());
             if (currImageURI != null) { // New image file selected
-                game.setImageUri(currImageURI.toString());
+//                game.setImageUri(currImageURI.toString());
                 postGame(game, true);
             } else if (coverDeleted){ // Custom cover got removed, get one from IGDB
                 // Get cover from IGDB
                 postGameAfterGettingCover(game, true);
             } else { // No changes, get the previous set cover
-                game.setImageUri(selectedGame.getImageUri());
+//                game.setImageUri(selectedGame.getImageUri());
                 postGame(game, true);
             }
         } else { // When creating a game
             if (currImageURI != null) { // upload custom image cover
-                game.setImageUri(currImageURI.toString());
+//                game.setImageUri(currImageURI.toString());
                 postGame(game, false);
             } else {
                 // Get cover from IGDB
@@ -272,8 +273,9 @@ public class AddGameActivityOld extends AppCompatActivity {
                                         if (response.isSuccessful()) {
                                             List<GameCoverIG> gameCoverIGS = response.body();
                                             if (gameCoverIGS != null)
-                                                if (!gameCoverIGS.isEmpty())
-                                                    game.setImageUri(gameCoverIGS.get(0).getUrl());
+                                                if (!gameCoverIGS.isEmpty()) {
+//                                                    game.setImageUri(gameCoverIGS.get(0).getUrl());
+                                                }
                                         }
                                         postGame(game, isEdit);
                                     }

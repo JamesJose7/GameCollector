@@ -48,9 +48,8 @@ class GamesRepository @Inject constructor(
                 }
                 val games = mutableListOf<Game>()
                 snapshot?.forEach {
-                    val game: Game = it.toObject(Game::class.java).apply {
-                        id = it.id
-                    }
+                    val game: Game = it.toObject(Game::class.java)
+                        .copy(id = it.id)
                     games.add(game)
                 }
                 trySend(State.Success(games))

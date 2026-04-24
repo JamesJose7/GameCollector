@@ -23,6 +23,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -95,17 +96,11 @@ class AddGameViewModel @Inject constructor(
 
     private fun initializeDefaultGame() {
         val game = Game(
-            "",
-            true,
-            "",
-            "",
-            platformId ?: "",
-            platformName ?: "",
-            "",
-            ""
-        ).apply {
+            isPhysical = true,
+            platformId = platformId ?: "",
+            platform = platformName ?: "",
             dateAdded = getCurrentTimeInUtcString()
-        }
+        )
         setSelectedGame(game)
     }
 
@@ -178,7 +173,7 @@ class AddGameViewModel @Inject constructor(
                     ?.let { handleNetworkResponse(igdbRepository.getGenresByIds(IgdbUtils.getGameGenresQuery(it))) }
                     ?: emptyList()
 
-                val updatedGame = game.addAdditionalGameDetails(selectedGame, genres.toNames())
+                var updatedGame = game.addAdditionalGameDetails(selectedGame, genres.toNames())
                 // Get image cover
                 when (val response = igdbRepository
                     .getGameCoverById(IgdbUtils.getCoverImageQuery(selectedGame.cover))) {
@@ -186,7 +181,8 @@ class AddGameViewModel @Inject constructor(
                         val gameCovers = response.body
                         if (gameCovers.isNotEmpty()) {
                             gameCovers[0].getBigCoverUrl().let { coverUrl ->
-                                _selectedGame.value.imageUri = coverUrl
+                                updatedGame = updatedGame.copy(imageUri = coverUrl)
+                                _selectedGame.update { updatedGame }
                                 currentImageUri = null
                             }
                         }

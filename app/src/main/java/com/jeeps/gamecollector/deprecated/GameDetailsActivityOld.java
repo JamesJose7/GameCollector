@@ -183,7 +183,7 @@ public class GameDetailsActivityOld extends AppCompatActivity {
                                 "Marked as complete" :
                                 "Marked as incomplete";
                         Snackbar.make(fabButton, message, Snackbar.LENGTH_SHORT).show();
-                        selectedGame.setTimesCompleted(completionResponse.isCompleted() ? 1 : 0);
+//                        selectedGame.setTimesCompleted(completionResponse.isCompleted() ? 1 : 0);
                     }
                 } else {
                     Log.e(TAG, "Toggle game completion request failed");
