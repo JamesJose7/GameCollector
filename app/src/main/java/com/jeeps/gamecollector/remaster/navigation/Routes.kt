@@ -148,9 +148,6 @@ fun Main() {
 
                 GameDetailsScreen(
                     animatedVisibilityScope = this@composable,
-                    platformId = route.platformId,
-                    platformName = route.platformName,
-                    selectedGame = route.game,
                     onBackPressed = { navController.popBackStackOnResume() },
                     onEditGame = { game ->
                         navController.navigate(Screen.AddGame(

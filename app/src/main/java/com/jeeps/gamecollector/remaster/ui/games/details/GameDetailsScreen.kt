@@ -92,9 +92,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 fun SharedTransitionScope.GameDetailsScreen(
     viewModel: GameDetailsViewModel = hiltViewModel(),
     animatedVisibilityScope: AnimatedVisibilityScope,
-    platformId: String? = null,
-    platformName: String? = null,
-    selectedGame: Game? = null,
     onBackPressed: () -> Unit = {},
     onEditGame: (Game) -> Unit = {}
 ) {
@@ -118,11 +115,6 @@ fun SharedTransitionScope.GameDetailsScreen(
         val color = uiState.gameMainColor ?: primaryColor
         val luminance = ColorUtils.calculateLuminance(color.toArgb())
         if (luminance < 0.5) Color.White else Color(0xFF212121)
-    }
-
-    LaunchedEffect(platformId, platformName, selectedGame) {
-        viewModel.platformId = platformId.orEmpty()
-        selectedGame?.let { viewModel.setSelectedGame(it) }
     }
 
     DisposableEffect(useDarkIcons) {

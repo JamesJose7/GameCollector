@@ -3,7 +3,9 @@ package com.jeeps.gamecollector.remaster.ui.games.details
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import androidx.palette.graphics.Palette
 import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
@@ -16,6 +18,8 @@ import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.data.repository.IgdbRepository
 import com.jeeps.gamecollector.remaster.data.repository.UserStatsRepository
+import com.jeeps.gamecollector.remaster.navigation.CustomNavType
+import com.jeeps.gamecollector.remaster.navigation.Screen
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.base.ErrorType
 import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
@@ -23,19 +27,21 @@ import com.jeeps.gamecollector.remaster.utils.IgdbUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URL
 import javax.inject.Inject
 import androidx.core.graphics.toColorInt
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlin.reflect.typeOf
 
 @ExperimentalCoroutinesApi
 @HiltViewModel
 class GameDetailsViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val authenticationRepository: AuthenticationRepository,
     private val gamesRepository: GamesRepository,
     private val igdbRepository: IgdbRepository,
@@ -55,13 +61,15 @@ class GameDetailsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(GameDetailsUiState())
     val uiState: StateFlow<GameDetailsUiState> = _uiState.asStateFlow()
 
-    var platformId: String = ""
-        set(value) {
-            field = value
-            getUserGames()
-        }
+    init {
+        val route = savedStateHandle.toRoute<Screen.GameDetails>(
+            typeMap = mapOf(typeOf<Game?>() to CustomNavType.GameType)
+        )
+        route.game?.let { setSelectedGame(it) }
+        getUserGames(route.platformId.orEmpty())
+    }
 
-    fun setSelectedGame(game: Game) {
+    private fun setSelectedGame(game: Game) {
         // TODO: Check if this is still needed
         val gameToSet = game.copy(currentSortStat = "")
 
@@ -197,7 +205,7 @@ class GameDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun getUserGames() {
+    private fun getUserGames(platformId: String) {
         val user = authenticationRepository.getUser() ?: return
 
         viewModelScope.launch {
