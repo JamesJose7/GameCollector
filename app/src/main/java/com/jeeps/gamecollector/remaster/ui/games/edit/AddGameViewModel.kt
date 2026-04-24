@@ -33,7 +33,6 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 @HiltViewModel
 class AddGameViewModel @Inject constructor(
-    private val authenticationRepository: AuthenticationRepository,
     private val gamesRepository: GamesRepository,
     private val igdbRepository: IgdbRepository,
     private val imageCompressor: ImageCompressor
@@ -133,8 +132,7 @@ class AddGameViewModel @Inject constructor(
     private fun saveNewGame(game: Game) {
         viewModelScope.launch {
             startLoading()
-            val token = authenticationRepository.getUserToken()
-            handleNetworkResponse(gamesRepository.saveNewGame(token, game)) {
+            handleNetworkResponse(gamesRepository.saveNewGame(game)) {
                 if (currentImageUri != null) {
                     setSelectedGame(it)
                     pendingMessage = "Game created successfully"
@@ -152,9 +150,7 @@ class AddGameViewModel @Inject constructor(
     private fun editGame(game: Game) {
         viewModelScope.launch {
             startLoading()
-            val token = authenticationRepository.getUserToken()
-
-            handleNetworkResponse(gamesRepository.editGame(token, game.id, game)) {
+            handleNetworkResponse(gamesRepository.editGame(game.id, game)) {
                 if (currentImageUri != null) {
                     pendingMessage = "Game edited successfully"
                     currentImageUri?.let { uri ->
@@ -214,7 +210,6 @@ class AddGameViewModel @Inject constructor(
         viewModelScope.launch {
             startLoading()
             imageFile?.let { image ->
-                val token = authenticationRepository.getUserToken()
                 val requestFile = image
                     .asRequestBody("image/png".toMediaTypeOrNull())
                 val body: MultipartBody.Part =
@@ -222,7 +217,7 @@ class AddGameViewModel @Inject constructor(
 
                 handleNetworkResponse(
                     gamesRepository
-                        .uploadGameCover(token, selectedGame.value.id, body)
+                        .uploadGameCover(selectedGame.value.id, body)
                 ) {
                     postServerMessage(pendingMessage)
                 }

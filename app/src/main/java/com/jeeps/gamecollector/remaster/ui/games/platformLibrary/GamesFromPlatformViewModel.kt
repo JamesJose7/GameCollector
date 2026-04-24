@@ -202,9 +202,7 @@ class GamesFromPlatformViewModel @Inject constructor(
         gamePendingDeletion = null
 
         viewModelScope.launch {
-            val token = authenticationRepository.getUserToken()
-
-            handleNetworkResponse(gamesRepository.deleteGame(token, game.id)) {
+            handleNetworkResponse(gamesRepository.deleteGame(game.id)) {
                 postServerMessage("Game deleted successfully")
             }
         }

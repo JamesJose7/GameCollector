@@ -16,6 +16,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
@@ -26,7 +27,8 @@ import kotlin.coroutines.suspendCoroutine
 @ExperimentalCoroutinesApi
 class GamesRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
-    private val apiGame: ApiGame
+    private val apiGame: ApiGame,
+    private val authenticationRepository: AuthenticationRepository
 ) {
 
     suspend fun getUserGamesByPlatform(username: String, platformId: String) = callbackFlow {
@@ -58,43 +60,43 @@ class GamesRepository @Inject constructor(
     }
 
     suspend fun deleteGame(
-        token: String,
         gameId: String
     ): NetworkResponse<ResponseBody, ErrorResponse> {
         return withContext(NonCancellable) {
+            val token = authenticationRepository.getUserToken()
             apiGame.deleteGame(token.bearer(), gameId)
         }
     }
 
     suspend fun toggleGameCompletion(
-        token: String,
         gameId: String
     ): NetworkResponse<ToggleCompletionResponse, ErrorResponse> {
         return withContext(NonCancellable) {
+            val token = authenticationRepository.getUserToken()
             apiGame.toggleGameCompletion(token.bearer(), gameId)
         }
     }
 
     suspend fun saveNewGame(
-        token: String,
         game: Game
     ): NetworkResponse<Game, ErrorResponse> {
+        val token = authenticationRepository.getUserToken()
         return apiGame.postGame(token.bearer(), game)
     }
 
     suspend fun editGame(
-        token: String,
         gameId: String,
         game: Game
     ): NetworkResponse<ResponseBody, ErrorResponse> {
+        val token = authenticationRepository.getUserToken()
         return apiGame.editGame(token.bearer(), gameId, game)
     }
 
     suspend fun uploadGameCover(
-        token: String,
         gameId: String,
         body: MultipartBody.Part
     ): NetworkResponse<ResponseBody, ErrorResponse> {
+        val token = authenticationRepository.getUserToken()
         return apiGame.uploadGameCover(token.bearer(), gameId, body)
     }
 
@@ -102,7 +104,7 @@ class GamesRepository @Inject constructor(
         stats: GameplayHoursStats,
         gameId: String
     ): State<Boolean> {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             val gameRef = firebaseFirestore
                 .collection("games")
                 .document(gameId)

@@ -114,9 +114,8 @@ class GameDetailsViewModel @Inject constructor(
     fun updateGameCompletion() {
         viewModelScope.launch {
             _loadingCompletionUpdate.postValue(true)
-            val token = authenticationRepository.getUserToken()
             selectedGame.value?.id?.let { gameId ->
-                handleNetworkResponse(gamesRepository.toggleGameCompletion(token, gameId)) {
+                handleNetworkResponse(gamesRepository.toggleGameCompletion(gameId)) {
                     val isCompleted = it.completed
                     val message =
                         if (isCompleted) "Marked as complete"
@@ -190,8 +189,7 @@ class GameDetailsViewModel @Inject constructor(
 
                 game.addAdditionalGameDetails(gameIG, genres.toNames())
 
-                val token = authenticationRepository.getUserToken()
-                handleNetworkResponse(gamesRepository.editGame(token, game.id, game)) {
+                handleNetworkResponse(gamesRepository.editGame(game.id, game)) {
                     _selectedGame.value = game
                 }
             }

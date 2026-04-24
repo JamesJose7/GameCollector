@@ -30,7 +30,6 @@ import javax.inject.Inject
 @HiltViewModel
 class AddPlatformViewModel @Inject constructor(
     private val platformsRepository: PlatformsRepository,
-    private val authenticationRepository: AuthenticationRepository,
     private val imageCompressor: ImageCompressor
 ) : BaseViewModel() {
 
@@ -75,10 +74,9 @@ class AddPlatformViewModel @Inject constructor(
     }
 
     private suspend fun saveNewPlatform() {
-        val token = authenticationRepository.getUserToken()
-        _platform.value?.let { currentPlatform ->
+        _platform.value.let { currentPlatform ->
             currentPlatform.imageUri = currentImageUri.toString()
-            handleNetworkResponse(platformsRepository.savePlatform(token, currentPlatform)) { newPlatform ->
+            handleNetworkResponse(platformsRepository.savePlatform(currentPlatform)) { newPlatform ->
                 currentPlatform.id = newPlatform.id
                 if (isImageEdited) {
                     currentImageUri?.let { uri ->
@@ -92,16 +90,13 @@ class AddPlatformViewModel @Inject constructor(
     }
 
     private suspend fun editPlatform() {
-        val token = authenticationRepository.getUserToken()
-        _platform.value?.let {
-            handleNetworkResponse(platformsRepository.editPlatform(token, it)) {
-                if (isImageEdited) {
-                    currentImageUri?.let { uri ->
-                        uploadImageCover(imageCompressor.compressImage(uri))
-                    }
-                } else {
-                    skipImageUpload()
+        handleNetworkResponse(platformsRepository.editPlatform(platform.value)) {
+            if (isImageEdited) {
+                currentImageUri?.let { uri ->
+                    uploadImageCover(imageCompressor.compressImage(uri))
                 }
+            } else {
+                skipImageUpload()
             }
         }
     }
@@ -109,14 +104,13 @@ class AddPlatformViewModel @Inject constructor(
     private fun uploadImageCover(compressedImage: File?) {
         viewModelScope.launch {
             compressedImage?.let { file ->
-                val token = authenticationRepository.getUserToken()
                 val requestFile = file
                     .asRequestBody("image/png".toMediaTypeOrNull())
                 val body: MultipartBody.Part =
                     MultipartBody.Part.createFormData("image", file.name, requestFile)
 
                 handleNetworkResponse(platformsRepository.uploadPlatformCover(
-                    token, _platform.value.id, body)) {
+                    _platform.value.id, body)) {
                     if (file.exists()) file.delete()
                 }
             }

@@ -9,10 +9,10 @@ import com.jeeps.gamecollector.remaster.data.model.data.user.UserDetails
 import com.jeeps.gamecollector.remaster.utils.PreferencesWrapper
 import com.jeeps.gamecollector.remaster.utils.extensions.bearer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.ResponseBody
 import javax.inject.Inject
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 @ExperimentalCoroutinesApi
 class AuthenticationDao @Inject constructor(
@@ -25,7 +25,7 @@ class AuthenticationDao @Inject constructor(
     }
 
     suspend fun getUserToken(user: FirebaseUser?): String {
-        val token = suspendCoroutine<String> { continuation ->
+        val token = suspendCancellableCoroutine { continuation ->
             if (user != null) {
                 user.getIdToken(true)
                     .addOnCompleteListener { task ->

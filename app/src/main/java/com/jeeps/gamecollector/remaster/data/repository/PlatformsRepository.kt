@@ -20,7 +20,8 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 class PlatformsRepository @Inject constructor(
     private val apiPlatform: ApiPlatform,
-    private val firebaseFirestore: FirebaseFirestore
+    private val firebaseFirestore: FirebaseFirestore,
+    private val authenticationRepository: AuthenticationRepository
 ) {
 
     suspend fun getPlatforms(username: String): Flow<State<List<Platform>>> = callbackFlow {
@@ -50,21 +51,24 @@ class PlatformsRepository @Inject constructor(
     }
 
     suspend fun savePlatform(
-        token: String,
         platform: Platform
-    ): NetworkResponse<Platform, ErrorResponse> =
-        apiPlatform.savePlatform(token.bearer(), platform)
+    ): NetworkResponse<Platform, ErrorResponse> {
+        val token = authenticationRepository.getUserToken()
+        return apiPlatform.savePlatform(token.bearer(), platform)
+    }
 
     suspend fun editPlatform(
-        token: String,
         platform: Platform
-    ): NetworkResponse<Platform, ErrorResponse> =
-        apiPlatform.editPlatform(token.bearer(), platform.id, platform)
+    ): NetworkResponse<Platform, ErrorResponse> {
+        val token = authenticationRepository.getUserToken()
+        return apiPlatform.editPlatform(token.bearer(), platform.id, platform)
+    }
 
     suspend fun uploadPlatformCover(
-        token: String,
         platformId: String,
         image: MultipartBody.Part
-    ): NetworkResponse<ResponseBody, ErrorResponse> =
-        apiPlatform.uploadPlatformCover(token.bearer(), platformId, image)
+    ): NetworkResponse<ResponseBody, ErrorResponse> {
+        val token = authenticationRepository.getUserToken()
+        return apiPlatform.uploadPlatformCover(token.bearer(), platformId, image)
+    }
 }
