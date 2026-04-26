@@ -10,8 +10,6 @@ import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.GameHoursStats
 import com.jeeps.gamecollector.remaster.data.model.data.games.ToggleCompletionResponse
 import com.jeeps.gamecollector.remaster.data.model.data.hltb.GameplayHoursStats
-import com.jeeps.gamecollector.remaster.utils.extensions.bearer
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
@@ -22,16 +20,13 @@ import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import javax.inject.Inject
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
-@ExperimentalCoroutinesApi
 class GamesRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
-    private val apiGame: ApiGame,
-    private val authenticationRepository: AuthenticationRepository
+    private val apiGame: ApiGame
 ) {
 
-    suspend fun getUserGamesByPlatform(username: String, platformId: String) = callbackFlow {
+    fun getUserGamesByPlatform(username: String, platformId: String) = callbackFlow {
         trySend(State.Loading())
 
         val userGamesRef = firebaseFirestore
@@ -62,8 +57,7 @@ class GamesRepository @Inject constructor(
         gameId: String
     ): NetworkResponse<ResponseBody, ErrorResponse> {
         return withContext(NonCancellable) {
-            val token = authenticationRepository.getUserToken()
-            apiGame.deleteGame(token.bearer(), gameId)
+            apiGame.deleteGame(gameId)
         }
     }
 
@@ -71,32 +65,28 @@ class GamesRepository @Inject constructor(
         gameId: String
     ): NetworkResponse<ToggleCompletionResponse, ErrorResponse> {
         return withContext(NonCancellable) {
-            val token = authenticationRepository.getUserToken()
-            apiGame.toggleGameCompletion(token.bearer(), gameId)
+            apiGame.toggleGameCompletion(gameId)
         }
     }
 
     suspend fun saveNewGame(
         game: Game
     ): NetworkResponse<Game, ErrorResponse> {
-        val token = authenticationRepository.getUserToken()
-        return apiGame.postGame(token.bearer(), game)
+        return apiGame.postGame(game)
     }
 
     suspend fun editGame(
         gameId: String,
         game: Game
     ): NetworkResponse<ResponseBody, ErrorResponse> {
-        val token = authenticationRepository.getUserToken()
-        return apiGame.editGame(token.bearer(), gameId, game)
+        return apiGame.editGame(gameId, game)
     }
 
     suspend fun uploadGameCover(
         gameId: String,
         body: MultipartBody.Part
     ): NetworkResponse<ResponseBody, ErrorResponse> {
-        val token = authenticationRepository.getUserToken()
-        return apiGame.uploadGameCover(token.bearer(), gameId, body)
+        return apiGame.uploadGameCover(gameId, body)
     }
 
     suspend fun updateGameHours(

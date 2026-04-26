@@ -7,8 +7,6 @@ import com.jeeps.gamecollector.remaster.data.State
 import com.jeeps.gamecollector.remaster.data.api.ApiPlatform
 import com.jeeps.gamecollector.remaster.data.model.ErrorResponse
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
-import com.jeeps.gamecollector.remaster.utils.extensions.bearer
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -17,14 +15,12 @@ import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
 class PlatformsRepository @Inject constructor(
     private val apiPlatform: ApiPlatform,
-    private val firebaseFirestore: FirebaseFirestore,
-    private val authenticationRepository: AuthenticationRepository
+    private val firebaseFirestore: FirebaseFirestore
 ) {
 
-    suspend fun getPlatforms(username: String): Flow<State<List<Platform>>> = callbackFlow {
+    fun getPlatforms(username: String): Flow<State<List<Platform>>> = callbackFlow {
         trySend(State.Loading())
 
         val userPlatforms = firebaseFirestore.collection("platforms")
@@ -53,22 +49,19 @@ class PlatformsRepository @Inject constructor(
     suspend fun savePlatform(
         platform: Platform
     ): NetworkResponse<Platform, ErrorResponse> {
-        val token = authenticationRepository.getUserToken()
-        return apiPlatform.savePlatform(token.bearer(), platform)
+        return apiPlatform.savePlatform(platform)
     }
 
     suspend fun editPlatform(
         platform: Platform
     ): NetworkResponse<Platform, ErrorResponse> {
-        val token = authenticationRepository.getUserToken()
-        return apiPlatform.editPlatform(token.bearer(), platform.id, platform)
+        return apiPlatform.editPlatform(platform.id, platform)
     }
 
     suspend fun uploadPlatformCover(
         platformId: String,
         image: MultipartBody.Part
     ): NetworkResponse<ResponseBody, ErrorResponse> {
-        val token = authenticationRepository.getUserToken()
-        return apiPlatform.uploadPlatformCover(token.bearer(), platformId, image)
+        return apiPlatform.uploadPlatformCover(platformId, image)
     }
 }

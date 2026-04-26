@@ -2,7 +2,9 @@ package com.jeeps.gamecollector.remaster.di
 
 import com.haroldadmin.cnradapter.NetworkResponseAdapterFactory
 import com.jeeps.gamecollector.remaster.data.api.ApiUser
+import com.jeeps.gamecollector.remaster.data.api.interceptors.FirebaseTokenInterceptor
 import com.jeeps.gamecollector.remaster.data.api.interceptors.IgdbInterceptor
+import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,10 +27,18 @@ object HttpClientsModule {
     @Singleton
     @Provides
     @Named("BaseApi")
-    fun provideRetrofit(): Retrofit = Retrofit.Builder()
+    fun provideRetrofit(@Named("BaseHttpClient") client: OkHttpClient): Retrofit = Retrofit.Builder()
         .addCallAdapterFactory(NetworkResponseAdapterFactory())
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl(BASE_API_URL)
+        .client(client)
+        .build()
+
+    @Singleton
+    @Provides
+    @Named("BaseHttpClient")
+    fun provideBaseHttpClient(firebaseAuth: FirebaseAuth): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(FirebaseTokenInterceptor(firebaseAuth))
         .build()
 
     @Singleton

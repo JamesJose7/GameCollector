@@ -13,7 +13,7 @@ import retrofit2.http.POST
 
 interface ApiUser {
     @GET("/api/user")
-    suspend fun getUser(@Header("Authorization") authorization: String): NetworkResponse<UserDetails, ErrorResponse>
+    suspend fun getUser(): NetworkResponse<UserDetails, ErrorResponse>
 
     @POST("/api/signupUserdetails")
     suspend fun signupUserDetails(@Body user: User): NetworkResponse<ResponseBody, ErrorResponse>

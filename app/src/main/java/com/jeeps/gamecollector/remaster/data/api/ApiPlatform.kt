@@ -11,13 +11,11 @@ interface ApiPlatform {
 
     @POST("/api/platforms")
     suspend fun savePlatform(
-        @Header("Authorization") authorization: String,
         @Body platform: Platform
     ): NetworkResponse<Platform, ErrorResponse>
 
     @POST("/api/platforms/{platformId}")
     suspend fun editPlatform(
-        @Header("Authorization") authorization: String,
         @Path("platformId") platformId: String,
         @Body platform: Platform
     ): NetworkResponse<Platform, ErrorResponse>
@@ -25,7 +23,6 @@ interface ApiPlatform {
     @Multipart
     @POST("/api/platforms/{platformId}/image")
     suspend fun uploadPlatformCover(
-        @Header("Authorization") authorization: String,
         @Path("platformId") platformId: String,
         @Part image: MultipartBody.Part
     ): NetworkResponse<ResponseBody, ErrorResponse>

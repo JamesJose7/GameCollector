@@ -4,18 +4,17 @@ import com.firebase.ui.auth.IdpResponse
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.data.model.data.user.User
 import com.jeeps.gamecollector.remaster.data.model.AuthenticationDao
+import com.jeeps.gamecollector.remaster.utils.extensions.getToken
 import com.jeeps.gamecollector.remaster.utils.user.UserUtils
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
 class AuthenticationRepository @Inject constructor(
     private val authenticationDao: AuthenticationDao
 ) {
 
     suspend fun isUserLoggedIn() : Boolean {
         val currentUser = authenticationDao.getCurrentFirebaseUser()
-        val token = authenticationDao.getUserToken(currentUser)
+        val token = currentUser?.getToken().orEmpty()
         // Refresh stored token
         authenticationDao.saveUserToken(token)
         return token.isNotEmpty()
@@ -23,7 +22,6 @@ class AuthenticationRepository @Inject constructor(
 
     suspend fun saveNewUser(authResponse: IdpResponse) {
         val user = authenticationDao.getCurrentFirebaseUser()
-        val token = authenticationDao.getUserToken(user)
 
         // Save user details for new users
         if (authResponse.isNewUser) {
@@ -42,7 +40,7 @@ class AuthenticationRepository @Inject constructor(
             }
         }
 
-        when (val response = authenticationDao.getUserDetails(token)) {
+        when (val response = authenticationDao.getUserDetails()) {
             is NetworkResponse.Error -> {
                 throw response.error!!
             }
@@ -55,9 +53,5 @@ class AuthenticationRepository @Inject constructor(
 
     fun getUser(): User? {
         return authenticationDao.getUser()
-    }
-
-    suspend fun getUserToken(): String {
-        return authenticationDao.getUserToken(authenticationDao.getCurrentFirebaseUser())
     }
 }

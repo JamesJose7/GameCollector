@@ -7,14 +7,9 @@ import com.jeeps.gamecollector.remaster.data.api.ApiUser
 import com.jeeps.gamecollector.remaster.data.model.data.user.User
 import com.jeeps.gamecollector.remaster.data.model.data.user.UserDetails
 import com.jeeps.gamecollector.remaster.utils.PreferencesWrapper
-import com.jeeps.gamecollector.remaster.utils.extensions.bearer
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.ResponseBody
 import javax.inject.Inject
-import kotlin.coroutines.resume
 
-@ExperimentalCoroutinesApi
 class AuthenticationDao @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val apiUser: ApiUser
@@ -22,25 +17,6 @@ class AuthenticationDao @Inject constructor(
 
     fun getCurrentFirebaseUser(): FirebaseUser? {
         return firebaseAuth.currentUser
-    }
-
-    suspend fun getUserToken(user: FirebaseUser?): String {
-        val token = suspendCancellableCoroutine { continuation ->
-            if (user != null) {
-                user.getIdToken(true)
-                    .addOnCompleteListener { task ->
-                        val token = if (task.isSuccessful) {
-                            task.result.token ?: ""
-                        } else {
-                            ""
-                        }
-                        continuation.resume(token)
-                    }
-            } else {
-                continuation.resume("")
-            }
-        }
-        return token
     }
 
     fun saveUserToken(token: String) {
@@ -65,8 +41,8 @@ class AuthenticationDao @Inject constructor(
         return PreferencesWrapper.read(CURRENT_USER, User::class.java)
     }
 
-    suspend fun getUserDetails(token: String): NetworkResponse<UserDetails, ErrorResponse> {
-        return apiUser.getUser(token.bearer())
+    suspend fun getUserDetails(): NetworkResponse<UserDetails, ErrorResponse> {
+        return apiUser.getUser()
     }
 
     companion object {
