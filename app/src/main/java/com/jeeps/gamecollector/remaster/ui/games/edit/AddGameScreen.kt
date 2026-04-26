@@ -88,9 +88,6 @@ import kotlin.math.roundToInt
 @Composable
 fun AddGameScreen(
     viewModel: AddGameViewModel = hiltViewModel(),
-    platformId: String? = null,
-    platformName: String? = null,
-    selectedGame: Game? = null,
     onBackPressed: () -> Unit = {},
     onGameSaved: (String) -> Unit = {}
 ) {
@@ -103,13 +100,6 @@ fun AddGameScreen(
         scope.launch {
             snackbarHostState.showSnackbar(message = message)
         }
-    }
-
-    LaunchedEffect(platformId, platformName, selectedGame) {
-        viewModel.platformId = platformId.orEmpty()
-        viewModel.platformName = platformName
-        selectedGame?.let { viewModel.setSelectedGame(it) }
-        viewModel.checkIfGameIsBeingEdited()
     }
 
     ObserveAsEvents(viewModel.messageEventsChannelFlow) { event ->

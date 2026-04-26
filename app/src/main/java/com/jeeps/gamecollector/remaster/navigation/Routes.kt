@@ -163,16 +163,16 @@ fun Main() {
                 val route: Screen.AddGame = it.toRoute()
 
                 AddGameScreen(
-                    platformId = route.platformId,
-                    platformName = route.platformName,
-                    selectedGame = route.game,
                     onBackPressed = { navController.popBackStackOnResume() },
                     onGameSaved = { message ->
                         // TODO: Notify user that game was saved
-                        navController.popBackStack(route = Screen.GamesFromPlatform(
-                            platformId = route.platformId.orEmpty(),
-                            platformName = route.platformName.orEmpty()
-                        ), inclusive = false)
+                        navController.popBackStack(
+                            route = Screen.GamesFromPlatform(
+                                platformId = route.platformId.orEmpty(),
+                                platformName = route.platformName.orEmpty()
+                            ),
+                            inclusive = false
+                        )
                     }
                 )
             }

@@ -1,7 +1,9 @@
 package com.jeeps.gamecollector.remaster.ui.games.edit
 
 import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.addAdditionalGameDetails
@@ -9,6 +11,8 @@ import com.jeeps.gamecollector.remaster.data.model.data.igdb.findMostSimilarGame
 import com.jeeps.gamecollector.remaster.data.model.data.igdb.toNames
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.data.repository.IgdbRepository
+import com.jeeps.gamecollector.remaster.navigation.CustomNavType
+import com.jeeps.gamecollector.remaster.navigation.Screen
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import com.jeeps.gamecollector.remaster.utils.getCurrentTimeInUtcString
@@ -25,9 +29,11 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import javax.inject.Inject
+import kotlin.reflect.typeOf
 
 @HiltViewModel
 class AddGameViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val gamesRepository: GamesRepository,
     private val igdbRepository: IgdbRepository,
     private val imageCompressor: ImageCompressor
@@ -46,7 +52,17 @@ class AddGameViewModel @Inject constructor(
 
     private var pendingMessage: String = ""
 
-    fun setSelectedGame(game: Game) {
+    init {
+        val route = savedStateHandle.toRoute<Screen.AddGame>(
+            typeMap = mapOf(typeOf<Game?>() to CustomNavType.GameType)
+        )
+        platformId = route.platformId
+        platformName = route.platformName
+        route.game?.let { setSelectedGame(it) }
+        checkIfGameIsBeingEdited()
+    }
+
+    private fun setSelectedGame(game: Game) {
         _selectedGame.value = game
     }
 
