@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.jeeps.gamecollector.remaster.ui.userStats
 
@@ -41,7 +41,6 @@ import com.jeeps.gamecollector.remaster.ui.composables.CircularGraph
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.remaster.utils.extensions.completionPercent
 import com.jeeps.gamecollector.remaster.utils.extensions.totalGames
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @Composable
 fun UserStatsScreen(

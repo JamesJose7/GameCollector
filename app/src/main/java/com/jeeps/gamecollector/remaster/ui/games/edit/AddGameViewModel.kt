@@ -1,25 +1,20 @@
 package com.jeeps.gamecollector.remaster.ui.games.edit
 
 import android.net.Uri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.data.model.data.games.addAdditionalGameDetails
 import com.jeeps.gamecollector.remaster.data.model.data.igdb.findMostSimilarGame
 import com.jeeps.gamecollector.remaster.data.model.data.igdb.toNames
-import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.GamesRepository
 import com.jeeps.gamecollector.remaster.data.repository.IgdbRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
-import com.jeeps.gamecollector.remaster.utils.Event
 import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import com.jeeps.gamecollector.remaster.utils.getCurrentTimeInUtcString
 import com.jeeps.gamecollector.remaster.utils.IgdbUtils
 import com.jeeps.gamecollector.remaster.utils.ImageCompressor
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,7 +26,6 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
 @HiltViewModel
 class AddGameViewModel @Inject constructor(
     private val gamesRepository: GamesRepository,
@@ -44,7 +38,6 @@ class AddGameViewModel @Inject constructor(
     private val _selectedGame = MutableStateFlow(Game())
     val selectedGame: StateFlow<Game> = _selectedGame.asStateFlow()
 
-    var selectedGamePosition: Int = -1
     var platformName: String? = null
     var platformId: String? = null
 
@@ -109,10 +102,10 @@ class AddGameViewModel @Inject constructor(
             val isEdit = game.id.isNotEmpty()
             when {
                 !isEdit && currentImageUri == null -> {
-                    saveGameAfterGettingCover(game, isEdit)
+                    saveGameAfterGettingCover(game, false)
                 }
                 isEdit && coverDeleted -> {
-                    saveGameAfterGettingCover(game, isEdit)
+                    saveGameAfterGettingCover(game, true)
                 }
                 isEdit -> {
                     editGame(game)

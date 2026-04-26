@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.jeeps.gamecollector.remaster.ui.games.details
 
 import androidx.activity.compose.LocalActivity
@@ -46,10 +44,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -85,7 +80,6 @@ import com.jeeps.gamecollector.remaster.ui.composables.HourStats
 import com.jeeps.gamecollector.remaster.ui.composables.RatingChip
 import com.jeeps.gamecollector.remaster.ui.composables.SharedElements
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -376,7 +370,7 @@ fun GenresChips(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = modifier
     ) {
-        genres.map { genre ->
+        genres.forEach { genre ->
             Text(
                 text = genre,
                 fontSize = 11.sp,

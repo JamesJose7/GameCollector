@@ -16,7 +16,6 @@ import com.jeeps.gamecollector.remaster.utils.comparators.GameByNameComparator
 import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import com.jeeps.gamecollector.remaster.utils.extensions.value
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +23,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
 @HiltViewModel
 class GamesFromPlatformViewModel @Inject constructor(
     private val gamesRepository: GamesRepository,
@@ -46,7 +44,6 @@ class GamesFromPlatformViewModel @Inject constructor(
     private var _currentShowInfoControls: MutableStateFlow<ShowInfoControls> = MutableStateFlow(ShowInfoControls())
     val currentShowInfoControls: StateFlow<ShowInfoControls> = _currentShowInfoControls.asStateFlow()
 
-    var gamePendingDeletion: Game? = null
 
     private var dbGames = MutableLiveData<List<Game>>()
     private var currentOrder: Comparator<Game> = GameByNameComparator()
@@ -81,7 +78,7 @@ class GamesFromPlatformViewModel @Inject constructor(
 
         _filteredStats.addSource(games) { result ->
             result?.let { games ->
-                _filteredStats.value = if (currentFilterControls.value?.isNotCleared().value()) {
+                _filteredStats.value = if (currentFilterControls.value.isNotCleared().value()) {
                     val totalAmount = dbGames.value?.size ?: 0
                     val filteredAmount = if (totalAmount == 0) 0 else games.size
                     FilterStats(true, filteredAmount, totalAmount)
@@ -105,7 +102,7 @@ class GamesFromPlatformViewModel @Inject constructor(
                     is State.Success -> {
                         stopLoading()
                         state.data.let { result ->
-                            result?.let { dbGames.value = it }
+                            result.let { dbGames.value = it }
                         }
                     }
                     is State.Failed -> {
@@ -181,10 +178,6 @@ class GamesFromPlatformViewModel @Inject constructor(
         }
     }
 
-    fun getGameAt(position: Int): Game? {
-        return games.value?.get(position)
-    }
-
     // TODO: Replace this with deleting game permanently and restoring it by saving it again
     fun removeGameLocally(game: Game) {
         _games.value = _games.value
@@ -199,18 +192,10 @@ class GamesFromPlatformViewModel @Inject constructor(
     }
 
     fun deleteGame(game: Game) {
-        gamePendingDeletion = null
-
         viewModelScope.launch {
             handleNetworkResponse(gamesRepository.deleteGame(game.id)) {
                 postServerMessage("Game deleted successfully")
             }
-        }
-    }
-
-    fun deleteGamePendingDeletion() {
-        gamePendingDeletion?.let { game ->
-            deleteGame(game)
         }
     }
 

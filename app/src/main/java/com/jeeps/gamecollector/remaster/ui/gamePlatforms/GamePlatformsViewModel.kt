@@ -14,18 +14,16 @@ import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.base.ErrorType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
 @HiltViewModel
 class GamePlatformsViewModel @Inject constructor(
     private val platformsRepository: PlatformsRepository,
     private val authenticationRepository: AuthenticationRepository,
-    @ApplicationContext private val appContext: Context
+    @param:ApplicationContext private val appContext: Context
 ) : BaseViewModel() {
 
     private val uiEventChannel = Channel<UiEvent>()

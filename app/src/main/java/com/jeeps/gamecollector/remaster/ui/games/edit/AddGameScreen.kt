@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.jeeps.gamecollector.remaster.ui.games.edit
 
@@ -79,7 +79,6 @@ import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.composables.ObserveAsEvents
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -481,7 +480,7 @@ fun DatePickerField(
             try {
                 Instant.parse(it)
                     .atZone(ZoneId.systemDefault())
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }

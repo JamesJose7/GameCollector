@@ -34,7 +34,7 @@ class IgdbInterceptor @Inject constructor(
                 invalidateToken()
                 fetchTwitchAuthToken()
                 val newRequest = buildRequest(original, token)
-                return chain.proceed(newRequest)
+                chain.proceed(newRequest)
             }
             else -> response
         }

@@ -7,9 +7,7 @@ import com.jeeps.gamecollector.remaster.navigation.Main
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class MainActivity : BaseActivity() {
 

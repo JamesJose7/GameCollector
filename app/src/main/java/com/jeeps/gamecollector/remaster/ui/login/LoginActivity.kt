@@ -11,9 +11,7 @@ import com.jeeps.gamecollector.R
 import com.jeeps.gamecollector.remaster.ui.MainActivity
 import com.jeeps.gamecollector.remaster.ui.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class LoginActivity : BaseActivity() {
 

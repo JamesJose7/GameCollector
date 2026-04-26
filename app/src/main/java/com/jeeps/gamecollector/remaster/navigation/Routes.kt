@@ -8,8 +8,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.lifecycle.Lifecycle
@@ -26,7 +24,6 @@ import com.jeeps.gamecollector.remaster.ui.games.details.GameDetailsScreen
 import com.jeeps.gamecollector.remaster.ui.games.edit.AddGameScreen
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformScreen
 import com.jeeps.gamecollector.remaster.ui.userStats.UserStatsScreen
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.serialization.Serializable
 import kotlin.reflect.typeOf
 
@@ -46,7 +43,7 @@ sealed class Screen {
     data class AddGame(val platformId: String? = null, val platformName: String? = null, val game: Game? = null) : Screen()
 }
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun Main() {
     val navController = rememberNavController()

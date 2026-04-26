@@ -63,10 +63,8 @@ import com.jeeps.gamecollector.remaster.ui.composables.PopUpMenu
 import com.jeeps.gamecollector.remaster.ui.login.LoginActivity
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import com.jeeps.gamecollector.remaster.utils.extensions.colorFromHexString
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun GamePlatformsScreen(
     viewModel: GamePlatformsViewModel = hiltViewModel(),

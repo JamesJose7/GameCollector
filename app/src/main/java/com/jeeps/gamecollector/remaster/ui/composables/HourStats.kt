@@ -253,7 +253,7 @@ private fun ErrorMessage(
     )
 }
 
-@Preview()
+@Preview
 @Composable
 fun HourStatsPreview() {
     AppTheme {
@@ -267,7 +267,7 @@ fun HourStatsPreview() {
     }
 }
 
-@Preview()
+@Preview
 @Composable
 fun HourStatsNoDataPreview() {
     AppTheme {
@@ -281,7 +281,7 @@ fun HourStatsNoDataPreview() {
     }
 }
 
-@Preview()
+@Preview
 @Composable
 fun HourStatsLoadingPreview() {
     AppTheme {
@@ -295,7 +295,7 @@ fun HourStatsLoadingPreview() {
     }
 }
 
-@Preview()
+@Preview
 @Composable
 fun HourStatsErrorPreview() {
     AppTheme {

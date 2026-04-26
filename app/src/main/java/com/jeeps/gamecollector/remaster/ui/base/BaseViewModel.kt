@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.haroldadmin.cnradapter.NetworkResponse
-import com.jeeps.gamecollector.remaster.utils.Event
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -26,12 +25,6 @@ open class BaseViewModel : ViewModel() {
     @Deprecated("Use messageEventChannelFlow instead")
     val errorMessage: LiveData<String>
         get() = _errorMessage
-
-    // TODO: Change this to a type safe class instead of strings
-    private val _serverMessage = MutableLiveData<Event<String>>()
-    @Deprecated("Use messageEventChannelFlow instead")
-    val serverMessage: LiveData<Event<String>>
-        get() = _serverMessage
 
     fun startLoading() {
         _isLoading.postValue(true)
@@ -64,7 +57,6 @@ open class BaseViewModel : ViewModel() {
     }
 
     fun postServerMessage(message: String) {
-        _serverMessage.value = Event(message)
         viewModelScope.launch {
             messageEventChannel.send(MessageEvent.Success(message))
         }

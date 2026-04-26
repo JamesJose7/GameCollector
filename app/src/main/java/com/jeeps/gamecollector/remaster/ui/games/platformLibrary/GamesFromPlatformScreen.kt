@@ -100,16 +100,13 @@ import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getAppr
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getFilterData
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getInfoData
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 import java.text.DecimalFormat
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class,
-    ExperimentalSharedTransitionApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.GamesFromPlatformScreen(
     viewModel: GamesFromPlatformViewModel = hiltViewModel(),

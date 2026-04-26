@@ -1,19 +1,13 @@
 package com.jeeps.gamecollector.remaster.ui.gamePlatforms
 
 import android.net.Uri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
-import com.jeeps.gamecollector.remaster.data.repository.AuthenticationRepository
 import com.jeeps.gamecollector.remaster.data.repository.PlatformsRepository
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
-import com.jeeps.gamecollector.remaster.utils.Event
 import com.jeeps.gamecollector.remaster.utils.ImageCompressor
 import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
-import com.squareup.picasso.Picasso
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +20,6 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
 @HiltViewModel
 class AddPlatformViewModel @Inject constructor(
     private val platformsRepository: PlatformsRepository,

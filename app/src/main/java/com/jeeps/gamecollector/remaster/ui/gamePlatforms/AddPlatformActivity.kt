@@ -60,10 +60,8 @@ import com.jeeps.gamecollector.remaster.utils.extensions.serializable
 import com.jeeps.gamecollector.remaster.utils.extensions.setComposable
 import com.jeeps.gamecollector.remaster.utils.extensions.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
-@ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class AddPlatformActivity : BaseActivity() {
 
@@ -96,7 +94,6 @@ class AddPlatformActivity : BaseActivity() {
     }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun AddPlatformScreen(
     viewModel: AddPlatformViewModel = hiltViewModel(),

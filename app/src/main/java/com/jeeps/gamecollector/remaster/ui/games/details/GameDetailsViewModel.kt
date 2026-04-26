@@ -3,6 +3,7 @@ package com.jeeps.gamecollector.remaster.ui.games.details
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.toColorInt
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
@@ -22,11 +23,10 @@ import com.jeeps.gamecollector.remaster.navigation.CustomNavType
 import com.jeeps.gamecollector.remaster.navigation.Screen
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.base.ErrorType
-import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import com.jeeps.gamecollector.remaster.utils.IgdbUtils
+import com.jeeps.gamecollector.remaster.utils.extensions.handleNetworkResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,10 +35,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URL
 import javax.inject.Inject
-import androidx.core.graphics.toColorInt
 import kotlin.reflect.typeOf
 
-@ExperimentalCoroutinesApi
 @HiltViewModel
 class GameDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,

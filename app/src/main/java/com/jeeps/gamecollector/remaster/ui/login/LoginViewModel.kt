@@ -11,12 +11,10 @@ import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.base.ErrorType
 import com.jeeps.gamecollector.remaster.utils.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-@ExperimentalCoroutinesApi
 class LoginViewModel @Inject constructor(
     private val authenticationRepository: AuthenticationRepository
 ) : BaseViewModel() {

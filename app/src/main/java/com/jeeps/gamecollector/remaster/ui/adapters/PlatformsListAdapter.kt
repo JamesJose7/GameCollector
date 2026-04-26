@@ -6,20 +6,17 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.jeeps.gamecollector.deprecated.MainLibraryActivity
-import com.jeeps.gamecollector.deprecated.PlatformLibraryActivity
 import com.jeeps.gamecollector.R
-import com.jeeps.gamecollector.remaster.ui.adapters.PlatformsListAdapter.PlatformsViewHolder
 import com.jeeps.gamecollector.databinding.PlatformCardLayoutBinding
+import com.jeeps.gamecollector.deprecated.MainLibraryActivity
 import com.jeeps.gamecollector.remaster.data.model.data.platforms.Platform
+import com.jeeps.gamecollector.remaster.ui.adapters.PlatformsListAdapter.PlatformsViewHolder
 import com.jeeps.gamecollector.remaster.ui.gamePlatforms.AddPlatformActivity
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Created by jeeps on 12/23/2017.
  */
-@ExperimentalCoroutinesApi
 class PlatformsListAdapter(
     private val parentActivity: Activity,
     private val platforms: List<Platform>
