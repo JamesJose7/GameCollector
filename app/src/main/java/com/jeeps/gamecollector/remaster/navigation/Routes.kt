@@ -118,8 +118,6 @@ fun Main() {
 
                 GamesFromPlatformScreen(
                     animatedVisibilityScope = this@composable,
-                    platformId = route.platformId,
-                    platformName = route.platformName,
                     onBackPressed = { navController.popBackStackOnResume() },
                     onEditGame = { game ->
                         navController.navigate(Screen.GameDetails(

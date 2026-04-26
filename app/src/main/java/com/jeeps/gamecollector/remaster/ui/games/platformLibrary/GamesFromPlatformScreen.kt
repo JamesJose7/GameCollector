@@ -106,24 +106,19 @@ import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 import java.text.DecimalFormat
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.GamesFromPlatformScreen(
     viewModel: GamesFromPlatformViewModel = hiltViewModel(),
     animatedVisibilityScope: AnimatedVisibilityScope,
-    platformId: String,
-    platformName: String,
     onBackPressed: () -> Unit,
     onEditGame: (Game) -> Unit,
     onAddGame: () -> Unit
 ) {
-    val games by viewModel.games.observeAsState(emptyList())
-    val sortStat by viewModel.currentSortStat.observeAsState(SortStat.NONE)
-    val searchQuery by viewModel.searchQuery.collectAsState()
-    val filteredStats by viewModel.filteredStats.observeAsState(FilterStats())
-    val filterControls by viewModel.currentFilterControls.collectAsState()
-    val sortControls by viewModel.currentSortControls.collectAsState()
-    val showInfoControls by viewModel.currentShowInfoControls.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    
     var showDeleteGameDialog by remember { mutableStateOf(false) }
     var gamePendingDeletion: Game? by remember { mutableStateOf(null) }
 
@@ -166,19 +161,14 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
         }
     }
 
-    LaunchedEffect(platformId, platformName) {
-        viewModel.platformName = platformName
-        viewModel.platformId = platformId
-    }
-
     GamesFromPlatformScreen(
         animatedVisibilityScope = animatedVisibilityScope,
         snackbarHostState = snackbarHostState,
-        games = games,
-        platformName = viewModel.platformName,
-        sortStat = sortStat,
-        searchQuery = searchQuery,
-        filteredStats = filteredStats,
+        games = state.games,
+        platformName = state.platformName,
+        sortStat = state.sortStat,
+        searchQuery = state.searchQuery,
+        filteredStats = state.filteredStats,
         onBackPressed = onBackPressed,
         onAdvancedFiltersClicked = { showFiltersBottomSheet = true },
         onSearchQueryChanged = {
@@ -218,13 +208,11 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
                 onDismissRequest = { showFiltersBottomSheet = false }
             ) {
                 AdvancedFiltersDialog(
-                    filterControls = filterControls,
-                    sortControls = sortControls,
-                    showInfoControls = showInfoControls,
+                    filterControls = state.filterControls,
+                    sortControls = state.sortControls,
+                    showInfoControls = state.showInfoControls,
                     onFilterControlsUpdated = { filterControls ->
-                        val (filtersList) = filterControls.getFilterData()
                         viewModel.setFilterControls(filterControls)
-                        viewModel.updateFilters(filtersList)
                     },
                     onClearFilters = {
                         viewModel.clearFilters(true)
@@ -234,10 +222,9 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
                             viewModel.clearShowInfoControls()
                         }
 
-                        val (comparator, sort) = sortControls.getAppropriateComparator()
+                        val (_, sort) = sortControls.getAppropriateComparator()
                         viewModel.setSortControls(sortControls)
                         viewModel.setCurrentSortStat(sort)
-                        viewModel.rearrangeGames(comparator)
                     },
                     onShowInfoControlsUpdated = { showInfoControls ->
                         val (sort) = showInfoControls.getInfoData()
