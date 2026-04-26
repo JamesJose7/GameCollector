@@ -39,96 +39,87 @@ class AddGameViewModel @Inject constructor(
     private val imageCompressor: ImageCompressor
 ) : BaseViewModel() {
 
-    private var timesCompleted: Int = 0
+    data class UiState(
+        val game: Game = Game(),
+        val currentImageUri: Uri? = null,
+        val isImageDeleted: Boolean = false,
+        val pendingMessage: String = ""
+    )
 
-    private val _selectedGame = MutableStateFlow(Game())
-    val selectedGame: StateFlow<Game> = _selectedGame.asStateFlow()
-
-    var platformName: String? = null
-    var platformId: String? = null
-
-    var currentImageUri: Uri? = null
-    private var coverDeleted: Boolean = false
-
-    private var pendingMessage: String = ""
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     init {
         val route = savedStateHandle.toRoute<Screen.AddGame>(
             typeMap = mapOf(typeOf<Game?>() to CustomNavType.GameType)
         )
-        platformId = route.platformId
-        platformName = route.platformName
-        route.game?.let { setSelectedGame(it) }
-        checkIfGameIsBeingEdited()
+        val platformId = route.platformId
+        val platformName = route.platformName
+
+        val initialGame = route.game ?: createDefaultGame(platformId, platformName)
+        _uiState.update { it.copy(game = initialGame) }
     }
 
-    private fun setSelectedGame(game: Game) {
-        _selectedGame.value = game
-    }
-
-    fun setTimesCompleted(value: Int) {
-        timesCompleted = value
-        _selectedGame.value = _selectedGame.value.copy(timesCompleted = value)
-    }
-
-    fun setCompletionDate(value: String) {
-        _selectedGame.value = _selectedGame.value.copy(completionDate = value)
-    }
-
-    fun setGameFormat(isPhysical: Boolean) {
-        _selectedGame.value = _selectedGame.value.copy(isPhysical = isPhysical)
-    }
-
-    fun setGameName(name: String) {
-        _selectedGame.value = _selectedGame.value.copy(name = name)
-    }
-
-    fun setGameShortName(shortName: String) {
-        _selectedGame.value = _selectedGame.value.copy(shortName = shortName)
-    }
-
-    fun setGamePublisher(publisher: String) {
-        _selectedGame.value = _selectedGame.value.copy(publisher = publisher)
-    }
-
-    fun setGameImageUri(uri: Uri?) {
-        coverDeleted = uri == null
-        currentImageUri = uri
-        _selectedGame.value = _selectedGame.value.copy(imageUri = uri?.toString() ?: "")
-    }
-
-    fun checkIfGameIsBeingEdited() {
-        if (selectedGame.value.id.isEmpty()) {
-            initializeDefaultGame()
-        }
-    }
-
-    private fun initializeDefaultGame() {
-        val game = Game(
+    private fun createDefaultGame(platformId: String?, platformName: String?): Game {
+        return Game(
             isPhysical = true,
             platformId = platformId ?: "",
             platform = platformName ?: "",
             dateAdded = getCurrentTimeInUtcString()
         )
-        setSelectedGame(game)
+    }
+
+    fun setTimesCompleted(value: Int) {
+        _uiState.update { it.copy(game = it.game.copy(timesCompleted = value)) }
+    }
+
+    fun setCompletionDate(value: String) {
+        _uiState.update { it.copy(game = it.game.copy(completionDate = value)) }
+    }
+
+    fun setGameFormat(isPhysical: Boolean) {
+        _uiState.update { it.copy(game = it.game.copy(isPhysical = isPhysical)) }
+    }
+
+    fun setGameName(name: String) {
+        _uiState.update { it.copy(game = it.game.copy(name = name)) }
+    }
+
+    fun setGameShortName(shortName: String) {
+        _uiState.update { it.copy(game = it.game.copy(shortName = shortName)) }
+    }
+
+    fun setGamePublisher(publisher: String) {
+        _uiState.update { it.copy(game = it.game.copy(publisher = publisher)) }
+    }
+
+    fun setGameImageUri(uri: Uri?) {
+        _uiState.update {
+            it.copy(
+                currentImageUri = uri,
+                isImageDeleted = uri == null,
+                game = it.game.copy(imageUri = uri?.toString() ?: "")
+            )
+        }
     }
 
     fun saveGame() {
-        selectedGame.value.let { game ->
-            val isEdit = game.id.isNotEmpty()
-            when {
-                !isEdit && currentImageUri == null -> {
-                    saveGameAfterGettingCover(game, false)
-                }
-                isEdit && coverDeleted -> {
-                    saveGameAfterGettingCover(game, true)
-                }
-                isEdit -> {
-                    editGame(game)
-                }
-                else -> {
-                    saveNewGame(game)
-                }
+        val state = _uiState.value
+        val game = state.game
+        val isEdit = game.id.isNotEmpty()
+        
+        when {
+            !isEdit && state.currentImageUri == null -> {
+                saveGameAfterGettingCover(game, false)
+            }
+            isEdit && state.isImageDeleted -> {
+                saveGameAfterGettingCover(game, true)
+            }
+            isEdit -> {
+                editGame(game)
+            }
+            else -> {
+                saveNewGame(game)
             }
         }
     }
@@ -136,11 +127,15 @@ class AddGameViewModel @Inject constructor(
     private fun saveNewGame(game: Game) {
         viewModelScope.launch {
             startLoading()
-            handleNetworkResponse(gamesRepository.saveNewGame(game)) {
-                if (currentImageUri != null) {
-                    setSelectedGame(it)
-                    pendingMessage = "Game created successfully"
-                    currentImageUri?.let { uri ->
+            handleNetworkResponse(gamesRepository.saveNewGame(game)) { newGame ->
+                if (_uiState.value.currentImageUri != null) {
+                    _uiState.update { 
+                        it.copy(
+                            game = newGame,
+                            pendingMessage = "Game created successfully"
+                        )
+                    }
+                    _uiState.value.currentImageUri?.let { uri ->
                         uploadCoverImage(imageCompressor.compressImage(uri))
                     }
                 } else {
@@ -155,9 +150,9 @@ class AddGameViewModel @Inject constructor(
         viewModelScope.launch {
             startLoading()
             handleNetworkResponse(gamesRepository.editGame(game.id, game)) {
-                if (currentImageUri != null) {
-                    pendingMessage = "Game edited successfully"
-                    currentImageUri?.let { uri ->
+                if (_uiState.value.currentImageUri != null) {
+                    _uiState.update { it.copy(pendingMessage = "Game edited successfully") }
+                    _uiState.value.currentImageUri?.let { uri ->
                         uploadCoverImage(imageCompressor.compressImage(uri))
                     }
                 } else {
@@ -173,26 +168,30 @@ class AddGameViewModel @Inject constructor(
             startLoading()
             val igdbGames =
                 handleNetworkResponse(igdbRepository.searchGames(IgdbUtils.getSearchGamesQuery(game.name)))
-            val selectedGame = igdbGames.findMostSimilarGame(_selectedGame.value.name)
+            val selectedIgdbGame = igdbGames.findMostSimilarGame(game.name)
 
-            if (selectedGame == null) {
+            if (selectedIgdbGame == null) {
                 continueSavingGame(isEdit, game)
             } else {
-                val genres = selectedGame.genres
+                val genres = selectedIgdbGame.genres
                     ?.let { handleNetworkResponse(igdbRepository.getGenresByIds(IgdbUtils.getGameGenresQuery(it))) }
                     ?: emptyList()
 
-                var updatedGame = game.addAdditionalGameDetails(selectedGame, genres.toNames())
+                var updatedGame = game.addAdditionalGameDetails(selectedIgdbGame, genres.toNames())
                 // Get image cover
                 when (val response = igdbRepository
-                    .getGameCoverById(IgdbUtils.getCoverImageQuery(selectedGame.cover))) {
+                    .getGameCoverById(IgdbUtils.getCoverImageQuery(selectedIgdbGame.cover))) {
                     is NetworkResponse.Success -> {
                         val gameCovers = response.body
                         if (gameCovers.isNotEmpty()) {
                             gameCovers[0].getBigCoverUrl().let { coverUrl ->
                                 updatedGame = updatedGame.copy(imageUri = coverUrl)
-                                _selectedGame.update { updatedGame }
-                                currentImageUri = null
+                                _uiState.update { 
+                                    it.copy(
+                                        game = updatedGame, 
+                                        currentImageUri = null
+                                    ) 
+                                }
                             }
                         }
                         continueSavingGame(isEdit, updatedGame)
@@ -222,9 +221,9 @@ class AddGameViewModel @Inject constructor(
 
                 handleNetworkResponse(
                     gamesRepository
-                        .uploadGameCover(selectedGame.value.id, body)
+                        .uploadGameCover(_uiState.value.game.id, body)
                 ) {
-                    postServerMessage(pendingMessage)
+                    postServerMessage(_uiState.value.pendingMessage)
                 }
                 if (image.exists()) {
                     image.delete()

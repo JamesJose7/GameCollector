@@ -50,7 +50,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -71,10 +70,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jeeps.gamecollector.R
-import com.jeeps.gamecollector.remaster.data.model.data.games.Game
 import com.jeeps.gamecollector.remaster.ui.base.BaseViewModel
 import com.jeeps.gamecollector.remaster.ui.composables.ObserveAsEvents
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
@@ -91,7 +90,7 @@ fun AddGameScreen(
     onBackPressed: () -> Unit = {},
     onGameSaved: (String) -> Unit = {}
 ) {
-    val game by viewModel.selectedGame.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.observeAsState(false)
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -113,6 +112,7 @@ fun AddGameScreen(
         }
     }
 
+    val game = state.game
     AddGameScreen(
         snackbarHostState = snackbarHostState,
         name = game.name,
