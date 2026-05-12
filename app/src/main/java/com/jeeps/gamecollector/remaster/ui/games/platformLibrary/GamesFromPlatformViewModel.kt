@@ -157,18 +157,14 @@ class GamesFromPlatformViewModel @Inject constructor(
         _showInfoControls.value = showInfoControls
     }
 
-    fun clearFilters(resetGamesList: Boolean = false) {
-        _filterControls.value = FilterControls()
+    fun clearFiltersAndSort() {
+        setFilterControls(FilterControls())
+        setSortControls(SortControls())
+        clearShowInfoControls()
     }
 
     fun clearShowInfoControls() {
-        _showInfoControls.update {
-            it.copy(
-                isHoursMain = false,
-                isHoursExtra = false,
-                isHoursCompletionist = false
-            )
-        }
+        setShowInfoControls(ShowInfoControls())
     }
 
     // TODO: Replace this with deleting game permanently and restoring it by saving it again

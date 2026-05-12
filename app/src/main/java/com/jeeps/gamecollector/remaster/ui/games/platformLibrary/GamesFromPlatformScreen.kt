@@ -215,7 +215,7 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
                         viewModel.setFilterControls(filterControls)
                     },
                     onClearFilters = {
-                        viewModel.clearFilters(true)
+                        viewModel.clearFiltersAndSort()
                     },
                     onSortControlsUpdated = { sortControls, isOrderSort ->
                         if (!isOrderSort) {
