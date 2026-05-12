@@ -136,7 +136,7 @@ class GamesFromPlatformViewModel @Inject constructor(
     ): List<Game> {
         val filtersList = filters.getFilterData().filtersList
         return dbGames
-            .filter { game -> isGameNameSimilar(game, query) }
+            .filter { game -> queryGame(game, query) }
             .filter { game -> filtersList.all { it(game) } }
             .sortedWith(comparator)
     }
@@ -177,7 +177,7 @@ class GamesFromPlatformViewModel @Inject constructor(
     }
 
     fun addGameLocally(game: Game) {
-        _dbGames.value = _dbGames.value + game
+        _dbGames.value += game
     }
 
     fun deleteGame(game: Game) {
@@ -188,11 +188,22 @@ class GamesFromPlatformViewModel @Inject constructor(
         }
     }
 
+    // Include either game names or publishers
+    private fun queryGame(game: Game, query: String): Boolean =
+        isGameNameSimilar(game, query) || isPublishedSimilar(game, query)
+
     private fun isGameNameSimilar(game: Game, query: String): Boolean {
         if (query.isEmpty()) return true
         val name = game.name.lowercase()
         val shortName = game.shortName.lowercase()
         val queryNormalized = query.lowercase()
         return name.contains(queryNormalized) || shortName.contains(queryNormalized)
+    }
+
+    private fun isPublishedSimilar(game: Game, query: String): Boolean {
+        if (query.isEmpty()) return true
+        val publisher = game.publisher.lowercase()
+        val queryNormalized = query.lowercase()
+        return publisher.contains(queryNormalized)
     }
 }
