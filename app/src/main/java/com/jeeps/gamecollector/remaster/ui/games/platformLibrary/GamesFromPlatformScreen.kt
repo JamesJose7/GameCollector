@@ -81,6 +81,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jeeps.gamecollector.R
@@ -94,17 +95,16 @@ import com.jeeps.gamecollector.remaster.ui.composables.LoadingAnimation
 import com.jeeps.gamecollector.remaster.ui.composables.SharedElements
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialog
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterStats
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.ShowInfoControls
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.ShowStat
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.SortControls
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getShowStat
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 import java.text.DecimalFormat
-
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.ShowInfoControls
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.ShowStat
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getShowStat
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -165,6 +165,7 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
         games = state.games,
         platformName = state.platformName,
         sortStat = state.sortStat,
+        sortControls = state.sortControls,
         showInfoControls = state.showInfoControls,
         searchQuery = state.searchQuery,
         filteredStats = state.filteredStats,
@@ -243,6 +244,7 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
     games: List<Game>,
     platformName: String,
     sortStat: SortStat,
+    sortControls: SortControls,
     showInfoControls: ShowInfoControls,
     searchQuery: String,
     filteredStats: FilterStats,
@@ -276,17 +278,20 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
     // Reset scroll when sorting or filtering
     var previousSortStat by remember { mutableStateOf<SortStat?>(null) }
     var previousFilterStats by remember { mutableStateOf<FilterStats?>(null) }
+    var previousSortControls by remember { mutableStateOf<SortControls?>(null) }
 
-    LaunchedEffect(sortStat, filteredStats, sortStat) {
+    LaunchedEffect(sortStat, filteredStats, sortControls) {
         // Track previous sort stat and filter stats to prevent changing when navigating back from another screen
         val sortChanged = previousSortStat != null && previousSortStat != sortStat
+        val sortControlsChanged = previousSortControls != null && previousSortControls != sortControls
         val filterChanged = previousFilterStats != null && previousFilterStats != filteredStats
 
-        if (sortChanged || filterChanged) {
+        if (sortChanged || filterChanged || sortControlsChanged) {
             gridState.scrollToItem(0)
         }
 
         previousSortStat = sortStat
+        previousSortControls = sortControls
         previousFilterStats = filteredStats
     }
 
@@ -718,6 +723,7 @@ private fun GamesFromPlatformScreenPreview() {
                     games = games,
                     platformName = "Nintendo Switch",
                     sortStat = SortStat.HOURS_MAIN,
+                    sortControls = SortControls(),
                     showInfoControls = ShowInfoControls(),
                     searchQuery = "",
                     filteredStats = filterStats
