@@ -58,10 +58,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -96,9 +94,6 @@ import com.jeeps.gamecollector.remaster.ui.composables.LoadingAnimation
 import com.jeeps.gamecollector.remaster.ui.composables.SharedElements
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialog
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterStats
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getAppropriateComparator
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getFilterData
-import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getInfoData
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
@@ -107,6 +102,9 @@ import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 import java.text.DecimalFormat
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.ShowInfoControls
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.ShowStat
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getShowStat
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -167,6 +165,7 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
         games = state.games,
         platformName = state.platformName,
         sortStat = state.sortStat,
+        showInfoControls = state.showInfoControls,
         searchQuery = state.searchQuery,
         filteredStats = state.filteredStats,
         onBackPressed = onBackPressed,
@@ -222,15 +221,11 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
                             viewModel.clearShowInfoControls()
                         }
 
-                        val (_, sort) = sortControls.getAppropriateComparator()
                         viewModel.setSortControls(sortControls)
-                        viewModel.setCurrentSortStat(sort)
                     },
                     onShowInfoControlsUpdated = { showInfoControls ->
-                        val (sort) = showInfoControls.getInfoData()
                         viewModel.clearShowInfoControls()
                         viewModel.setShowInfoControls(showInfoControls)
-                        viewModel.setCurrentSortStat(sort)
                     },
                     modifier = Modifier
                 )
@@ -248,6 +243,7 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
     games: List<Game>,
     platformName: String,
     sortStat: SortStat,
+    showInfoControls: ShowInfoControls,
     searchQuery: String,
     filteredStats: FilterStats,
     onBackPressed: () -> Unit = {},
@@ -473,6 +469,7 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
                             animatedVisibilityScope = animatedVisibilityScope,
                             game = game,
                             sortStat = sortStat,
+                            showInfoControls = showInfoControls,
                             modifier = Modifier
                                 .combinedClickable(
                                     onClick = { onEditGame(game) },
@@ -502,7 +499,8 @@ private fun SharedTransitionScope.GameCard(
     modifier: Modifier = Modifier,
     animatedVisibilityScope: AnimatedVisibilityScope,
     game: Game,
-    sortStat: SortStat
+    sortStat: SortStat,
+    showInfoControls: ShowInfoControls
 ) {
     var isLoadingImage by remember { mutableStateOf(true) }
     val checkmarkColor = if (game.timesCompleted > 0) {
@@ -510,11 +508,18 @@ private fun SharedTransitionScope.GameCard(
     } else {
         Color.LightGray
     }
-    val hours = when (sortStat) {
-        SortStat.HOURS_MAIN -> game.gameHoursStats.gameplayMain
-        SortStat.HOURS_MAIN_EXTRA -> game.gameHoursStats.gameplayMainExtra
-        SortStat.HOURS_COMPLETIONIST -> game.gameHoursStats.gameplayCompletionist
-        SortStat.NONE -> 0.0
+
+    val showStat = if (sortStat == SortStat.NONE) {
+        showInfoControls.getShowStat()
+    } else {
+        sortStat.getShowStat()
+    }
+
+    val hours = when (showStat) {
+        ShowStat.HoursMain -> game.gameHoursStats.gameplayMain
+        ShowStat.HoursMainExtra -> game.gameHoursStats.gameplayMainExtra
+        ShowStat.HoursCompletionist -> game.gameHoursStats.gameplayCompletionist
+        ShowStat.None -> 0.0
     }
     val decimalFormat = DecimalFormat("#.#")
     val hoursFormatted = stringResource(R.string.hours_template, decimalFormat.format(hours))
@@ -625,7 +630,7 @@ private fun SharedTransitionScope.GameCard(
                 }
             }
 
-            if (sortStat != SortStat.NONE) {
+            if (showStat != ShowStat.None) {
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = Color.White
@@ -713,6 +718,7 @@ private fun GamesFromPlatformScreenPreview() {
                     games = games,
                     platformName = "Nintendo Switch",
                     sortStat = SortStat.HOURS_MAIN,
+                    showInfoControls = ShowInfoControls(),
                     searchQuery = "",
                     filteredStats = filterStats
                 )
@@ -743,7 +749,8 @@ private fun GameCardPreview() {
                 GameCard(
                     game = game,
                     animatedVisibilityScope = this,
-                    sortStat = SortStat.HOURS_MAIN
+                    sortStat = SortStat.HOURS_MAIN,
+                    showInfoControls = ShowInfoControls()
                 )
             }
         }
@@ -761,7 +768,8 @@ private fun GameCardNoSortStatPreview() {
                 GameCard(
                     animatedVisibilityScope = this,
                     game = game,
-                    sortStat = SortStat.NONE
+                    sortStat = SortStat.NONE,
+                    showInfoControls = ShowInfoControls()
                 )
             }
         }

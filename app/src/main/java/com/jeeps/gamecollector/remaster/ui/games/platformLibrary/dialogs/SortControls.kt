@@ -15,6 +15,21 @@ data class SortControls(
     var isHoursCompletionist: Boolean = false
 )
 
+fun SortControls.defaultToAlphabetical(): SortControls {
+    val isNoSortSelected = listOf(
+        isPhysical,
+        isDigital,
+        isAlphabetical,
+        isCompletion,
+        isHoursMain,
+        isHoursExtra,
+        isHoursCompletionist
+    ).none { it }
+    return if (isNoSortSelected) {
+        copy(isAlphabetical = true)
+    } else this
+}
+
 data class SortData(
     val comparator: Comparator<Game>,
     val sortStat: SortStat = SortStat.NONE

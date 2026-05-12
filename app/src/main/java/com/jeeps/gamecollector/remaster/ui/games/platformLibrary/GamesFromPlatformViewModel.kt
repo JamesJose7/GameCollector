@@ -15,6 +15,7 @@ import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterC
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterStats
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.ShowInfoControls
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.SortControls
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.defaultToAlphabetical
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getAppropriateComparator
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.getFilterData
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.isNotCleared
@@ -57,7 +58,6 @@ class GamesFromPlatformViewModel @Inject constructor(
     private val _filterControls = MutableStateFlow(FilterControls())
     private val _sortControls = MutableStateFlow(SortControls())
     private val _showInfoControls = MutableStateFlow(ShowInfoControls())
-    private val _currentSortStat = MutableStateFlow(SortStat.NONE)
     private val _isLoading = MutableStateFlow(true)
 
     val uiState: StateFlow<GamesFromPlatformUiState> = combine(
@@ -66,11 +66,10 @@ class GamesFromPlatformViewModel @Inject constructor(
         _filterControls,
         _sortControls,
         _showInfoControls,
-        _currentSortStat,
         _isLoading
-    ) { dbGames, query, filters, sortControls, showInfo, sortStat, loading ->
+    ) { dbGames, query, filters, sortControls, showInfo, loading ->
 
-        val comparator = sortControls.getAppropriateComparator().comparator
+        val (comparator, sort) = sortControls.getAppropriateComparator()
         val filteredGames = filterAndSortGames(dbGames, query, filters, comparator)
 
         val totalAmount = dbGames.size
@@ -86,10 +85,10 @@ class GamesFromPlatformViewModel @Inject constructor(
             platformName = route.platformName,
             games = filteredGames,
             filteredStats = stats,
-            sortStat = sortStat,
+            sortStat = sort,
             searchQuery = query,
             filterControls = filters,
-            sortControls = sortControls,
+            sortControls = sortControls.defaultToAlphabetical(),
             showInfoControls = showInfo,
             isLoading = loading
         )
@@ -156,10 +155,6 @@ class GamesFromPlatformViewModel @Inject constructor(
 
     fun setShowInfoControls(showInfoControls: ShowInfoControls) {
         _showInfoControls.value = showInfoControls
-    }
-
-    fun setCurrentSortStat(sortStat: SortStat) {
-        _currentSortStat.value = sortStat
     }
 
     fun clearFilters(resetGamesList: Boolean = false) {

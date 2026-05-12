@@ -1,7 +1,6 @@
 package com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs
 
 import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
-import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat.*
 
 data class ShowInfoControls(
     var isHoursMain: Boolean = false,
@@ -9,27 +8,25 @@ data class ShowInfoControls(
     var isHoursCompletionist: Boolean = false
 )
 
-data class ShowInfoData(
-    val sortStat: SortStat = NONE
-)
+enum class ShowStat {
+    HoursMain,
+    HoursMainExtra,
+    HoursCompletionist,
+    None
+}
 
-fun ShowInfoControls.getInfoData(): ShowInfoData {
+fun ShowInfoControls.getShowStat(): ShowStat {
     return when {
-        isHoursMain -> ShowInfoData(HOURS_MAIN)
-        isHoursExtra -> ShowInfoData(HOURS_MAIN_EXTRA)
-        isHoursCompletionist -> ShowInfoData(HOURS_COMPLETIONIST)
-        else -> ShowInfoData(NONE)
+        isHoursMain -> ShowStat.HoursMain
+        isHoursExtra -> ShowStat.HoursMainExtra
+        isHoursCompletionist -> ShowStat.HoursCompletionist
+        else -> ShowStat.None
     }
 }
 
-fun getInfoControlsFromSortStat(sortStat: SortStat?): ShowInfoControls {
-    return if (sortStat != null) {
-        when (sortStat) {
-            HOURS_MAIN -> ShowInfoControls(isHoursMain = true)
-            HOURS_MAIN_EXTRA -> ShowInfoControls(isHoursExtra = true)
-            HOURS_COMPLETIONIST -> ShowInfoControls(isHoursCompletionist = true)
-            NONE -> ShowInfoControls()
-        }
-    } else
-        ShowInfoControls()
+fun SortStat.getShowStat(): ShowStat = when(this) {
+    SortStat.HOURS_MAIN -> ShowStat.HoursMain
+    SortStat.HOURS_MAIN_EXTRA -> ShowStat.HoursMainExtra
+    SortStat.HOURS_COMPLETIONIST -> ShowStat.HoursCompletionist
+    SortStat.NONE -> ShowStat.None
 }
