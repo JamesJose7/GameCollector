@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -12,19 +13,18 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,22 +48,50 @@ fun AdvancedFiltersDialog(
             .background(MaterialTheme.colorScheme.surface)
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 8.dp)
     ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Spacer(
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = "Filters & Sorting",
+                fontSize = 21.sp,
+                color = colorResource(R.color.textColorPrimary),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .weight(2f)
+            )
+            TextButton(
+                onClick = onClearFilters,
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                Text(
+                    text = "Clear All",
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
         Text(
-            text = "Filters",
-            fontSize = 25.sp,
+            text = "Filter By",
+            fontSize = 18.sp,
             color = colorResource(R.color.textColorPrimary),
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Start,
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(top = 10.dp)
         )
         FlowRow(
             verticalArrangement = Arrangement.spacedBy(0.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp)
+                .padding(top = 4.dp)
         ) {
             FilterChip(
                 onClick = {
@@ -103,6 +131,21 @@ fun AdvancedFiltersDialog(
                 label = { Text(text = "Not completed") },
                 selected = filterControls.notCompleted
             )
+        }
+        Text(
+            text = "Format",
+            fontSize = 14.sp,
+            color = colorResource(R.color.textSecondaryColor),
+            textAlign = TextAlign.Start,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+        FlowRow(
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
             FilterChip(
                 onClick = {
                     // Turn off opposite filter if it's on
@@ -142,33 +185,17 @@ fun AdvancedFiltersDialog(
                 selected = filterControls.isPhysical
             )
         }
-        AssistChip(
-            onClick = onClearFilters,
-            label = { Text("Clear filters") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = "Localized description",
-                    modifier = Modifier.size(AssistChipDefaults.IconSize)
-                )
-            }
-        )
-        Text(
-            text = "Sorting",
-            fontSize = 25.sp,
-            color = colorResource(R.color.textColorPrimary),
-            textAlign = TextAlign.Center,
+        HorizontalDivider(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp)
+                .padding(vertical = 10.dp)
         )
         Text(
-            text = "Order",
+            text = "Sort By",
             fontSize = 18.sp,
             color = colorResource(R.color.textColorPrimary),
+            textAlign = TextAlign.Start,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 12.dp)
         )
         AssistChip(
             onClick = {
@@ -189,71 +216,16 @@ fun AdvancedFiltersDialog(
                 )
             }
         )
-        Text(
-            text = "Format",
-            fontSize = 18.sp,
-            color = colorResource(R.color.textColorPrimary),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp)
-        )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            FilterChip(
-                onClick = {
-                    onSortControlsUpdated(
-                        SortControls(isDigital = !sortControls.isDigital, isAscending = sortControls.isAscending),
-                        false
-                    )
-                },
-                label = { Text("Digital") },
-                selected = sortControls.isDigital,
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_download_cloud),
-                        contentDescription = "Localized description",
-                        modifier = Modifier.size(AssistChipDefaults.IconSize)
-                    )
-                }
-            )
-            FilterChip(
-                onClick = {
-                    onSortControlsUpdated(
-                        SortControls(isPhysical = !sortControls.isPhysical, isAscending = sortControls.isAscending),
-                        false
-                    )
-                },
-                label = { Text("Physical") },
-                selected = sortControls.isPhysical,
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_physical),
-                        contentDescription = "Localized description",
-                        modifier = Modifier.size(AssistChipDefaults.IconSize)
-                    )
-                }
-            )
-        }
-        Text(
-            text = "Miscellaneous",
-            fontSize = 18.sp,
-            color = colorResource(R.color.textColorPrimary),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp)
-        )
         FlowRow(
             verticalArrangement = Arrangement.spacedBy(0.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp)
         ) {
             FilterChip(
                 onClick = {
                     onSortControlsUpdated(
-                        SortControls(isAlphabetical = !sortControls.isAlphabetical, isAscending = sortControls.isAscending),
+                        SortControls(isAlphabetical = true, isAscending = sortControls.isAscending),
                         false
                     )
                 },
@@ -301,21 +273,23 @@ fun AdvancedFiltersDialog(
                 selected = sortControls.isHoursCompletionist
             )
         }
+        HorizontalDivider(
+            modifier = Modifier
+                .padding(vertical = 10.dp)
+        )
         Text(
             text = "Show info",
-            fontSize = 25.sp,
+            fontSize = 18.sp,
             color = colorResource(R.color.textColorPrimary),
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Start,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 20.dp)
         )
         FlowRow(
             verticalArrangement = Arrangement.spacedBy(0.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp)
         ) {
             FilterChip(
                 onClick = {
