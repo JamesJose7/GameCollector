@@ -82,7 +82,7 @@ class GamesFromPlatformViewModel @Inject constructor(
 
         val totalAmount = dbGames.size
         val filteredAmount = filteredGames.size
-        val stats = if (filters.isNotCleared().value()) {
+        val stats = if (filters.isNotCleared() || query.isNotEmpty() || enabledGenresFilters.isNotEmpty()) {
             FilterStats(showStats = true, filteredAmount = filteredAmount, totalAmount = totalAmount)
         } else {
             FilterStats()
