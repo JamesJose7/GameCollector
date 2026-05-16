@@ -93,6 +93,7 @@ import com.jeeps.gamecollector.remaster.data.model.data.games.SortStat
 import com.jeeps.gamecollector.remaster.ui.composables.Dialog
 import com.jeeps.gamecollector.remaster.ui.composables.LoadingAnimation
 import com.jeeps.gamecollector.remaster.ui.composables.SharedElements
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformViewModel.GenreFilter
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.AdvancedFiltersDialog
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.FilterStats
 import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.dialogs.ShowInfoControls
@@ -169,6 +170,7 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
         showInfoControls = state.showInfoControls,
         searchQuery = state.searchQuery,
         filteredStats = state.filteredStats,
+        genresFilters = state.genresFilterControls,
         onBackPressed = onBackPressed,
         onAdvancedFiltersClicked = { showFiltersBottomSheet = true },
         onSearchQueryChanged = {
@@ -211,6 +213,7 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
                     filterControls = state.filterControls,
                     sortControls = state.sortControls,
                     showInfoControls = state.showInfoControls,
+                    genresFilterControls = state.genresFilterControls,
                     onFilterControlsUpdated = { filterControls ->
                         viewModel.setFilterControls(filterControls)
                     },
@@ -227,6 +230,9 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
                     onShowInfoControlsUpdated = { showInfoControls ->
                         viewModel.clearShowInfoControls()
                         viewModel.setShowInfoControls(showInfoControls)
+                    },
+                    onGenreFilterUpdated = { genreFilter ->
+                        viewModel.updateGenreFilters(genreFilter)
                     },
                     modifier = Modifier
                 )
@@ -245,6 +251,7 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
     platformName: String,
     sortStat: SortStat,
     sortControls: SortControls,
+    genresFilters: List<GenreFilter>,
     showInfoControls: ShowInfoControls,
     searchQuery: String,
     filteredStats: FilterStats,
@@ -278,21 +285,24 @@ fun SharedTransitionScope.GamesFromPlatformScreen(
     // Reset scroll when sorting or filtering
     var previousSortStat by remember { mutableStateOf<SortStat?>(null) }
     var previousFilterStats by remember { mutableStateOf<FilterStats?>(null) }
+    var previousGenresFilters by remember { mutableStateOf<List<GenreFilter>?>(null) }
     var previousSortControls by remember { mutableStateOf<SortControls?>(null) }
 
-    LaunchedEffect(sortStat, filteredStats, sortControls) {
+    LaunchedEffect(sortStat, filteredStats, sortControls, genresFilters) {
         // Track previous sort stat and filter stats to prevent changing when navigating back from another screen
         val sortChanged = previousSortStat != null && previousSortStat != sortStat
         val sortControlsChanged = previousSortControls != null && previousSortControls != sortControls
         val filterChanged = previousFilterStats != null && previousFilterStats != filteredStats
+        val genresFiltersChanged = previousGenresFilters != null && previousGenresFilters != genresFilters
 
-        if (sortChanged || filterChanged || sortControlsChanged) {
+        if (sortChanged || filterChanged || sortControlsChanged || genresFiltersChanged) {
             gridState.scrollToItem(0)
         }
 
         previousSortStat = sortStat
         previousSortControls = sortControls
         previousFilterStats = filteredStats
+        previousGenresFilters = genresFilters
     }
 
     // Request focus when search bar is visible
@@ -725,6 +735,7 @@ private fun GamesFromPlatformScreenPreview() {
                     sortStat = SortStat.HOURS_MAIN,
                     sortControls = SortControls(),
                     showInfoControls = ShowInfoControls(),
+                    genresFilters = emptyList(),
                     searchQuery = "",
                     filteredStats = filterStats
                 )

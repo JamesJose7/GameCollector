@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -48,7 +47,13 @@ class GamesFromPlatformViewModel @Inject constructor(
         val filterControls: FilterControls = FilterControls(),
         val sortControls: SortControls = SortControls(),
         val showInfoControls: ShowInfoControls = ShowInfoControls(),
+        val genresFilterControls: List<GenreFilter> = emptyList(),
         val isLoading: Boolean = true
+    )
+
+    data class GenreFilter(
+        val name: String,
+        val enabled: Boolean
     )
 
     private val route = savedStateHandle.toRoute<Screen.GamesFromPlatform>()
@@ -58,6 +63,7 @@ class GamesFromPlatformViewModel @Inject constructor(
     private val _filterControls = MutableStateFlow(FilterControls())
     private val _sortControls = MutableStateFlow(SortControls())
     private val _showInfoControls = MutableStateFlow(ShowInfoControls())
+    private val _genresFilterControls = MutableStateFlow<List<GenreFilter>>(emptyList())
     private val _isLoading = MutableStateFlow(true)
 
     val uiState: StateFlow<GamesFromPlatformUiState> = combine(
@@ -66,11 +72,13 @@ class GamesFromPlatformViewModel @Inject constructor(
         _filterControls,
         _sortControls,
         _showInfoControls,
+        _genresFilterControls,
         _isLoading
-    ) { dbGames, query, filters, sortControls, showInfo, loading ->
+    ) { dbGames, query, filters, sortControls, showInfo, genresFilters, loading ->
 
         val (comparator, sort) = sortControls.getAppropriateComparator()
-        val filteredGames = filterAndSortGames(dbGames, query, filters, comparator)
+        val enabledGenresFilters = genresFilters.filter { it.enabled }.map { it.name }
+        val filteredGames = filterAndSortGames(dbGames, query, filters, enabledGenresFilters, comparator)
 
         val totalAmount = dbGames.size
         val filteredAmount = filteredGames.size
@@ -90,6 +98,7 @@ class GamesFromPlatformViewModel @Inject constructor(
             filterControls = filters,
             sortControls = sortControls.defaultToAlphabetical(),
             showInfoControls = showInfo,
+            genresFilterControls = genresFilters,
             isLoading = loading
         )
     }.stateIn(
@@ -117,7 +126,12 @@ class GamesFromPlatformViewModel @Inject constructor(
                     is State.Loading -> _isLoading.value = true
                     is State.Success -> {
                         _isLoading.value = false
-                        state.data.let { _dbGames.value = it }
+                        state.data.let {
+                            _dbGames.value = it
+                            if (uiState.value.genresFilterControls.isEmpty()) {
+                                populateGenres(it)
+                            }
+                        }
                     }
                     is State.Failed -> {
                         _isLoading.value = false
@@ -128,17 +142,34 @@ class GamesFromPlatformViewModel @Inject constructor(
         }
     }
 
+    private fun populateGenres(games: MutableList<Game>) {
+        val genres = games
+            .flatMap { it.genresNames }
+            .distinct()
+            .sorted()
+            .map { GenreFilter(it, false) }
+
+        _genresFilterControls.value = genres
+    }
+
     private fun filterAndSortGames(
         dbGames: List<Game>,
         query: String,
         filters: FilterControls,
+        genresFilters: List<String>,
         comparator: Comparator<Game>
     ): List<Game> {
         val filtersList = filters.getFilterData().filtersList
         return dbGames
             .filter { game -> queryGame(game, query) }
             .filter { game -> filtersList.all { it(game) } }
+            .filter { game -> filterGenres(game, genresFilters) }
             .sortedWith(comparator)
+    }
+
+    private fun filterGenres(game: Game, genresFilters: List<String>): Boolean {
+        if (genresFilters.isEmpty()) return true
+        return game.genresNames.any { it in genresFilters }
     }
 
     fun handleSearch(query: String) {
@@ -161,10 +192,20 @@ class GamesFromPlatformViewModel @Inject constructor(
         setFilterControls(FilterControls())
         setSortControls(SortControls())
         clearShowInfoControls()
+        clearGenreFilters()
     }
 
     fun clearShowInfoControls() {
         setShowInfoControls(ShowInfoControls())
+    }
+
+    fun clearGenreFilters() {
+        _genresFilterControls.value = _genresFilterControls.value.map { it.copy(enabled = false) }
+    }
+
+    fun updateGenreFilters(genreFilter: GenreFilter) {
+        _genresFilterControls.value = _genresFilterControls.value
+            .map { if (it.name == genreFilter.name) it.copy(enabled = genreFilter.enabled) else it }
     }
 
     // TODO: Replace this with deleting game permanently and restoring it by saving it again

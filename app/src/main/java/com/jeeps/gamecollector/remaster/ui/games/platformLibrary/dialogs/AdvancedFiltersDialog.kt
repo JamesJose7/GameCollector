@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -30,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jeeps.gamecollector.R
+import com.jeeps.gamecollector.remaster.ui.games.platformLibrary.GamesFromPlatformViewModel.GenreFilter
 import com.jeeps.gamecollector.remaster.ui.theme.AppTheme
 
 @Composable
@@ -38,9 +41,11 @@ fun AdvancedFiltersDialog(
     filterControls: FilterControls,
     sortControls: SortControls,
     showInfoControls: ShowInfoControls,
+    genresFilterControls: List<GenreFilter>,
     onFilterControlsUpdated: (FilterControls) -> Unit = {},
     onSortControlsUpdated: (SortControls, isOrderSort: Boolean) -> Unit = { _, _ -> },
     onShowInfoControlsUpdated: (ShowInfoControls) -> Unit = {},
+    onGenreFilterUpdated: (GenreFilter) -> Unit = {},
     onClearFilters: () -> Unit = {}
 ) {
     Column(
@@ -185,6 +190,31 @@ fun AdvancedFiltersDialog(
                 selected = filterControls.isPhysical
             )
         }
+        if (genresFilterControls.isNotEmpty()) {
+            Text(
+                text = "Genres",
+                fontSize = 14.sp,
+                color = colorResource(R.color.textSecondaryColor),
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(genresFilterControls) {
+                    FilterChip(
+                        onClick = {
+                            onGenreFilterUpdated(it.copy(enabled = !it.enabled))
+                        },
+                        label = { Text(text = it.name) },
+                        selected = it.enabled
+                    )
+                }
+            }
+        }
+
+
         HorizontalDivider(
             modifier = Modifier
                 .padding(vertical = 10.dp)
@@ -325,11 +355,19 @@ fun AdvancedFiltersDialog(
 @Preview
 @Composable
 private fun AdvancedFiltersDialogPreview() {
+    val genres = listOf(
+        GenreFilter("RPG", true),
+        GenreFilter("Platformer", false),
+        GenreFilter("Adventure", false),
+        GenreFilter("Open World", false),
+    )
+
     AppTheme {
         AdvancedFiltersDialog(
             filterControls = FilterControls(),
             sortControls = SortControls(),
-            showInfoControls = ShowInfoControls()
+            showInfoControls = ShowInfoControls(),
+            genresFilterControls = genres
         )
     }
 }
